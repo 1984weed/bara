@@ -15,6 +15,7 @@ require (
 	github.com/graphql-go/handler v0.2.3
 	github.com/graphql-go/relay v0.0.0-20171208134043-54350098cfe5
 	github.com/json-iterator/go v1.1.7 // indirect
+	github.com/lib/pq v1.2.0
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/mattn/go-shellwords v1.0.6 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect

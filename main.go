@@ -2,6 +2,7 @@ package main
 
 import (
 	"bara/data"
+	"bara/store"
 	"fmt"
 	"log"
 	"math/rand"
@@ -214,16 +215,14 @@ func initProductsData(p *[]Product) {
 }
 
 func main() {
-	// Primary data initialization
-	// initProductsData(&products)
 
-	// http.HandleFunc("/product", func(w http.ResponseWriter, r *http.Request) {
-	// 	result := executeQuery(r.URL.Query().Get("query"), schema)
-	// 	json.NewEncoder(w).Encode(result)
-	// })
-
-	// fmt.Println("Server is running on port 8080")
-	// http.ListenAndServe(":8080", nil)
+	store.NewStore(store.StoreConfig{
+		UserName: "postgres",
+		Password: "postgres",
+		Host:     "localhost",
+		Port:     "5432",
+		DbName:   "bara",
+	})
 
 	// simplest relay-compliant graphql server HTTP handler
 	h := handler.New(&handler.Config{
