@@ -1,2 +1,0 @@
-function helloworld(){console.log("aaaaaaaaaaaaaaaaa")}
-console.log(helloworld())

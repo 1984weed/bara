@@ -1,0 +1,9 @@
+type SubmitCode {
+  typedCode: String!
+  lang: String!
+  slug: String!
+  result: String!
+}
+type Query {
+    submitCode: SubmitCode!
+}

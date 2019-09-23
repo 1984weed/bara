@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -13,7 +14,7 @@ var userType *graphql.Object
 var widgetType *graphql.Object
 var questionType = graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "Product",
+		Name: "Question",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
 				Type: graphql.Int,
@@ -27,6 +28,29 @@ var questionType = graphql.NewObject(
 		},
 	},
 )
+
+var SubmitCodeType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "SubmitCodeType",
+		Fields: graphql.Fields{
+			"typedCode": &graphql.Field{
+				Type: graphql.NewNonNull(graphql.String),
+			},
+			"lang": &graphql.Field{
+				Type: graphql.NewNonNull(graphql.String),
+			},
+			"result": &graphql.Field{
+				Type: graphql.String,
+			},
+		},
+	},
+)
+
+type SubmitCode struct {
+	TypedCode string
+	Result    string
+	Lang      string
+}
 
 var nodeDefinitions *relay.NodeDefinitions
 var widgetConnection *relay.GraphQLConnectionDefinitions
@@ -120,7 +144,6 @@ func init() {
 		Name: "Query",
 		Fields: graphql.Fields{
 			"node": nodeDefinitions.NodeField,
-
 			// Add you own root fields here
 			"viewer": &graphql.Field{
 				Type: userType,
@@ -137,6 +160,28 @@ func init() {
 	mutationType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Mutation",
 		Fields: graphql.Fields{
+			"codesSubmit": &graphql.Field{
+				Type: SubmitCodeType,
+				Args: graphql.FieldConfigArgument{
+					"typedCode": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"lang": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					fmt.Println("ki------------ta")
+					// nodeClient := remoteNewNodeJsClient()
+					result := SubmitCode{
+						TypedCode: p.Args["typedCode"].(string),
+						Lang:      p.Args["lang"].(string),
+						Result:    "OK",
+					}
+
+					return result, nil
+				},
+			},
 			// Add you own mutations here
 			"createQuestion": &graphql.Field{
 				Type:        questionType,

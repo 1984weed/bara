@@ -1,10 +1,7 @@
 package store
 
 import (
-	"database/sql"
-	"fmt"
-
-	_ "github.com/lib/pq"
+	"github.com/go-pg/pg/v9"
 )
 
 type StoreConfig struct {
@@ -15,15 +12,17 @@ type StoreConfig struct {
 	DbName   string
 }
 
-func NewStore(config StoreConfig) *sql.DB {
+func NewStore(config *pg.Options) *pg.DB {
+	// dbinfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	// 	config.Host, config.Port, config.UserName, config.Password, config.DbName)
+	// db, err := sql.Open("postgres", dbinfo)
 
-	dbinfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.Host, config.Port, config.UserName, config.Password, config.DbName)
-	db, err := sql.Open("postgres", dbinfo)
+	// if err != nil {
+	// 	return nil
+	// }
 
-	if err != nil {
-		return nil
-	}
+	// return db
+	db := pg.Connect(config)
 
 	return db
 }
