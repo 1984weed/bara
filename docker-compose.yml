@@ -1,19 +1,17 @@
-postgresql:
-  image: postgres:11.5-alpine
-  container_name: postgresql
-  ports:
-    - 5432:5432
-  volumes:
-    - ./postgres/init:/docker-entrypoint-initdb.d
-  environment:
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-  restart: always
+version: "3.7"
 
+volumes:
+  bara.db:
 
-CREATE TABLE questions (
-  id SERIAL PRIMARY KEY,
-  slug VARCHAR(255) NOT NULL,
-  title VARCHAR(300) NOT NULL,
-  description VARCHAR(255) NOT NULL
-);
+services:
+  postgresql:
+    image: postgres:11.5-alpine
+    container_name: postgresql
+    ports:
+      - 5432:5432
+    volumes:
+      - bara.db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    restart: always

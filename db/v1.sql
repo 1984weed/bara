@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(255) NOT NULL,
@@ -11,6 +13,8 @@ CREATE TABLE users (
   CONSTRAINT user_username_unique UNIQUE (username)
 );
 
+DROP TABLE IF EXISTS questions;
+
 CREATE TABLE questions (
   id SERIAL PRIMARY KEY,
   slug VARCHAR(255) NOT NULL,
@@ -18,7 +22,7 @@ CREATE TABLE questions (
   description TEXT NOT NULL,
   function_name VARCHAR(255),
   arg_id INTEGER,
-  languate_id INTEGER,
+  language_id INTEGER,
   author_id INTEGER,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
