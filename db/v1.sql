@@ -28,3 +28,17 @@ CREATE TABLE questions (
   updated_at TIMESTAMP NOT NULL,
   CONSTRAINT questions_slug_unique UNIQUE(slug)
 );
+
+CREATE TYPE args_t AS enum('string', 'list', 'num', 'likedList', 'node');
+
+DROP TABLE IF EXISTS question_args;
+
+CREATE TABLE question_args (
+  id SERIAL PRIMARY KEY,
+  question_id INTEGER NOT NULL,
+  order_no INTEGER NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type args_t NOT NULL,
+  constraint fk_question_args_question FOREIGN KEY (question_id) REFERENCES questions (id)
+);
+

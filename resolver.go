@@ -35,16 +35,12 @@ func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
 
-// type MutationResolver interface {
-// 	SubmitCode(ctx context.Context, input SubmitCode) (*CodeResult, error)
-// }
-
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*CodeResult, error) {
 	jsClient := remote.NewNodeJsClient(r.DB)
-	// question := &Question{ID: 1}
-	result, stdout := jsClient.Exec("", "function helloWorld(){ console.log('Hellow world') }")
+
+	result, stdout := jsClient.Exec("", input.TypedCode)
 
 	fmt.Println(result)
 
