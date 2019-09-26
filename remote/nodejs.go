@@ -60,15 +60,13 @@ func (n *NodeJSClient) Exec(slug string, typedCode string) (string, string) {
 		Where("question_args.question_id = ?", 2).
 		Select()
 
-	fmt.Println("======================", args)
-
 	if err != nil {
 		return "", ""
 	}
 
 	// main function
 	mainFn := fmt.Sprintf("console.log(%s())", question.FunctionName)
-	inputCommand := fmt.Sprintf(`echo "%s" > ./temp && echo "%s" >> ./temp  && node temp`, typedCode, mainFn)
+	inputCommand := fmt.Sprintf(`time echo "%s" > ./temp && echo "%s" >> ./temp  && node temp`, typedCode, mainFn)
 
 	out, err := exec.Command("docker", "run", "node:12.10.0-alpine", "/bin/ash", "-c", inputCommand).Output()
 
