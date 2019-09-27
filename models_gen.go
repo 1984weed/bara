@@ -3,8 +3,15 @@
 package bara
 
 type CodeResult struct {
-	Result string `json:"result"`
-	Stdout string `json:"stdout"`
+	Result *CodeResultDetail `json:"result"`
+	Stdout string            `json:"stdout"`
+}
+
+type CodeResultDetail struct {
+	Expected string `json:"expected"`
+	Result   string `json:"result"`
+	Status   string `json:"status"`
+	Time     int    `json:"time"`
 }
 
 type Question struct {

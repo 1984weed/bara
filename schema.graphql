@@ -1,6 +1,13 @@
 type CodeResult {
-  result: String!
+  result: CodeResultDetail!
   stdout: String!
+}
+
+type CodeResultDetail {
+  expected: String!
+  result: String!
+  status: String!
+  time: Int!
 }
 
 type Question {

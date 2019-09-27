@@ -45,7 +45,12 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 	fmt.Println(result)
 
 	return &CodeResult{
-		Result: result,
+		Result: &CodeResultDetail{
+			Expected: result.Expected,
+			Result:   result.Result,
+			Status:   result.Status,
+			Time:     result.Time,
+		},
 		Stdout: stdout,
 	}, nil
 }

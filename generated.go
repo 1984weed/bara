@@ -47,6 +47,13 @@ type ComplexityRoot struct {
 		Stdout func(childComplexity int) int
 	}
 
+	CodeResultDetail struct {
+		Expected func(childComplexity int) int
+		Result   func(childComplexity int) int
+		Status   func(childComplexity int) int
+		Time     func(childComplexity int) int
+	}
+
 	Mutation struct {
 		SubmitCode func(childComplexity int, input SubmitCode) int
 	}
@@ -97,6 +104,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CodeResult.Stdout(childComplexity), true
+
+	case "CodeResultDetail.expected":
+		if e.complexity.CodeResultDetail.Expected == nil {
+			break
+		}
+
+		return e.complexity.CodeResultDetail.Expected(childComplexity), true
+
+	case "CodeResultDetail.result":
+		if e.complexity.CodeResultDetail.Result == nil {
+			break
+		}
+
+		return e.complexity.CodeResultDetail.Result(childComplexity), true
+
+	case "CodeResultDetail.status":
+		if e.complexity.CodeResultDetail.Status == nil {
+			break
+		}
+
+		return e.complexity.CodeResultDetail.Status(childComplexity), true
+
+	case "CodeResultDetail.time":
+		if e.complexity.CodeResultDetail.Time == nil {
+			break
+		}
+
+		return e.complexity.CodeResultDetail.Time(childComplexity), true
 
 	case "Mutation.submitCode":
 		if e.complexity.Mutation.SubmitCode == nil {
@@ -206,8 +241,15 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `type CodeResult {
-  result: String!
+  result: CodeResultDetail!
   stdout: String!
+}
+
+type CodeResultDetail {
+  expected: String!
+  result: String!
+  status: String!
+  time: Int!
 }
 
 type Question {
@@ -352,10 +394,10 @@ func (ec *executionContext) _CodeResult_result(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*CodeResultDetail)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNCodeResultDetail2ᚖbaraᚐCodeResultDetail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CodeResult_stdout(ctx context.Context, field graphql.CollectedField, obj *CodeResult) (ret graphql.Marshaler) {
@@ -393,6 +435,154 @@ func (ec *executionContext) _CodeResult_stdout(ctx context.Context, field graphq
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CodeResultDetail_expected(ctx context.Context, field graphql.CollectedField, obj *CodeResultDetail) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CodeResultDetail",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Expected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CodeResultDetail_result(ctx context.Context, field graphql.CollectedField, obj *CodeResultDetail) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CodeResultDetail",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Result, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CodeResultDetail_status(ctx context.Context, field graphql.CollectedField, obj *CodeResultDetail) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CodeResultDetail",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CodeResultDetail_time(ctx context.Context, field graphql.CollectedField, obj *CodeResultDetail) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CodeResultDetail",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Time, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_submitCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1890,6 +2080,48 @@ func (ec *executionContext) _CodeResult(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var codeResultDetailImplementors = []string{"CodeResultDetail"}
+
+func (ec *executionContext) _CodeResultDetail(ctx context.Context, sel ast.SelectionSet, obj *CodeResultDetail) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, codeResultDetailImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CodeResultDetail")
+		case "expected":
+			out.Values[i] = ec._CodeResultDetail_expected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "result":
+			out.Values[i] = ec._CodeResultDetail_result(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+			out.Values[i] = ec._CodeResultDetail_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "time":
+			out.Values[i] = ec._CodeResultDetail_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2273,6 +2505,34 @@ func (ec *executionContext) marshalNCodeResult2ᚖbaraᚐCodeResult(ctx context.
 		return graphql.Null
 	}
 	return ec._CodeResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCodeResultDetail2baraᚐCodeResultDetail(ctx context.Context, sel ast.SelectionSet, v CodeResultDetail) graphql.Marshaler {
+	return ec._CodeResultDetail(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCodeResultDetail2ᚖbaraᚐCodeResultDetail(ctx context.Context, sel ast.SelectionSet, v *CodeResultDetail) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._CodeResultDetail(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNQuestion2baraᚐQuestion(ctx context.Context, sel ast.SelectionSet, v Question) graphql.Marshaler {

@@ -42,3 +42,13 @@ CREATE TABLE question_args (
   constraint fk_question_args_question FOREIGN KEY (question_id) REFERENCES questions (id)
 );
 
+DROP TABLE IF EXISTS question_testcases;
+
+CREATE TABLE question_testcases (
+  id SERIAL PRIMARY KEY,
+  question_id INTEGER NOT NULL,
+  input_text TEXT NOT NULL,
+  output_text TEXT NOT NULL,
+  constraint fk_question_args_question FOREIGN KEY (question_id) REFERENCES questions (id)
+);
+

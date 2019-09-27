@@ -3,9 +3,11 @@ package remote
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v9"
@@ -21,6 +23,13 @@ type NodeJSClient struct {
 
 func NewNodeJsClient(store *pg.DB) *NodeJSClient {
 	return &NodeJSClient{store: store}
+}
+
+type CodeResult struct {
+	Status   string
+	Result   string
+	Expected string
+	Time     int
 }
 
 type Question struct {
@@ -43,14 +52,19 @@ type QuestionArgs struct {
 	Type       string
 }
 
-func (n *NodeJSClient) Exec(slug string, typedCode string) (string, string) {
+type QuestionTestcases struct {
+	ID         int64
+	InputText  string
+	OutputText string
+}
+
+func (n *NodeJSClient) Exec(slug string, typedCode string) (*CodeResult, string) {
 	question := &Question{ID: 2}
 	// args := &QuestionArgs{QuestionID: 2}
 	err := n.store.Select(question)
 
 	if err != nil {
-		fmt.Println(err)
-		return "", ""
+		return nil, ""
 	}
 	// create args
 	// err = n.store.Select(args)
@@ -61,27 +75,49 @@ func (n *NodeJSClient) Exec(slug string, typedCode string) (string, string) {
 		Select()
 
 	if err != nil {
-		return "", ""
+		return nil, ""
 	}
 
-	// main function
-	mainFn := fmt.Sprintf("console.log(%s())", question.FunctionName)
-	inputCommand := fmt.Sprintf(`time echo "%s" > ./temp && echo "%s" >> ./temp  && node temp`, typedCode, mainFn)
+	qts := new([]QuestionTestcases)
 
+	err = n.store.Model(qts).
+		Where("question_testcases.question_id = ?", 2).
+		Select()
+
+	if err != nil {
+		return nil, ""
+	}
+
+	testcase := ""
+	inputCount := strings.Count((*qts)[0].InputText, "\\n") + 1
+
+	testcase += fmt.Sprintln(len(*qts))
+	testcase += fmt.Sprintln(inputCount)
+	for _, qt := range *qts {
+		inputCases := strings.Split(qt.InputText, "\\n")
+		for _, in := range inputCases {
+			testcase += fmt.Sprintln(in)
+		}
+		testcase += fmt.Sprintln(qt.OutputText)
+	}
+
+	execFile := fmt.Sprintf(nodeJsTemplate, typedCode, question.FunctionName)
+	inputCommand := fmt.Sprintf(`echo -e %q > ./temp && echo -e %q | node temp`, execFile, testcase)
+
+	fmt.Println(inputCommand)
 	out, err := exec.Command("docker", "run", "node:12.10.0-alpine", "/bin/ash", "-c", inputCommand).Output()
 
 	if err != nil {
-		return "", ""
+		return nil, ""
 	}
 
 	bytesReader := bytes.NewReader(out)
 	reader := bufio.NewReader(bytesReader)
-	var result string
+	var result CodeResult
 	stdoutArray := []string{}
 
 	for {
 		line, _, err := reader.ReadLine()
-		fmt.Println(string(line))
 
 		stdoutArray = append(stdoutArray, fmt.Sprintf("%s", line))
 
@@ -89,7 +125,7 @@ func (n *NodeJSClient) Exec(slug string, typedCode string) (string, string) {
 			break
 		}
 
-		result = fmt.Sprintf("%s", line)
+		err = json.Unmarshal([]byte(line), &result)
 	}
 
 	stdout := ""
@@ -100,5 +136,5 @@ func (n *NodeJSClient) Exec(slug string, typedCode string) (string, string) {
 		}
 	}
 
-	return result, stdout
+	return &result, stdout
 }
