@@ -2,21 +2,16 @@ import React from 'react'
 import initGraphQL from './init-graphql'
 import Head from 'next/head'
 import { getInitialState } from 'graphql-hooks-ssr'
-import App from 'next/app'
-import { NextPageContext } from 'next'
-import { MyApp } from '../pages/_app'
 import { GraphQLClient } from 'graphql-hooks'
-import { Router } from 'next/dist/client/router'
-import { AppContextType } from 'next/dist/next-server/lib/utils'
 
 type Props = {
   graphQLState: object;
 }
-export default (MyAppI: typeof MyApp) => {
+export default (MyAppI: any) => {
   return class GraphQLHooks extends React.Component {
     private graphQLClient: GraphQLClient;
     static displayName = 'GraphQLHooks(App)'
-    static async getInitialProps (ctx: AppContextType<Router>) {
+    static async getInitialProps (ctx: any) {
       const { Component, router } = ctx
 
       let appProps = {}
@@ -34,6 +29,7 @@ export default (MyAppI: typeof MyApp) => {
           graphQLState = await getInitialState({
             App: (
               <MyAppI
+                pageProps={null}
                 {...appProps}
                 Component={Component}
                 router={router}
