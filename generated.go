@@ -55,7 +55,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		SubmitCode func(childComplexity int, input SubmitCode) int
+		CreateQuestion func(childComplexity int, input NewQuestion) int
+		SubmitCode     func(childComplexity int, input SubmitCode) int
 	}
 
 	Query struct {
@@ -71,6 +72,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	SubmitCode(ctx context.Context, input SubmitCode) (*CodeResult, error)
+	CreateQuestion(ctx context.Context, input NewQuestion) (*Question, error)
 }
 type QueryResolver interface {
 	Questions(ctx context.Context, limit *int, offset *int) ([]*Question, error)
@@ -132,6 +134,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CodeResultDetail.Time(childComplexity), true
+
+	case "Mutation.createQuestion":
+		if e.complexity.Mutation.CreateQuestion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createQuestion_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateQuestion(childComplexity, args["input"].(NewQuestion)), true
 
 	case "Mutation.submitCode":
 		if e.complexity.Mutation.SubmitCode == nil {
@@ -262,20 +276,59 @@ type Query {
   Questions(limit: Int = 25, offset: Int = 0): [Question!]!
 }
 
+enum CodeLanguage {
+  JavaScript
+}
+
+enum TestCaseArgType {
+  NUMBER
+  STRING
+}
+
 input SubmitCode {
   typedCode: String!
   lang: String!
   slug: String!
 }
 
+input TestCase {
+  input: [String!]!
+  output: String!
+}
+
+input NewQuestion {
+  title: String!
+  description: String!
+  functionName: String!
+  languageID: CodeLanguage!
+  argsNum: Int!
+  argsTypes: [TestCaseArgType!]!
+  testCases: [TestCase!]!
+}
+
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
+  createQuestion(input: NewQuestion!): Question!
 }`},
 )
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createQuestion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewQuestion
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNNewQuestion2baraᚐNewQuestion(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_submitCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -627,6 +680,50 @@ func (ec *executionContext) _Mutation_submitCode(ctx context.Context, field grap
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNCodeResult2ᚖbaraᚐCodeResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createQuestion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createQuestion_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateQuestion(rctx, args["input"].(NewQuestion))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Question)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNQuestion2ᚖbaraᚐQuestion(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_Questions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2010,6 +2107,60 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewQuestion(ctx context.Context, obj interface{}) (NewQuestion, error) {
+	var it NewQuestion
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "functionName":
+			var err error
+			it.FunctionName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "languageID":
+			var err error
+			it.LanguageID, err = ec.unmarshalNCodeLanguage2baraᚐCodeLanguage(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "argsNum":
+			var err error
+			it.ArgsNum, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "argsTypes":
+			var err error
+			it.ArgsTypes, err = ec.unmarshalNTestCaseArgType2ᚕbaraᚐTestCaseArgType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "testCases":
+			var err error
+			it.TestCases, err = ec.unmarshalNTestCase2ᚕᚖbaraᚐTestCase(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSubmitCode(ctx context.Context, obj interface{}) (SubmitCode, error) {
 	var it SubmitCode
 	var asMap = obj.(map[string]interface{})
@@ -2031,6 +2182,30 @@ func (ec *executionContext) unmarshalInputSubmitCode(ctx context.Context, obj in
 		case "slug":
 			var err error
 			it.Slug, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTestCase(ctx context.Context, obj interface{}) (TestCase, error) {
+	var it TestCase
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "input":
+			var err error
+			it.Input, err = ec.unmarshalNString2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "output":
+			var err error
+			it.Output, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2139,6 +2314,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "submitCode":
 			out.Values[i] = ec._Mutation_submitCode(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createQuestion":
+			out.Values[i] = ec._Mutation_createQuestion(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2493,6 +2673,15 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNCodeLanguage2baraᚐCodeLanguage(ctx context.Context, v interface{}) (CodeLanguage, error) {
+	var res CodeLanguage
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNCodeLanguage2baraᚐCodeLanguage(ctx context.Context, sel ast.SelectionSet, v CodeLanguage) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNCodeResult2baraᚐCodeResult(ctx context.Context, sel ast.SelectionSet, v CodeResult) graphql.Marshaler {
 	return ec._CodeResult(ctx, sel, &v)
 }
@@ -2533,6 +2722,10 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNNewQuestion2baraᚐNewQuestion(ctx context.Context, v interface{}) (NewQuestion, error) {
+	return ec.unmarshalInputNewQuestion(ctx, v)
 }
 
 func (ec *executionContext) marshalNQuestion2baraᚐQuestion(ctx context.Context, sel ast.SelectionSet, v Question) graphql.Marshaler {
@@ -2600,8 +2793,135 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalNString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNSubmitCode2baraᚐSubmitCode(ctx context.Context, v interface{}) (SubmitCode, error) {
 	return ec.unmarshalInputSubmitCode(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNTestCase2baraᚐTestCase(ctx context.Context, v interface{}) (TestCase, error) {
+	return ec.unmarshalInputTestCase(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNTestCase2ᚕᚖbaraᚐTestCase(ctx context.Context, v interface{}) ([]*TestCase, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*TestCase, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNTestCase2ᚖbaraᚐTestCase(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNTestCase2ᚖbaraᚐTestCase(ctx context.Context, v interface{}) (*TestCase, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNTestCase2baraᚐTestCase(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNTestCaseArgType2baraᚐTestCaseArgType(ctx context.Context, v interface{}) (TestCaseArgType, error) {
+	var res TestCaseArgType
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNTestCaseArgType2baraᚐTestCaseArgType(ctx context.Context, sel ast.SelectionSet, v TestCaseArgType) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNTestCaseArgType2ᚕbaraᚐTestCaseArgType(ctx context.Context, v interface{}) ([]TestCaseArgType, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]TestCaseArgType, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNTestCaseArgType2baraᚐTestCaseArgType(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNTestCaseArgType2ᚕbaraᚐTestCaseArgType(ctx context.Context, sel ast.SelectionSet, v []TestCaseArgType) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTestCaseArgType2baraᚐTestCaseArgType(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

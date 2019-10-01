@@ -1,17 +1,99 @@
 import * as React from 'react'
-import Link from 'next/link'
 import Layout from '../../components/Layout'
+import { useMutation, FetchData } from 'graphql-hooks'
+import { FormEvent } from 'react'
 
-const AdminQuestionPage: React.FunctionComponent = () => (
+export const createQuestion = `
+mutation createQuestion {
+    submitCode(input: {typedCode: "function helloWorld(){return 'hello world'}", lang:"js", slug:"test"}) {
+    result {
+      status,
+      expected,
+      time,
+      result
+    }
+  }
+}
+`
+
+type Props = {
+  onSubmission: () => void;
+}
+
+const AdminQuestionPage: React.FunctionComponent<Props> = ({onSubmission}: Props) => {
+    const [createPost, state] = useMutation(createQuestion)
+
+    return (
   <Layout title="About | Next.js + TypeScript Example">
-    <h1>About</h1>
+    <h1>new Question</h1>
     <p>This is the about page</p>
-    <p>
-      <Link href="/">
-        <a>Go home</a>
-      </Link>
-    </p>
+    <form onSubmit={event => handleSubmit(event, createPost, onSubmission)}>
+      <div>
+        Title: <input type="text" name="title" />
+      </div>
+      <div>
+          Description: <textarea name="description"></textarea>
+      </div>
+      <div>
+          Description: <textarea name="description"></textarea>
+      </div>
+      <div>
+        Function name: <input type="text" name="functionName" />
+      </div>
+
+      <div>
+        <div>
+          <label>Args: </label><input type="text" name="args" />
+        </div>
+        <label>Argument Type:</label> 
+        <select name="argumentType">
+            <option value="number">Number</option>
+            <option value="string">String</option>
+            <option value="list">List</option>
+            <option value="node">Node</option>
+        </select>
+    </div>
+    <div>
+      <label>Languege: </label>
+      <select name="argumentType">
+          <option value="js">JavaScript</option>
+      </select>
+    </div>
+    <button type='submit'>{state.loading ? 'Loading...' : 'Submit'}</button>
+  </form>
+  <style jsx>{`
+        form {
+          border-bottom: 1px solid #ececec;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+        }
+        h1 {
+          font-size: 20px;
+        }
+        input {
+          display: block;
+          margin-bottom: 10px;
+        }
+  `}</style>
   </Layout>
-)
+    )
+}
 
 export default AdminQuestionPage
+
+async function handleSubmit (event: FormEvent<HTMLFormElement>, createPost: FetchData<any>, onSubmission: () => void) {
+    event.preventDefault()
+    const form = event.target as HTMLFormElement
+    const formData = new FormData(form)
+    const title = formData.get('title')
+    const url = formData.get('url')
+    form.reset()
+    const result = await createPost({
+      variables: {
+        title,
+        url
+      }
+    })
+    console.log(result)
+    onSubmission && onSubmission()
+  }

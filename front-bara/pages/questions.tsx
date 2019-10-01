@@ -1,13 +1,3 @@
-// import App from '../components/app'
-// import Header from '../components/header'
-
-// export default () => (
-//   <App>
-//     <Header />
-//     Questions list: 
-
-//   </App>
-// )
 import * as React from 'react'
 import Link from 'next/link'
 import Layout from '../components/Layout'

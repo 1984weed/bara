@@ -2,6 +2,12 @@
 
 package bara
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type CodeResult struct {
 	Result *CodeResultDetail `json:"result"`
 	Stdout string            `json:"stdout"`
@@ -14,6 +20,16 @@ type CodeResultDetail struct {
 	Time     int    `json:"time"`
 }
 
+type NewQuestion struct {
+	Title        string            `json:"title"`
+	Description  string            `json:"description"`
+	FunctionName string            `json:"functionName"`
+	LanguageID   CodeLanguage      `json:"languageID"`
+	ArgsNum      int               `json:"argsNum"`
+	ArgsTypes    []TestCaseArgType `json:"argsTypes"`
+	TestCases    []*TestCase       `json:"testCases"`
+}
+
 type Question struct {
 	Slug        string `json:"slug"`
 	Title       string `json:"title"`
@@ -24,4 +40,89 @@ type SubmitCode struct {
 	TypedCode string `json:"typedCode"`
 	Lang      string `json:"lang"`
 	Slug      string `json:"slug"`
+}
+
+type TestCase struct {
+	Input  []string `json:"input"`
+	Output string   `json:"output"`
+}
+
+type CodeLanguage string
+
+const (
+	CodeLanguageJavaScript CodeLanguage = "JavaScript"
+)
+
+var AllCodeLanguage = []CodeLanguage{
+	CodeLanguageJavaScript,
+}
+
+func (e CodeLanguage) IsValid() bool {
+	switch e {
+	case CodeLanguageJavaScript:
+		return true
+	}
+	return false
+}
+
+func (e CodeLanguage) String() string {
+	return string(e)
+}
+
+func (e *CodeLanguage) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CodeLanguage(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CodeLanguage", str)
+	}
+	return nil
+}
+
+func (e CodeLanguage) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TestCaseArgType string
+
+const (
+	TestCaseArgTypeNumber TestCaseArgType = "NUMBER"
+	TestCaseArgTypeString TestCaseArgType = "STRING"
+)
+
+var AllTestCaseArgType = []TestCaseArgType{
+	TestCaseArgTypeNumber,
+	TestCaseArgTypeString,
+}
+
+func (e TestCaseArgType) IsValid() bool {
+	switch e {
+	case TestCaseArgTypeNumber, TestCaseArgTypeString:
+		return true
+	}
+	return false
+}
+
+func (e TestCaseArgType) String() string {
+	return string(e)
+}
+
+func (e *TestCaseArgType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TestCaseArgType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TestCaseArgType", str)
+	}
+	return nil
+}
+
+func (e TestCaseArgType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -7,7 +7,7 @@ let graphQLClient: null | GraphQLClient = null
 function create (this: unknown, _: object = {}): GraphQLClient {
   return new GraphQLClient({
     ssrMode: false,//typeof window === 'undefined',
-	url: 'https://api.graph.cool/simple/v1/cixmkt2ul01q00122mksg82pn',
+    url: 'http://localhost:8080/query',
 	cache: undefined,
     fetch: typeof window !== 'undefined' ? fetch.bind(this) : unfetch, // eslint-disable-line
   })

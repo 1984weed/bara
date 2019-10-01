@@ -20,12 +20,37 @@ type Query {
   Questions(limit: Int = 25, offset: Int = 0): [Question!]!
 }
 
+enum CodeLanguage {
+  JavaScript
+}
+
+enum TestCaseArgType {
+  NUMBER
+  STRING
+}
+
 input SubmitCode {
   typedCode: String!
   lang: String!
   slug: String!
 }
 
+input TestCase {
+  input: [String!]!
+  output: String!
+}
+
+input NewQuestion {
+  title: String!
+  description: String!
+  functionName: String!
+  languageID: CodeLanguage!
+  argsNum: Int!
+  argsTypes: [TestCaseArgType!]!
+  testCases: [TestCase!]!
+}
+
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
+  createQuestion(input: NewQuestion!): Question!
 }
