@@ -54,3 +54,7 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 		Stdout: stdout,
 	}, nil
 }
+
+func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion) (*Question, error) {
+	return nil, nil
+}

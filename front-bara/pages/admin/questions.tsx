@@ -4,14 +4,9 @@ import { useMutation, FetchData } from 'graphql-hooks'
 import { FormEvent } from 'react'
 
 export const createQuestion = `
-mutation createQuestion {
-    submitCode(input: {typedCode: "function helloWorld(){return 'hello world'}", lang:"js", slug:"test"}) {
-    result {
-      status,
-      expected,
-      time,
-      result
-    }
+mutation createQuestion($title: String!, $description: String!, $functionName: String!, $languageID: CodeLanguage!, $argsNum: Int!, $argsTypes:  [TestCaseArgType!]!, $testCases: [TestCase!]!) {
+    createQuestion(input: {title: $title, description: $description, functionName: $functionName, languageID: $languageID, argsNum: $argsNum, argsTypes: $argsTypes, testCases: $testCases}) {
+      title
   }
 }
 `
@@ -43,7 +38,7 @@ const AdminQuestionPage: React.FunctionComponent<Props> = ({onSubmission}: Props
 
       <div>
         <div>
-          <label>Args: </label><input type="text" name="args" />
+          <label>Args: </label><input type="text" name="argsNum" />
         </div>
         <label>Argument Type:</label> 
         <select name="argumentType">
@@ -55,7 +50,7 @@ const AdminQuestionPage: React.FunctionComponent<Props> = ({onSubmission}: Props
     </div>
     <div>
       <label>Languege: </label>
-      <select name="argumentType">
+      <select name="codeLanguage">
           <option value="js">JavaScript</option>
       </select>
     </div>
@@ -86,12 +81,22 @@ async function handleSubmit (event: FormEvent<HTMLFormElement>, createPost: Fetc
     const form = event.target as HTMLFormElement
     const formData = new FormData(form)
     const title = formData.get('title')
-    const url = formData.get('url')
+    const description = formData.get('description')
+    const functionName = formData.get('functionName')
+    const languageID = formData.get('codeLanguage')
+    const argsNum = formData.get('argsNum')
+    const testCases = [{}]
+    const argsTypes = [{}]
     form.reset()
     const result = await createPost({
       variables: {
         title,
-        url
+        description,
+        functionName,
+        argsNum,
+        languageID,
+        testCases,
+        argsTypes
       }
     })
     console.log(result)
