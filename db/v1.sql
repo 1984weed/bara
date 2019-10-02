@@ -40,6 +40,8 @@ CREATE TABLE question_args (
   order_no INTEGER NOT NULL,
   name VARCHAR(255) NOT NULL,
   type args_t NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
   constraint fk_question_args_question FOREIGN KEY (question_id) REFERENCES questions (id)
 );
 
@@ -50,6 +52,8 @@ CREATE TABLE question_testcases (
   question_id INTEGER NOT NULL,
   input_text TEXT NOT NULL,
   output_text TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
   constraint fk_question_testcases_question FOREIGN KEY (question_id) REFERENCES questions (id)
 );
 

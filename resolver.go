@@ -4,8 +4,10 @@ import (
 	"bara/remote"
 	"context"
 	"fmt"
+	"time"
 
 	pg "github.com/go-pg/pg/v9"
+	"github.com/gosimple/slug"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct {
@@ -56,32 +58,88 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 }
 
 func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion) (*Question, error) {
-	remote.Question{
-		Slug:         "hogehoge",
+	tx, err := r.DB.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	// tx, err := db.Begin()
+	// if err != nil {
+	//     return err
+	// }
+	// // Rollback tx on error.
+	// defer tx.Rollback()
+
+	// var counter int
+	// _, err = tx.QueryOne(
+	//     pg.Scan(&counter), `SELECT counter FROM tx_test FOR UPDATE`)
+	// if err != nil {
+	//     return err
+	// }
+
+	// counter++
+
+	// _, err = tx.Exec(`UPDATE tx_test SET counter = ?`, counter)
+	// if err != nil {
+	//     return err
+	// }
+
+	// return tx.Commit()
+
+	question := &remote.Question{
+		Slug:         slug.Make(input.Title),
 		Title:        input.Title,
 		Description:  input.Description,
 		FunctionName: input.FunctionName,
-
-		// ID           int64
-		// Slug         string
-		// Title        string
-		// Description  string
-		// FunctionName string
-		// ArgID        int
-		// AuthorID     int
-		// CreatedAt    time.Time
-		// UpdatedAt    time.Time
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
 	}
-	err = r.DB.Insert(&User{
-		Name:   "root",
-		Emails: []string{"root1@root", "root2@root"},
-	})
+	err = tx.Insert(question)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+	for i, arg := range input.Args {
+		err = tx.Insert(&remote.QuestionArgs{
+			QuestionID: question.ID,
+			OrderNo:    i + 1,
+			Name:       arg.Name,
+			Type:       convertArgsType(arg.Type),
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	for _, testcase := range input.TestCases {
+		inputString := ""
+		for _, input := range testcase.Input {
+			inputString += fmt.Sprintf("%s\n", input)
+		}
+		err = tx.Insert(&remote.QuestionTestcases{
+			QuestionID: question.ID,
+			InputText:  inputString,
+			OutputText: testcase.Output,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+	tx.Commit()
+
 	return &Question{
 		Slug:        "testtest",
-		Title:       input.Title,
-		Description: input.Description,
+		Title:       question.Title,
+		Description: question.Description,
 	}, nil
+}
+
+func convertArgsType(argType TestCaseArgType) string {
+	switch argType {
+	case TestCaseArgTypeNumber:
+		return "num"
+	case TestCaseArgTypeString:
+		return "string"
+	}
+	return "num"
 }

@@ -8,6 +8,11 @@ export type Scalars = {
   Float: number,
 };
 
+export type CodeArg = {
+  type: TestCaseArgType,
+  name: Scalars['String'],
+};
+
 export enum CodeLanguage {
   JavaScript = 'JavaScript'
 }
@@ -48,7 +53,7 @@ export type NewQuestion = {
   functionName: Scalars['String'],
   languageID: CodeLanguage,
   argsNum: Scalars['Int'],
-  argsTypes: Array<TestCaseArgType>,
+  args: Array<CodeArg>,
   testCases: Array<TestCase>,
 };
 

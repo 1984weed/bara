@@ -296,13 +296,18 @@ input TestCase {
   output: String!
 }
 
+input CodeArg {
+  type: TestCaseArgType!
+  name: String!
+}
+
 input NewQuestion {
   title: String!
   description: String!
   functionName: String!
   languageID: CodeLanguage!
   argsNum: Int!
-  argsTypes: [TestCaseArgType!]!
+  args: [CodeArg!]!
   testCases: [TestCase!]!
 }
 
@@ -2107,6 +2112,30 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCodeArg(ctx context.Context, obj interface{}) (CodeArg, error) {
+	var it CodeArg
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "type":
+			var err error
+			it.Type, err = ec.unmarshalNTestCaseArgType2baraᚐTestCaseArgType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewQuestion(ctx context.Context, obj interface{}) (NewQuestion, error) {
 	var it NewQuestion
 	var asMap = obj.(map[string]interface{})
@@ -2143,9 +2172,9 @@ func (ec *executionContext) unmarshalInputNewQuestion(ctx context.Context, obj i
 			if err != nil {
 				return it, err
 			}
-		case "argsTypes":
+		case "args":
 			var err error
-			it.ArgsTypes, err = ec.unmarshalNTestCaseArgType2ᚕbaraᚐTestCaseArgType(ctx, v)
+			it.Args, err = ec.unmarshalNCodeArg2ᚕᚖbaraᚐCodeArg(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2673,6 +2702,38 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNCodeArg2baraᚐCodeArg(ctx context.Context, v interface{}) (CodeArg, error) {
+	return ec.unmarshalInputCodeArg(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNCodeArg2ᚕᚖbaraᚐCodeArg(ctx context.Context, v interface{}) ([]*CodeArg, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*CodeArg, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNCodeArg2ᚖbaraᚐCodeArg(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCodeArg2ᚖbaraᚐCodeArg(ctx context.Context, v interface{}) (*CodeArg, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNCodeArg2baraᚐCodeArg(ctx, v)
+	return &res, err
+}
+
 func (ec *executionContext) unmarshalNCodeLanguage2baraᚐCodeLanguage(ctx context.Context, v interface{}) (CodeLanguage, error) {
 	var res CodeLanguage
 	return res, res.UnmarshalGQL(v)
@@ -2865,63 +2926,6 @@ func (ec *executionContext) unmarshalNTestCaseArgType2baraᚐTestCaseArgType(ctx
 
 func (ec *executionContext) marshalNTestCaseArgType2baraᚐTestCaseArgType(ctx context.Context, sel ast.SelectionSet, v TestCaseArgType) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) unmarshalNTestCaseArgType2ᚕbaraᚐTestCaseArgType(ctx context.Context, v interface{}) ([]TestCaseArgType, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]TestCaseArgType, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalNTestCaseArgType2baraᚐTestCaseArgType(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNTestCaseArgType2ᚕbaraᚐTestCaseArgType(ctx context.Context, sel ast.SelectionSet, v []TestCaseArgType) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTestCaseArgType2baraᚐTestCaseArgType(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

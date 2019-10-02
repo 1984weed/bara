@@ -8,6 +8,11 @@ import (
 	"strconv"
 )
 
+type CodeArg struct {
+	Type TestCaseArgType `json:"type"`
+	Name string          `json:"name"`
+}
+
 type CodeResult struct {
 	Result *CodeResultDetail `json:"result"`
 	Stdout string            `json:"stdout"`
@@ -21,13 +26,13 @@ type CodeResultDetail struct {
 }
 
 type NewQuestion struct {
-	Title        string            `json:"title"`
-	Description  string            `json:"description"`
-	FunctionName string            `json:"functionName"`
-	LanguageID   CodeLanguage      `json:"languageID"`
-	ArgsNum      int               `json:"argsNum"`
-	ArgsTypes    []TestCaseArgType `json:"argsTypes"`
-	TestCases    []*TestCase       `json:"testCases"`
+	Title        string       `json:"title"`
+	Description  string       `json:"description"`
+	FunctionName string       `json:"functionName"`
+	LanguageID   CodeLanguage `json:"languageID"`
+	ArgsNum      int          `json:"argsNum"`
+	Args         []*CodeArg   `json:"args"`
+	TestCases    []*TestCase  `json:"testCases"`
 }
 
 type Question struct {

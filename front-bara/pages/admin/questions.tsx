@@ -4,8 +4,8 @@ import { useMutation, FetchData } from 'graphql-hooks'
 import { CodeLanguage, TestCaseArgType } from '../../graphql/types'
 
 export const createQuestion = `
-mutation createQuestion($title: String!, $description: String!, $functionName: String!, $languageID: CodeLanguage!, $argsNum: Int!, $argsTypes:  [TestCaseArgType!]!, $testCases: [TestCase!]!) {
-    createQuestion(input: {title: $title, description: $description, functionName: $functionName, languageID: $languageID, argsNum: $argsNum, argsTypes: $argsTypes, testCases: $testCases}) {
+mutation createQuestion($title: String!, $description: String!, $functionName: String!, $languageID: CodeLanguage!, $argsNum: Int!, $args:  [CodeArg!]!, $testCases: [TestCase!]!) {
+    createQuestion(input: {title: $title, description: $description, functionName: $functionName, languageID: $languageID, argsNum: $argsNum, args: $args, testCases: $testCases}) {
       title
   }
 }
@@ -25,9 +25,6 @@ const AdminQuestionPage: React.FunctionComponent<Props> = ({onSubmission}: Props
     <form onSubmit={event => handleSubmit(event, createPost, onSubmission)}>
       <div>
         Title: <input type="text" name="title" />
-      </div>
-      <div>
-          Description: <textarea name="description"></textarea>
       </div>
       <div>
           Description: <textarea name="description"></textarea>
@@ -87,12 +84,15 @@ async function handleSubmit (event: React.FormEvent<HTMLFormElement>, createPost
     const functionName = formData.get('functionName')
     const languageID = CodeLanguage.JavaScript;//formData.get('codeLanguage')
     const argsNum = 1;//formData.get('argsNum')
+    const args = [{
+      name: "target",
+      type: TestCaseArgType.Number
+    }]
     const testCases = [{
       input: ["10"],
       output: "10"
     }];
-    const argsTypes = [TestCaseArgType.Number]
-    form.reset()
+    // form.reset()
     const result = await createPost({
       variables: {
         title,
@@ -101,7 +101,7 @@ async function handleSubmit (event: React.FormEvent<HTMLFormElement>, createPost
         argsNum,
         languageID,
         testCases,
-        argsTypes
+        args
       }
     })
     console.log(result)

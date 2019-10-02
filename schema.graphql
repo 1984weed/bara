@@ -40,13 +40,18 @@ input TestCase {
   output: String!
 }
 
+input CodeArg {
+  type: TestCaseArgType!
+  name: String!
+}
+
 input NewQuestion {
   title: String!
   description: String!
   functionName: String!
   languageID: CodeLanguage!
   argsNum: Int!
-  argsTypes: [TestCaseArgType!]!
+  args: [CodeArg!]!
   testCases: [TestCase!]!
 }
 

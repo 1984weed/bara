@@ -54,6 +54,7 @@ type QuestionArgs struct {
 
 type QuestionTestcases struct {
 	ID         int64
+	QuestionID int64
 	InputText  string
 	OutputText string
 }

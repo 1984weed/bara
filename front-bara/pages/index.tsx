@@ -1,10 +1,28 @@
 import React from 'react'
-import styled from 'styled-components'
-import App from "../components/app"
+import { Grommet, Box } from 'grommet';
+// import { Card, Value } from 'grommet-controls';
+const { Card } = require('grommet-controls')
 
-const Title = styled.h1`
-  color: red;
-  font-size: 50px;
-`
+export default () => 
+      <Grommet>
+        <Box basis='full'>
+          Problems
+          <Card height='small'>
+            <Card.CardTitle>
+              Problem 1
+            </Card.CardTitle>
+            <Card.CardContent align='center'>
+              説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明
+            </Card.CardContent>
+          </Card>
+          <Card height='small'>
+            <Card.CardTitle>
+              Problem 2
+            </Card.CardTitle>
+            <Card.CardContent align='center'>
+              説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明 説明説明
+            </Card.CardContent>
+          </Card>
+        </Box>
+      </Grommet>
 
-export default () => <App><Title>My page</Title></App>
