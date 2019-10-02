@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-pg/pg/v9"
+	pg "github.com/go-pg/pg/v9"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct {
@@ -56,5 +56,32 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 }
 
 func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion) (*Question, error) {
-	return nil, nil
+	remote.Question{
+		Slug:         "hogehoge",
+		Title:        input.Title,
+		Description:  input.Description,
+		FunctionName: input.FunctionName,
+
+		// ID           int64
+		// Slug         string
+		// Title        string
+		// Description  string
+		// FunctionName string
+		// ArgID        int
+		// AuthorID     int
+		// CreatedAt    time.Time
+		// UpdatedAt    time.Time
+	}
+	err = r.DB.Insert(&User{
+		Name:   "root",
+		Emails: []string{"root1@root", "root2@root"},
+	})
+	if err != nil {
+		panic(err)
+	}
+	return &Question{
+		Slug:        "testtest",
+		Title:       input.Title,
+		Description: input.Description,
+	}, nil
 }

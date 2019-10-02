@@ -1,7 +1,7 @@
 import * as React from 'react'
 import Layout from '../../components/Layout'
 import { useMutation, FetchData } from 'graphql-hooks'
-import { FormEvent } from 'react'
+import { CodeLanguage, TestCaseArgType } from '../../graphql/types'
 
 export const createQuestion = `
 mutation createQuestion($title: String!, $description: String!, $functionName: String!, $languageID: CodeLanguage!, $argsNum: Int!, $argsTypes:  [TestCaseArgType!]!, $testCases: [TestCase!]!) {
@@ -76,17 +76,22 @@ const AdminQuestionPage: React.FunctionComponent<Props> = ({onSubmission}: Props
 
 export default AdminQuestionPage
 
-async function handleSubmit (event: FormEvent<HTMLFormElement>, createPost: FetchData<any>, onSubmission: () => void) {
+async function handleSubmit (event: React.FormEvent<HTMLFormElement>, createPost: FetchData<any>, onSubmission: () => void) {
     event.preventDefault()
+    console.log(createPost)
+    console.log(onSubmission)
     const form = event.target as HTMLFormElement
     const formData = new FormData(form)
     const title = formData.get('title')
     const description = formData.get('description')
     const functionName = formData.get('functionName')
-    const languageID = formData.get('codeLanguage')
-    const argsNum = formData.get('argsNum')
-    const testCases = [{}]
-    const argsTypes = [{}]
+    const languageID = CodeLanguage.JavaScript;//formData.get('codeLanguage')
+    const argsNum = 1;//formData.get('argsNum')
+    const testCases = [{
+      input: ["10"],
+      output: "10"
+    }];
+    const argsTypes = [TestCaseArgType.Number]
     form.reset()
     const result = await createPost({
       variables: {

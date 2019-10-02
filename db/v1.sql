@@ -29,6 +29,7 @@ CREATE TABLE questions (
   CONSTRAINT questions_slug_unique UNIQUE(slug)
 );
 
+DROP TYPE IF EXISTS args_t;
 CREATE TYPE args_t AS enum('string', 'list', 'num', 'likedList', 'node');
 
 DROP TABLE IF EXISTS question_args;
@@ -49,6 +50,6 @@ CREATE TABLE question_testcases (
   question_id INTEGER NOT NULL,
   input_text TEXT NOT NULL,
   output_text TEXT NOT NULL,
-  constraint fk_question_args_question FOREIGN KEY (question_id) REFERENCES questions (id)
+  constraint fk_question_testcases_question FOREIGN KEY (question_id) REFERENCES questions (id)
 );
 

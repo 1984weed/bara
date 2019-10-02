@@ -33,12 +33,12 @@ export type Mutation = {
 };
 
 
-export type MutationSubmitCodeArgs = {
+export type Mutation_SubmitCodeArgs = {
   input: SubmitCode
 };
 
 
-export type MutationCreateQuestionArgs = {
+export type Mutation_CreateQuestionArgs = {
   input: NewQuestion
 };
 
@@ -58,7 +58,7 @@ export type Query = {
 };
 
 
-export type QueryQuestionsArgs = {
+export type Query_QuestionsArgs = {
   limit?: Maybe<Scalars['Int']>,
   offset?: Maybe<Scalars['Int']>
 };
