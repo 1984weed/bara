@@ -33,6 +33,58 @@ func (r *queryResolver) Questions(ctx context.Context, limit *int, offset *int) 
 	return []*Question{}, nil
 }
 
+func (r *queryResolver) Question(ctx context.Context, slug *string) (*Question, error) {
+	question := new(remote.Question)
+
+	err := r.DB.Model(question).
+		Where("slug = ?", *slug).
+		Select()
+
+	if err != nil {
+		return nil, err
+	}
+
+	args := new([]remote.QuestionArgs)
+
+	err = r.DB.Model(args).
+		Where("question_args.question_id = ?", 2).
+		Select()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Question{
+		Slug:        question.Slug,
+		Title:       question.Title,
+		Description: question.Description,
+		CodeSnippets: []*CodeSnippet{
+			{
+				Code: makeSnippets(question.FunctionName, args),
+				Lang: CodeLanguageJavaScript,
+			},
+		},
+	}, nil
+
+}
+
+func makeSnippets(functionName string, args *[]remote.QuestionArgs) string {
+	argsString := ""
+	for i, a := range *args {
+		separator := ", "
+		if i == 0 {
+			separator = ""
+		}
+		argsString += fmt.Sprintf("%s%s", separator, a.Name)
+	}
+	return fmt.Sprintf(`/**
+ */
+function %s(%s) {
+	
+};
+	`, functionName, argsString)
+
+}
+
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
@@ -63,29 +115,6 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 		return nil, err
 	}
 	defer tx.Rollback()
-
-	// tx, err := db.Begin()
-	// if err != nil {
-	//     return err
-	// }
-	// // Rollback tx on error.
-	// defer tx.Rollback()
-
-	// var counter int
-	// _, err = tx.QueryOne(
-	//     pg.Scan(&counter), `SELECT counter FROM tx_test FOR UPDATE`)
-	// if err != nil {
-	//     return err
-	// }
-
-	// counter++
-
-	// _, err = tx.Exec(`UPDATE tx_test SET counter = ?`, counter)
-	// if err != nil {
-	//     return err
-	// }
-
-	// return tx.Commit()
 
 	question := &remote.Question{
 		Slug:         slug.Make(input.Title),

@@ -61,14 +61,11 @@ type QuestionTestcases struct {
 
 func (n *NodeJSClient) Exec(slug string, typedCode string) (*CodeResult, string) {
 	question := &Question{ID: 2}
-	// args := &QuestionArgs{QuestionID: 2}
 	err := n.store.Select(question)
 
 	if err != nil {
 		return nil, ""
 	}
-	// create args
-	// err = n.store.Select(args)
 
 	args := new([]QuestionArgs)
 	err = n.store.Model(args).

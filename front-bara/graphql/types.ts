@@ -31,6 +31,12 @@ export type CodeResultDetail = {
   time: Scalars['Int'],
 };
 
+export type CodeSnippet = {
+   __typename?: 'CodeSnippet',
+  code: Scalars['String'],
+  lang: CodeLanguage,
+};
+
 export type Mutation = {
    __typename?: 'Mutation',
   submitCode: CodeResult,
@@ -60,6 +66,7 @@ export type NewQuestion = {
 export type Query = {
    __typename?: 'Query',
   Questions: Array<Question>,
+  Question: Question,
 };
 
 
@@ -68,11 +75,17 @@ export type Query_QuestionsArgs = {
   offset?: Maybe<Scalars['Int']>
 };
 
+
+export type Query_QuestionArgs = {
+  slug?: Maybe<Scalars['String']>
+};
+
 export type Question = {
    __typename?: 'Question',
   slug: Scalars['String'],
   title: Scalars['String'],
   description: Scalars['String'],
+  codeSnippets: Array<CodeSnippet>,
 };
 
 export type SubmitCode = {

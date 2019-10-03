@@ -54,19 +54,26 @@ type ComplexityRoot struct {
 		Time     func(childComplexity int) int
 	}
 
+	CodeSnippet struct {
+		Code func(childComplexity int) int
+		Lang func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateQuestion func(childComplexity int, input NewQuestion) int
 		SubmitCode     func(childComplexity int, input SubmitCode) int
 	}
 
 	Query struct {
+		Question  func(childComplexity int, slug *string) int
 		Questions func(childComplexity int, limit *int, offset *int) int
 	}
 
 	Question struct {
-		Description func(childComplexity int) int
-		Slug        func(childComplexity int) int
-		Title       func(childComplexity int) int
+		CodeSnippets func(childComplexity int) int
+		Description  func(childComplexity int) int
+		Slug         func(childComplexity int) int
+		Title        func(childComplexity int) int
 	}
 }
 
@@ -76,6 +83,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Questions(ctx context.Context, limit *int, offset *int) ([]*Question, error)
+	Question(ctx context.Context, slug *string) (*Question, error)
 }
 
 type executableSchema struct {
@@ -135,6 +143,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CodeResultDetail.Time(childComplexity), true
 
+	case "CodeSnippet.code":
+		if e.complexity.CodeSnippet.Code == nil {
+			break
+		}
+
+		return e.complexity.CodeSnippet.Code(childComplexity), true
+
+	case "CodeSnippet.lang":
+		if e.complexity.CodeSnippet.Lang == nil {
+			break
+		}
+
+		return e.complexity.CodeSnippet.Lang(childComplexity), true
+
 	case "Mutation.createQuestion":
 		if e.complexity.Mutation.CreateQuestion == nil {
 			break
@@ -159,6 +181,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SubmitCode(childComplexity, args["input"].(SubmitCode)), true
 
+	case "Query.Question":
+		if e.complexity.Query.Question == nil {
+			break
+		}
+
+		args, err := ec.field_Query_Question_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Question(childComplexity, args["slug"].(*string)), true
+
 	case "Query.Questions":
 		if e.complexity.Query.Questions == nil {
 			break
@@ -170,6 +204,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Questions(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
+
+	case "Question.codeSnippets":
+		if e.complexity.Question.CodeSnippets == nil {
+			break
+		}
+
+		return e.complexity.Question.CodeSnippets(childComplexity), true
 
 	case "Question.description":
 		if e.complexity.Question.Description == nil {
@@ -266,14 +307,21 @@ type CodeResultDetail {
   time: Int!
 }
 
+type CodeSnippet {
+  code: String!
+  lang: CodeLanguage!
+}
+
 type Question {
   slug: String!
   title: String!
   description: String!
+  codeSnippets: [CodeSnippet!]!
 }
 
 type Query {
   Questions(limit: Int = 25, offset: Int = 0): [Question!]!
+  Question(slug: String): Question!
 }
 
 enum CodeLanguage {
@@ -346,6 +394,20 @@ func (ec *executionContext) field_Mutation_submitCode_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_Question_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["slug"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["slug"] = arg0
 	return args, nil
 }
 
@@ -643,6 +705,80 @@ func (ec *executionContext) _CodeResultDetail_time(ctx context.Context, field gr
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _CodeSnippet_code(ctx context.Context, field graphql.CollectedField, obj *CodeSnippet) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CodeSnippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CodeSnippet_lang(ctx context.Context, field graphql.CollectedField, obj *CodeSnippet) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CodeSnippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Lang, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(CodeLanguage)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNCodeLanguage2baraᚐCodeLanguage(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_submitCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -773,6 +909,50 @@ func (ec *executionContext) _Query_Questions(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNQuestion2ᚕᚖbaraᚐQuestion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_Question(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_Question_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Question(rctx, args["slug"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Question)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNQuestion2ᚖbaraᚐQuestion(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -959,6 +1139,43 @@ func (ec *executionContext) _Question_description(ctx context.Context, field gra
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Question_codeSnippets(ctx context.Context, field graphql.CollectedField, obj *Question) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Question",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CodeSnippets, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*CodeSnippet)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNCodeSnippet2ᚕᚖbaraᚐCodeSnippet(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2326,6 +2543,38 @@ func (ec *executionContext) _CodeResultDetail(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var codeSnippetImplementors = []string{"CodeSnippet"}
+
+func (ec *executionContext) _CodeSnippet(ctx context.Context, sel ast.SelectionSet, obj *CodeSnippet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, codeSnippetImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CodeSnippet")
+		case "code":
+			out.Values[i] = ec._CodeSnippet_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "lang":
+			out.Values[i] = ec._CodeSnippet_lang(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2391,6 +2640,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "Question":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_Question(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -2429,6 +2692,11 @@ func (ec *executionContext) _Question(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "description":
 			out.Values[i] = ec._Question_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "codeSnippets":
+			out.Values[i] = ec._Question_codeSnippets(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2769,6 +3037,57 @@ func (ec *executionContext) marshalNCodeResultDetail2ᚖbaraᚐCodeResultDetail(
 		return graphql.Null
 	}
 	return ec._CodeResultDetail(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCodeSnippet2baraᚐCodeSnippet(ctx context.Context, sel ast.SelectionSet, v CodeSnippet) graphql.Marshaler {
+	return ec._CodeSnippet(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCodeSnippet2ᚕᚖbaraᚐCodeSnippet(ctx context.Context, sel ast.SelectionSet, v []*CodeSnippet) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCodeSnippet2ᚖbaraᚐCodeSnippet(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNCodeSnippet2ᚖbaraᚐCodeSnippet(ctx context.Context, sel ast.SelectionSet, v *CodeSnippet) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._CodeSnippet(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {

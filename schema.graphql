@@ -10,14 +10,21 @@ type CodeResultDetail {
   time: Int!
 }
 
+type CodeSnippet {
+  code: String!
+  lang: CodeLanguage!
+}
+
 type Question {
   slug: String!
   title: String!
   description: String!
+  codeSnippets: [CodeSnippet!]!
 }
 
 type Query {
   Questions(limit: Int = 25, offset: Int = 0): [Question!]!
+  Question(slug: String): Question!
 }
 
 enum CodeLanguage {

@@ -25,6 +25,11 @@ type CodeResultDetail struct {
 	Time     int    `json:"time"`
 }
 
+type CodeSnippet struct {
+	Code string       `json:"code"`
+	Lang CodeLanguage `json:"lang"`
+}
+
 type NewQuestion struct {
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
@@ -36,9 +41,10 @@ type NewQuestion struct {
 }
 
 type Question struct {
-	Slug        string `json:"slug"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Slug         string         `json:"slug"`
+	Title        string         `json:"title"`
+	Description  string         `json:"description"`
+	CodeSnippets []*CodeSnippet `json:"codeSnippets"`
 }
 
 type SubmitCode struct {
