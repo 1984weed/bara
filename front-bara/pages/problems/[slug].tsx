@@ -2,9 +2,10 @@ import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import Editor from '../../components/Editor'
 import React from 'react'
-import { useQuery } from 'graphql-hooks'
+import { useQuery, useMutation, FetchData } from 'graphql-hooks'
 import {Question} from '../../graphql/types'
 import { Grid, Button, Box } from 'grommet';
+import { useFormState } from 'react-use-form-state';
 
 type Props = {}
 
@@ -22,21 +23,41 @@ query getQuestion($slug: String!) {
 }
 `
 
+const submitCodeMutation = `
+mutation submitCode($typedCode: String!, $lang: String!, $slug: String!) {
+    submitCode(input: {typedCode: $typedCode, lang: $lang, slug: $slug}) {
+    result {
+      status,
+      expected,
+      time,
+      result
+    }
+  }
+}
+`
+
 const Problem: React.FunctionComponent<Props> = ({}: Props) => {
     const router = useRouter()
-    // const [skip, setSkip] = useState(0)
     const { slug } = router.query
+
+    const [formState, { raw }] = useFormState({code : null});
+
     const { error, data } = useQuery<{Question: Question}>(problem, {
         variables: { slug },
-        updateData: (_, result) => ({
-          ...result
-        })
+        updateData: (_, result) => {
+            console.log(result)
+            return {
+
+            }
+        }
       })
+    const [submitCode, ] = useMutation(submitCodeMutation)
 
     if (error) return <span>Error</span>
     if (!data) return <div>Loading</div>
 
     const { Question } = data
+    const language = "JavaScript"
     const targetCodeSnippet = Question.codeSnippets.find(a => a.lang === "JavaScript") || {code: ""};
 
     return (
@@ -61,18 +82,36 @@ const Problem: React.FunctionComponent<Props> = ({}: Props) => {
                 <div></div>
                 <Box gridArea='editor'>
                     <Editor
+                        {...raw({
+                            name: "code"
+                        })
+                        }
                         value={targetCodeSnippet.code}
                     />
                 </Box>
                 <Box gridArea='controls'>
                     <Box direction="row" justify="end" margin={{ top: "medium" }}>
                         <Button label="Cancel" />
-                        <Button type="submit" label="Submit" primary />
+                        <Button type="button" label="Submit" onClick={() => {
+                            const typedCode = formState.values.code == null ? targetCodeSnippet.code :formState.values.code
+                            return handleSubmit(submitCode, typedCode, language, slug as string);
+                        }} primary />
                     </Box>
                 </Box>
             </Grid>
         </Layout>
     )
+}
+
+async function handleSubmit (submitCode: FetchData<any>, typedCode: string, lang: string, slug: string) {
+    const result = await submitCode({
+      variables: {
+        typedCode,
+        lang,
+        slug
+      }
+    })
+    console.log(result)
 }
 
 export default Problem

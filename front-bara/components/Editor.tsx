@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 
 type EditorProps = {
   value?: string;
+  onChange: (allValue: string) => void;
 }
 class CodeEditor extends Component<EditorProps> {
   private ace: any;
@@ -18,7 +19,8 @@ class CodeEditor extends Component<EditorProps> {
       return
     }
     const editor = this.ace.editor; 
-    console.log(editor.getValue());
+    console.log(editor.getValue())
+    this.props.onChange(editor.getValue())
   }
   render() {
     return (
@@ -31,14 +33,6 @@ class CodeEditor extends Component<EditorProps> {
         ref={(instance: any) => { this.ace = instance; }}
         setValue={this.props.value}
         fontSize={14}
-        // setOptions={{
-        //   enableBasicAutocompletion: false,
-        //   enableLiveAutocompletion: false,
-        //   enableSnippets: false,
-        //   showLineNumbers: true,
-        //   tabSize: 8,
-        //   useSoftTabs: true
-        // }}
       />
     );
   }
