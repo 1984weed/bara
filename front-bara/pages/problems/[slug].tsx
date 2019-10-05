@@ -3,9 +3,10 @@ import Layout from '../../components/Layout'
 import Editor from '../../components/Editor'
 import React from 'react'
 import { useQuery, useMutation, FetchData } from 'graphql-hooks'
-import {Question} from '../../graphql/types'
+import {Question, CodeLanguage} from '../../graphql/types'
 import { Grid, Button, Box } from 'grommet';
 import { useFormState } from 'react-use-form-state';
+import SubmittedResult from '../../components/problems/SubmittedResult'
 
 type Props = {}
 
@@ -51,19 +52,19 @@ const Problem: React.FunctionComponent<Props> = ({}: Props) => {
             }
         }
       })
-    const [submitCode, ] = useMutation(submitCodeMutation)
+    const [submitCode, submittedResult ] = useMutation(submitCodeMutation)
 
     if (error) return <span>Error</span>
     if (!data) return <div>Loading</div>
 
     const { Question } = data
-    const language = "JavaScript"
+    const language = CodeLanguage.JavaScript;
     const targetCodeSnippet = Question.codeSnippets.find(a => a.lang === "JavaScript") || {code: ""};
 
     return (
         <Layout title="">
             <Grid
-            rows={['flex', '60px']}
+            rows={['flex', '60px', 'auto']}
             columns={['flex', '5px', 'flex']}
             gap='1px'
             areas={[
@@ -71,6 +72,7 @@ const Problem: React.FunctionComponent<Props> = ({}: Props) => {
             { name: 'partition', start: [1, 0], end: [1, 0] },
             { name: 'editor', start: [2, 0], end: [2, 0] },
             { name: 'controls', start: [0, 1], end: [2, 1] },
+            { name: 'result', start: [0, 2], end: [2, 2] },
             ]}
         >
                 <Box gridArea='description'>
@@ -98,6 +100,15 @@ const Problem: React.FunctionComponent<Props> = ({}: Props) => {
                         }} primary />
                     </Box>
                 </Box>
+                {submittedResult.data != null &&
+                    <Box gridArea='result'>
+                        <SubmittedResult 
+                            title={Question.title}
+                            language={language}
+                            {...submittedResult.data.submitCode.result}
+                        />
+                    </Box>
+                }
             </Grid>
         </Layout>
     )
