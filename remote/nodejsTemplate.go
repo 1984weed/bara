@@ -22,6 +22,9 @@ async function main() {
   var countTestCase = 1;
 
   for await (const line of rl) {
+    if(line === "") {
+      break;
+    }
     if (lineCount === 0) {
       testCaseNum = parseInt(line);
     } else if (lineCount === 1) {

@@ -34,8 +34,8 @@ const SubmittedResult: React.FunctionComponent<Props> = props =>
     <Box align='center'>
         <Text color='accent-3'>{statusSlugToLabel(props.status)}</Text>
         <Paragraph>
-            {status === "success" || <Text>Runtime: {props.time} ms, {languageSlugToLabel(props.language)} online submissions for {props.title}</Text>}
-            {status === "fail" || <Text>
+            {props.status === "success" && <Text>Runtime: {props.time} ms, {languageSlugToLabel(props.language)} online submissions for {props.title}</Text>}
+            {props.status === "fail" && <Text>
                 It failed
                 <PrintDetail title='Input' detail='[9,9,9,9]' />
                 <PrintDetail title='Output' detail={props.result} />

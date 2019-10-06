@@ -7,6 +7,7 @@ import {Question, CodeLanguage} from '../../graphql/types'
 import { Grid, Button, Box } from 'grommet';
 import { useFormState } from 'react-use-form-state';
 import SubmittedResult from '../../components/problems/SubmittedResult'
+import useLocalStorage from '../../hooks/useRememberState'
 
 type Props = {}
 
@@ -37,20 +38,19 @@ mutation submitCode($typedCode: String!, $lang: String!, $slug: String!) {
 }
 `
 
+const getLocalStorageKey = (slug: string) => {
+    return `${slug}-typed-code`
+}
+
 const Problem: React.FunctionComponent<Props> = ({}: Props) => {
     const router = useRouter()
     const { slug } = router.query
 
     const [formState, { raw }] = useFormState({code : null});
+    const [typedCode, setTypedCode] = useLocalStorage(getLocalStorageKey(slug as string), '');
 
     const { error, data } = useQuery<{Question: Question}>(problem, {
-        variables: { slug },
-        updateData: (_, result) => {
-            console.log(result)
-            return {
-
-            }
-        }
+        variables: { slug }
       })
     const [submitCode, submittedResult ] = useMutation(submitCodeMutation)
 
@@ -60,6 +60,8 @@ const Problem: React.FunctionComponent<Props> = ({}: Props) => {
     const { Question } = data
     const language = CodeLanguage.JavaScript;
     const targetCodeSnippet = Question.codeSnippets.find(a => a.lang === "JavaScript") || {code: ""};
+
+    const defaultCode = typedCode === '' || typedCode === null ? targetCodeSnippet.code : typedCode;
 
     return (
         <Layout title="">
@@ -88,11 +90,18 @@ const Problem: React.FunctionComponent<Props> = ({}: Props) => {
                             name: "code"
                         })
                         }
-                        value={targetCodeSnippet.code}
+                        onChange={(typedCode: string) => {
+                            formState.setField("code", typedCode);
+                            setTypedCode(typedCode);
+                       }}
+                        value={defaultCode}
                     />
                 </Box>
                 <Box gridArea='controls'>
                     <Box direction="row" justify="end" margin={{ top: "medium" }}>
+                        <Button label="Reset code" onClick={() => {
+                            setTypedCode(targetCodeSnippet.code);
+                        }}/>
                         <Button label="Cancel" />
                         <Button type="button" label="Submit" onClick={() => {
                             const typedCode = formState.values.code == null ? targetCodeSnippet.code :formState.values.code

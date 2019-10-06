@@ -18,6 +18,7 @@ type Props = {
 const AdminQuestionPage: React.FunctionComponent<Props> = ({onSubmission}: Props) => {
     const [createPost, state] = useMutation(createQuestion)
 
+
     return (
   <Layout title="About | Next.js + TypeScript Example">
     <h1>new Question</h1>
