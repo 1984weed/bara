@@ -1,9 +1,15 @@
-import React from 'react'
-import { Grommet, Box, Button } from 'grommet';
-import { Card, Value, Form, TextInputField, TextAreaField, SelectField } from 'grommet-controls';
-import { useMutation, FetchData } from 'graphql-hooks'
-import Layout from '../../components/Layout'
-import { CodeLanguage, TestCaseArgType } from '../../graphql/types'
+import React, { useState } from "react";
+import { Grommet, Box, Button } from "grommet";
+import {
+  NumberInput,
+  Form,
+  TextInputField,
+  TextAreaField,
+  SelectField
+} from "grommet-controls";
+import { useMutation, FetchData } from "graphql-hooks";
+import Layout from "../../components/Layout";
+import { CodeLanguage, TestCaseArgType } from "../../graphql/types";
 
 export const createQuestion = `
 mutation createQuestion($title: String!, $description: String!, $functionName: String!, $languageID: CodeLanguage!, $argsNum: Int!, $args:  [CodeArg!]!, $testCases: [TestCase!]!) {
@@ -11,89 +17,128 @@ mutation createQuestion($title: String!, $description: String!, $functionName: S
       title
   }
 }
-`
+`;
 
-export default () =>  {
-    const [createPost, state] = useMutation(createQuestion)
+export default () => {
+  const [createPost, state] = useMutation(createQuestion);
+  const [argsNum, setArgsNum] = useState(0);
+  const [testCaseNum, setTestCaseNum] = useState(1);
+
   return (
-      <Grommet>
-   <Layout title="Admin problems">
-     <h1>New problem</h1>
-     <p>This is the about page</p>
-     <Form onSubmit={(event: any) => handleSubmit(event, createPost)}>
-       <div>
-         <TextInputField label='Title' name='title'  />
-       </div>
-       <div>
-         <TextAreaField
-          rows='5'
-          label='Description'
-          name='description'
-        />
-       </div>
-       <div>
-         <TextInputField label='Function name' name='functionName'  />
-       </div>
-       <div>
-         <div>
-          <TextInputField label='Args' name='argsNum'  />
-         </div>
-         <SelectField
-            label='Argument Type:'
-            name='argumentType'
-            options={['Number', 'String', 'List', 'Node']}
-          />
-     </div>
-     <div>
-         <SelectField
-            label='Language'
-            name='codeLanguage'
-            options={['JavaScript']}
-          />
-     </div>
-    <Box pad='small'>
-      <Button type='submit' label='Submit' />
-    </Box>
-   </Form>
-   </Layout>
-      </Grommet>
+    <Layout title="Admin problems">
+      <h1>New problem</h1>
+      <p>This is the about page</p>
+      <Box alignContent="center">
+        <Form
+          onSubmit={(event: any) => handleSubmit(event, createPost)}
+          basis="full"
+        >
+          <Box>
+            <TextInputField label="Title" name="title" />
+          </Box>
+          <Box>
+            <TextAreaField rows="5" label="Description" name="description" />
+          </Box>
+          <Box>
+            <TextInputField label="Function name" name="functionName" />
+          </Box>
+          <Box>
+            Args Count
+            <NumberInput
+              label="Args Count"
+              name="argsNum"
+              value={argsNum}
+              min={0}
+              max={10}
+              onChange={({ target: { value } }) => setArgsNum(value)}
+            />
+          </Box>
+          {Array.from({ length: argsNum }).map((_, i) => (
+            <Box key={i}>
+              <TextInputField label={`Arg Name ${i + 1}:`} name="argName" />
+              <SelectField
+                label={`Argument Type ${i + 1}:`}
+                name="argumentType"
+                options={["Number", "String", "List", "Node"]}
+              />
+            </Box>
+          ))}
+          <Box>
+            Testcase Count
+            <NumberInput
+              label="Testcase Count"
+              name="testcaseNum"
+              value={testCaseNum}
+              min={1}
+              max={10}
+              onChange={({ target: { value } }) => setTestCaseNum(value)}
+            />
+            {Array.from({ length: testCaseNum }).map((_, testcaseIndex) => (
+              <Box 
+                key={testcaseIndex}
+              >
+                {Array.from({ length: argsNum }).map((_, i) => (
+                  <TextInputField key={i} label={`Arg Name ${i + 1}:`} name="input" />
+                ))}
+                <TextInputField label="Output" name="output" />
+              </Box>
+            ))}
+          </Box>
+          <Box>
+            <SelectField
+              label="Language"
+              name="codeLanguage"
+              options={["JavaScript"]}
+            />
+          </Box>
+          <Box pad="small">
+            <Button type="submit" label="Submit" />
+          </Box>
+        </Form>
+      </Box>
+    </Layout>
+  );
+};
 
-  )
-
-}
-
-async function handleSubmit (event: React.FormEvent<HTMLFormElement>, createPost: FetchData<any>) {
-    event.preventDefault()
-    console.log(createPost)
-    const form = event.target as HTMLFormElement
-    const formData = new FormData(form)
-    const title = formData.get('title')
-    const description = formData.get('description')
-    const functionName = formData.get('functionName')
-    const languageID = CodeLanguage.JavaScript;//formData.get('codeLanguage')
-    const argsNum = 1;//formData.get('argsNum')
-    const args = [{
+async function handleSubmit(
+  event: React.FormEvent<HTMLFormElement>,
+  createPost: FetchData<any>
+) {
+  event.preventDefault();
+  console.log(createPost);
+  const form = event.target as HTMLFormElement;
+  const formData = new FormData(form);
+  const title = formData.get("title");
+  const description = formData.get("description");
+  const functionName = formData.get("functionName");
+  const languageID = CodeLanguage.JavaScript; //formData.get('codeLanguage')
+  const argsNum = 1; //formData.get('argsNum')
+  const args = [
+    {
       name: "target",
       type: TestCaseArgType.Number
-    }]
-    const testCases = [{
+    }
+  ];
+  const testCases = [
+    {
       input: ["10"],
       output: "10"
-    }];
-    // form.reset()
-    const result = await createPost({
-      variables: {
-        title,
-        description,
-        functionName,
-        argsNum,
-        languageID,
-        testCases,
-        args
-      }
-    })
-    console.log(result)
-  }
+    }
+  ];
+  // form.reset()
+  const result = await createPost({
+    variables: {
+      title,
+      description,
+      functionName,
+      argsNum,
+      languageID,
+      testCases,
+      args
+    }
+  });
+  console.log(result);
+}
 
 // import * as React from 'react'
 // import Layout from '../../components/Layout'
@@ -116,7 +161,6 @@ async function handleSubmit (event: React.FormEvent<HTMLFormElement>, createPost
 // const AdminQuestionPage: React.FunctionComponent<Props> = ({onSubmission}: Props) => {
 //     const [createPost, state] = useMutation(createQuestion)
 
-
 //     return (
 //   <Layout title="Admin problems">
 //     <h1>New problem</h1>
@@ -136,7 +180,7 @@ async function handleSubmit (event: React.FormEvent<HTMLFormElement>, createPost
 //         <div>
 //           <label>Args: </label><input type="text" name="argsNum" />
 //         </div>
-//         <label>Argument Type:</label> 
+//         <label>Argument Type:</label>
 //         <select name="argumentType">
 //             <option value="number">Number</option>
 //             <option value="string">String</option>

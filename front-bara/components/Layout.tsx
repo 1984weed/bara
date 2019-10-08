@@ -1,5 +1,5 @@
 import * as React from 'react'
-import Head from 'next/head'
+import { Box, Grommet } from "grommet";
 import Footer from './Footer'
 import Header from './Header'
 
@@ -11,16 +11,18 @@ const Layout: React.FunctionComponent<Props> = ({
   children,
   title = 'This is the default title',
 }) => (
-  <div>
-    <Head>
-      <title>{title}</title>
-      <meta charSet="utf-8" />
-      <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-    </Head>
+  <Grommet>
+    {title}
     <Header />
-    {children}
+    <Box
+      pad="medium"
+      alignContent="center"
+      style={{maxWidth: "1100px"}}
+    >
+      {children}
+    </Box>
     <Footer />
-  </div>
+  </Grommet>
 )
 
 export default Layout

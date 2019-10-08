@@ -7,29 +7,45 @@ type Props = {
 }
 
 const Header: React.FunctionComponent<Props>  = ({ router: { pathname } }: Props) => (
-  <header>
-    <Box>
-      <Link href='/'>
-        <a className={pathname === '/' ? 'is-active' : ''}>Home</a>
-      </Link>
-      <Link href='/about'>
-        <a className={pathname === '/about' ? 'is-active' : ''}>About</a>
-      </Link>
-    </Box>
+  <Box
+    tag='header'
+    background=''
+    height='66px'
+    border={{
+      "color": "border",
+      "size": "xsmall",
+      "style": "solid",
+      "side": "bottom"
+    }}
+  >
+    <Box 
+      direction="row"
+      pad="medium"
+      margin="auto"
+      alignSelf="center"
+      width="1110px"
+    >
+        <Box
+          margin={{left: "xsmall", right: "xsmall"}}
+        >
+          <Link href='/'>
+            <a className={pathname === '/' ? 'is-active' : ''}>Top</a>
+          </Link>
+        </Box>
+        <Box
+          margin={{left: "xsmall", right: "xsmall"}}
+        >
+          <Link href='/problems'>
+            <a className={pathname === '/problems' ? 'is-active' : ''}>Problems</a>
+          </Link>
+        </Box>
+      </Box>
     <style jsx>{`
-      header {
-        margin-bottom: 25px;
-      }
-      a {
-        font-size: 14px;
-        margin-right: 15px;
-        text-decoration: none;
-      }
       .is-active {
         text-decoration: underline;
       }
     `}</style>
-  </header>
+  </Box>
 )
 
 export default withRouter(Header)
