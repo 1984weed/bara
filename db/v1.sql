@@ -50,7 +50,7 @@ DROP TABLE IF EXISTS question_testcases;
 CREATE TABLE question_testcases (
   id SERIAL PRIMARY KEY,
   question_id INTEGER NOT NULL,
-  input_text TEXT NOT NULL,
+  input_text TEXT,
   output_text TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,

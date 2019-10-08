@@ -67,6 +67,28 @@ func (r *queryResolver) Question(ctx context.Context, slug *string) (*Question, 
 
 }
 
+func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) (*Question, error) {
+	args := make([]remote.QuestionArgs, len(input.Args))
+	for i, arg := range input.Args {
+		args[i] = remote.QuestionArgs{
+			Name: arg.Name,
+			Type: arg.Type.String(),
+		}
+	}
+	return &Question{
+		Slug:        slug.Make(input.Title),
+		Title:       input.Title,
+		Description: input.Description,
+		CodeSnippets: []*CodeSnippet{
+			{
+				Code: makeSnippets(input.FunctionName, &args),
+				Lang: CodeLanguageJavaScript,
+			},
+		},
+	}, nil
+
+}
+
 func makeSnippets(functionName string, args *[]remote.QuestionArgs) string {
 	argsString := ""
 	for i, a := range *args {

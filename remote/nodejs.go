@@ -40,8 +40,8 @@ type Question struct {
 	FunctionName string
 	ArgID        int
 	AuthorID     int
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	CreatedAt    time.Time `pg:"default:now()"`
+	UpdatedAt    time.Time `pg:"default:now()"`
 }
 
 type QuestionArgs struct {
@@ -55,7 +55,7 @@ type QuestionArgs struct {
 type QuestionTestcases struct {
 	ID         int64
 	QuestionID int64
-	InputText  string
+	InputText  string `pg:",notnull"`
 	OutputText string
 }
 

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Grommet, Box, Button } from "grommet";
 import {
-  NumberInput,
+  NumberInputField,
   Form,
   TextInputField,
   TextAreaField,
   SelectField
 } from "grommet-controls";
-import { useMutation, FetchData } from "graphql-hooks";
+import { useClientRequest, useMutation, FetchData } from "graphql-hooks";
 import Layout from "../../components/Layout";
 import { CodeLanguage, TestCaseArgType } from "../../graphql/types";
 
@@ -19,18 +19,38 @@ mutation createQuestion($title: String!, $description: String!, $functionName: S
 }
 `;
 
+export const testQuestion = `
+query testNewQuestion($title: String!, $description: String!, $functionName: String!, $languageID: CodeLanguage!, $argsNum: Int!, $args:  [CodeArg!]!, $testCases: [TestCase!]!) {
+    testNewQuestion(input: {title: $title, description: $description, functionName: $functionName, languageID: $languageID, argsNum: $argsNum, args: $args, testCases: $testCases}) {
+      slug,
+      title,
+      description, 
+      codeSnippets {
+        code,
+        lang
+      }
+  }
+}
+`;
+
 export default () => {
   const [createPost, state] = useMutation(createQuestion);
+  const [doTest ] = useClientRequest(testQuestion);
+  const [formState, setFormState] = useState({})
   const [argsNum, setArgsNum] = useState(0);
   const [testCaseNum, setTestCaseNum] = useState(1);
+  let form: any = {}
 
   return (
     <Layout title="Admin problems">
       <h1>New problem</h1>
       <p>This is the about page</p>
       <Box alignContent="center">
-        <Form
-          onSubmit={(event: any) => handleSubmit(event, createPost)}
+          <Form
+          ref={(instance: any) => form = instance}
+          onSubmit={(values) => 
+            handleSubmit(createPost, values, argsNum, testCaseNum)
+          }
           basis="full"
         >
           <Box>
@@ -43,8 +63,7 @@ export default () => {
             <TextInputField label="Function name" name="functionName" />
           </Box>
           <Box>
-            Args Count
-            <NumberInput
+            <NumberInputField
               label="Args Count"
               name="argsNum"
               value={argsNum}
@@ -55,17 +74,16 @@ export default () => {
           </Box>
           {Array.from({ length: argsNum }).map((_, i) => (
             <Box key={i}>
-              <TextInputField label={`Arg Name ${i + 1}:`} name="argName" />
+              <TextInputField label={`Arg Name ${i + 1}:`} name={`argName[${i}]`} />
               <SelectField
                 label={`Argument Type ${i + 1}:`}
-                name="argumentType"
-                options={["Number", "String", "List", "Node"]}
+                name={`argumentType[${i}]`}
+                options={["NUMBER", "STRING", "LIST", "NODE"]}
               />
             </Box>
           ))}
           <Box>
-            Testcase Count
-            <NumberInput
+            <NumberInputField
               label="Testcase Count"
               name="testcaseNum"
               value={testCaseNum}
@@ -73,14 +91,14 @@ export default () => {
               max={10}
               onChange={({ target: { value } }) => setTestCaseNum(value)}
             />
-            {Array.from({ length: testCaseNum }).map((_, testcaseIndex) => (
+            {Array.from({ length: testCaseNum }).map((_, testCaseIndex) => (
               <Box 
-                key={testcaseIndex}
+                key={testCaseIndex}
               >
                 {Array.from({ length: argsNum }).map((_, i) => (
-                  <TextInputField key={i} label={`Arg Name ${i + 1}:`} name="input" />
+                  <TextInputField key={i} label={`Arg Name ${i + 1}:`} name={`inputTestCase[${testCaseIndex}][${i}]`} />
                 ))}
-                <TextInputField label="Output" name="output" />
+                <TextInputField label="Output" name={`outTestCase[${testCaseIndex}]`} />
               </Box>
             ))}
           </Box>
@@ -91,7 +109,15 @@ export default () => {
               options={["JavaScript"]}
             />
           </Box>
-          <Box pad="small">
+          <Box 
+            pad="small" 
+            alignContent="center"
+            direction="row"
+            justify="end"
+          >
+            <Button label="Test" onClick={() => {
+              handleTest(doTest, form.state.data, argsNum, testCaseNum)
+            }} />
             <Button type="submit" label="Submit" />
           </Box>
         </Form>
@@ -100,42 +126,50 @@ export default () => {
   );
 };
 
+function createNewProblemsVariables(formState: any, argsNum: number, testCaseNum: number): any {
+  const testCases = []
+  for(let i = 0; i < testCaseNum; i++) {
+    const inputArray = new Array(argsNum).fill("").map((_, argIndex) => 
+          formState[`inputTestCase[${argIndex}][${i}]`]
+        )
+    testCases.push(
+      {
+        input: inputArray,
+        output: formState[`outTestCase[${i}]`]
+      }
+    )
+  }
+  
+  const args = []
+  for(let i = 0; i < argsNum; i++) {
+    args.push({
+      name: formState[`argName[${i}]`],
+      type: formState[`argumentType[${i}]`]
+    })
+  }
+  const {title, description, functionName, codeLanguage} = formState;
+  return {
+    title,
+    description,
+    functionName,
+    argsNum,
+    languageID: codeLanguage,
+    testCases,
+    args
+  }
+}
+async function handleTest(doTestform: FetchData<any>, formState: any, argsNum: number, testCaseNum: number){
+  const result = await doTestform({
+    variables: createNewProblemsVariables(formState, argsNum, testCaseNum)
+  });
+  return result
+}
 async function handleSubmit(
-  event: React.FormEvent<HTMLFormElement>,
-  createPost: FetchData<any>
+  createPost: FetchData<any>,
+ formState: any, argsNum: number, testCaseNum: number
 ) {
-  event.preventDefault();
-  console.log(createPost);
-  const form = event.target as HTMLFormElement;
-  const formData = new FormData(form);
-  const title = formData.get("title");
-  const description = formData.get("description");
-  const functionName = formData.get("functionName");
-  const languageID = CodeLanguage.JavaScript; //formData.get('codeLanguage')
-  const argsNum = 1; //formData.get('argsNum')
-  const args = [
-    {
-      name: "target",
-      type: TestCaseArgType.Number
-    }
-  ];
-  const testCases = [
-    {
-      input: ["10"],
-      output: "10"
-    }
-  ];
-  // form.reset()
   const result = await createPost({
-    variables: {
-      title,
-      description,
-      functionName,
-      argsNum,
-      languageID,
-      testCases,
-      args
-    }
+    variables: createNewProblemsVariables(formState, argsNum, testCaseNum)
   });
   console.log(result);
 }

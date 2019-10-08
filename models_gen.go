@@ -102,16 +102,18 @@ type TestCaseArgType string
 const (
 	TestCaseArgTypeNumber TestCaseArgType = "NUMBER"
 	TestCaseArgTypeString TestCaseArgType = "STRING"
+	TestCaseArgTypeList   TestCaseArgType = "LIST"
 )
 
 var AllTestCaseArgType = []TestCaseArgType{
 	TestCaseArgTypeNumber,
 	TestCaseArgTypeString,
+	TestCaseArgTypeList,
 }
 
 func (e TestCaseArgType) IsValid() bool {
 	switch e {
-	case TestCaseArgTypeNumber, TestCaseArgTypeString:
+	case TestCaseArgTypeNumber, TestCaseArgTypeString, TestCaseArgTypeList:
 		return true
 	}
 	return false
