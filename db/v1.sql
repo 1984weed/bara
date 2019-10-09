@@ -21,7 +21,6 @@ CREATE TABLE questions (
   title VARCHAR(300) NOT NULL,
   description TEXT NOT NULL,
   function_name VARCHAR(255),
-  arg_id INTEGER,
   language_id INTEGER,
   author_id INTEGER,
   created_at TIMESTAMP NOT NULL,

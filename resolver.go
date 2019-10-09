@@ -47,7 +47,7 @@ func (r *queryResolver) Question(ctx context.Context, slug *string) (*Question, 
 	args := new([]remote.QuestionArgs)
 
 	err = r.DB.Model(args).
-		Where("question_args.question_id = ?", 2).
+		Where("question_args.question_id = ?", question.ID).
 		Select()
 	if err != nil {
 		return nil, err
@@ -116,7 +116,17 @@ type mutationResolver struct{ *Resolver }
 func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*CodeResult, error) {
 	jsClient := remote.NewNodeJsClient(r.DB)
 
-	result, stdout := jsClient.Exec("", input.TypedCode)
+	question := new(remote.Question)
+
+	err := r.DB.Model(question).
+		Where("slug = ?", input.Slug).
+		Select()
+
+	if err != nil {
+		return nil, err
+	}
+
+	result, stdout := jsClient.Exec(question.ID, question.FunctionName, input.TypedCode)
 
 	fmt.Println(result)
 
@@ -156,6 +166,8 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 			OrderNo:    i + 1,
 			Name:       arg.Name,
 			Type:       convertArgsType(arg.Type),
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
 		})
 		if err != nil {
 			return nil, err
@@ -171,6 +183,8 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 			QuestionID: question.ID,
 			InputText:  inputString,
 			OutputText: testcase.Output,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
 		})
 	}
 	if err != nil {

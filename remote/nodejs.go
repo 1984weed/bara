@@ -50,6 +50,8 @@ type QuestionArgs struct {
 	OrderNo    int
 	Name       string
 	Type       string
+	CreatedAt  time.Time `pg:"default:now()"`
+	UpdatedAt  time.Time `pg:"default:now()"`
 }
 
 type QuestionTestcases struct {
@@ -57,19 +59,14 @@ type QuestionTestcases struct {
 	QuestionID int64
 	InputText  string `pg:",notnull"`
 	OutputText string
+	CreatedAt  time.Time `pg:"default:now()"`
+	UpdatedAt  time.Time `pg:"default:now()"`
 }
 
-func (n *NodeJSClient) Exec(slug string, typedCode string) (*CodeResult, string) {
-	question := &Question{ID: 2}
-	err := n.store.Select(question)
-
-	if err != nil {
-		return nil, ""
-	}
-
+func (n *NodeJSClient) Exec(questionID int64, functionName string, typedCode string) (*CodeResult, string) {
 	args := new([]QuestionArgs)
-	err = n.store.Model(args).
-		Where("question_args.question_id = ?", 2).
+	err := n.store.Model(args).
+		Where("question_args.question_id = ?", questionID).
 		Select()
 
 	if err != nil {
@@ -79,7 +76,7 @@ func (n *NodeJSClient) Exec(slug string, typedCode string) (*CodeResult, string)
 	qts := new([]QuestionTestcases)
 
 	err = n.store.Model(qts).
-		Where("question_testcases.question_id = ?", 2).
+		Where("question_testcases.question_id = ?", questionID).
 		Select()
 
 	if err != nil {
@@ -99,7 +96,7 @@ func (n *NodeJSClient) Exec(slug string, typedCode string) (*CodeResult, string)
 		testcase += fmt.Sprintln(qt.OutputText)
 	}
 
-	execFile := fmt.Sprintf(nodeJsTemplate, typedCode, question.FunctionName)
+	execFile := fmt.Sprintf(nodeJsTemplate, typedCode, functionName)
 	inputCommand := fmt.Sprintf(`echo -e %q > ./temp && echo -e %q | node temp`, execFile, testcase)
 
 	fmt.Println(inputCommand)
