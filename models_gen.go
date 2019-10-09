@@ -54,8 +54,8 @@ type SubmitCode struct {
 }
 
 type TestCase struct {
-	Input  []string `json:"input"`
-	Output string   `json:"output"`
+	Input  []*string `json:"input"`
+	Output string    `json:"output"`
 }
 
 type CodeLanguage string

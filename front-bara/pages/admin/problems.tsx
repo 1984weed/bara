@@ -96,7 +96,7 @@ export default () => {
                 key={testCaseIndex}
               >
                 {Array.from({ length: argsNum }).map((_, i) => (
-                  <TextInputField key={i} label={`Arg Name ${i + 1}:`} name={`inputTestCase[${testCaseIndex}][${i}]`} />
+                  <TextInputField key={i} label={`Input Test Case ${i + 1}:`} name={`inputTestCase[${testCaseIndex}][${i}]`} />
                 ))}
                 <TextInputField label="Output" name={`outTestCase[${testCaseIndex}]`} />
               </Box>

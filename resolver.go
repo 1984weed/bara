@@ -176,8 +176,12 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 
 	for _, testcase := range input.TestCases {
 		inputString := ""
-		for _, input := range testcase.Input {
-			inputString += fmt.Sprintf("%s\n", input)
+		for i, input := range testcase.Input {
+			if i == 0 {
+				inputString += fmt.Sprintf("%s", input)
+			} else {
+				inputString += fmt.Sprintf("%s\n", input)
+			}
 		}
 		err = tx.Insert(&remote.QuestionTestcases{
 			QuestionID: question.ID,
