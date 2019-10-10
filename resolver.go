@@ -102,8 +102,7 @@ func makeSnippets(functionName string, args *[]remote.QuestionArgs) string {
  */
 function %s(%s) {
 	
-};
-	`, functionName, argsString)
+};`, functionName, argsString)
 
 }
 
