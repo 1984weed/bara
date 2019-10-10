@@ -24,19 +24,21 @@ const Header: React.FunctionComponent<Props>  = ({ router: { pathname } }: Props
       margin="auto"
       alignSelf="center"
       width="1110px"
+      gap="small"
     >
-        <Box
-          margin={{left: "xsmall", right: "xsmall"}}
-        >
+        <Box>
           <Link href='/'>
             <a className={pathname === '/' ? 'is-active' : ''}>Top</a>
           </Link>
         </Box>
-        <Box
-          margin={{left: "xsmall", right: "xsmall"}}
-        >
+        <Box>
           <Link href='/problems'>
             <a className={pathname === '/problems' ? 'is-active' : ''}>Problems</a>
+          </Link>
+        </Box>
+        <Box>
+          <Link href='/admin'>
+            <a className={pathname === '/admin' ? 'is-active' : ''}>Admin</a>
           </Link>
         </Box>
       </Box>

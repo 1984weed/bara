@@ -17,7 +17,7 @@ const Layout: React.FunctionComponent<Props> = ({
     <Box
       pad="medium"
       alignContent="center"
-      style={{maxWidth: "1100px"}}
+      style={{maxWidth: "1100px", margin: "0 auto"}}
     >
       {children}
     </Box>

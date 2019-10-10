@@ -1,5 +1,5 @@
-// import * as ReactAce from 'react-ace-editor';
-const ReactAce = require('react-ace-editor')
+// const ReactAce = require('react-ace-editor')
+import AceEditor from './AceEditor'
 import React, { Component } from 'react';
 
 type EditorProps = {
@@ -24,15 +24,14 @@ class CodeEditor extends Component<EditorProps> {
   }
   render() {
     return (
-      <ReactAce
+      <AceEditor
         mode="javascript"
         theme="eclipse"
         setReadOnly={false}
         onChange={this.onChange}
-        style={{ height: '400px' }}
         ref={(instance: any) => { this.ace = instance; }}
         setValue={this.props.value}
-        fontSize={14}
+        option={{fontSize: '14px'}}
       />
     );
   }

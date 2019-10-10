@@ -59,7 +59,7 @@ func (r *queryResolver) Question(ctx context.Context, slug *string) (*Question, 
 		Description: question.Description,
 		CodeSnippets: []*CodeSnippet{
 			{
-				Code: makeSnippets(question.FunctionName, args),
+				Code: makeSnippets(question.FunctionName, args, "number"),
 				Lang: CodeLanguageJavaScript,
 			},
 		},
@@ -81,7 +81,7 @@ func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) 
 		Description: input.Description,
 		CodeSnippets: []*CodeSnippet{
 			{
-				Code: makeSnippets(input.FunctionName, &args),
+				Code: makeSnippets(input.FunctionName, &args, "number"),
 				Lang: CodeLanguageJavaScript,
 			},
 		},
@@ -89,20 +89,24 @@ func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) 
 
 }
 
-func makeSnippets(functionName string, args *[]remote.QuestionArgs) string {
+func makeSnippets(functionName string, args *[]remote.QuestionArgs, output string) string {
 	argsString := ""
+	explainArgs := ""
 	for i, a := range *args {
 		separator := ", "
 		if i == 0 {
 			separator = ""
 		}
+		explainArgs += fmt.Sprintf("* @param {%s} %s", a.Type, a.Name)
 		argsString += fmt.Sprintf("%s%s", separator, a.Name)
 	}
+	explainArgs += fmt.Sprintf("* @return {%s}", output)
+
 	return fmt.Sprintf(`/**
- */
+	%s */
 function %s(%s) {
 	
-};`, functionName, argsString)
+}`, explainArgs, functionName, argsString)
 
 }
 

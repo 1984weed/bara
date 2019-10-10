@@ -72,7 +72,7 @@ const Problem: React.FunctionComponent<Props> = ({  }: Props) => {
   return (
     <Layout title="">
       <Grid
-        rows={["flex", "60px", "auto"]}
+        rows={["100%", "60px", "auto"]}
         columns={["flex", "5px", "flex"]}
         gap="1px"
         areas={[
@@ -101,7 +101,7 @@ const Problem: React.FunctionComponent<Props> = ({  }: Props) => {
           />
         </Box>
         <Box gridArea="controls">
-          <Box direction="row" justify="end" margin={{ top: "medium" }}>
+          <Box direction="row" justify="end" gap="xsmall" margin={{ top: "medium" }}>
             <Button
               label="Reset code"
               onClick={() => {
