@@ -15,8 +15,10 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "generate": "graphql-codegen"
+    "generate": "graphql-codegen",
+    "export": "next export"
   },
+  "proxy": "http://localhost:8080",
   "dependencies": {
     "@devexpress/dx-react-core": "^1.10.4",
     "@devexpress/dx-react-grid": "^1.10.4",

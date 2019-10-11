@@ -36,7 +36,12 @@ func main() {
 		Database: "bara",
 	})
 
-	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
+	fs := http.FileServer(http.Dir("out"))
+	http.Handle("/", http.StripPrefix("/", fs))
+
+	// r.Use(static.Serve("/", static.LocalFile("./out", true)))
+
+	http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
 	http.Handle("/query", c.Handler(handler.GraphQL(bara.NewExecutableSchema(bara.Config{Resolvers: &bara.Resolver{DB: db}}),
 		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
 			debug.PrintStack()
