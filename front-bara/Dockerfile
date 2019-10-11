@@ -16,4 +16,4 @@ RUN npm run build
 ENV PORT=${PORT}
 
 # Running the app
-CMD [ "npm", "start" ]
+CMD [ "npm", "start", "--", "-p", ${PORT} ]
