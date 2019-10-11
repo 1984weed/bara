@@ -1,4 +1,4 @@
 build:
   docker:
-    web: ./front-bara/Dockerfile
+    web: front-bara/Dockerfile
     api: Dockerfile
