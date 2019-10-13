@@ -1,7 +1,0 @@
-schema: ../schema.graphql
-generates:
-  ./graphql/types.ts:
-    plugins:
-      - typescript
-config:
-  addUnderscoreToArgsType: true
