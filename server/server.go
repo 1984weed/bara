@@ -17,8 +17,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-const defaultPort = "8080"
-
 func main() {
 	app := cli.NewApp()
 
@@ -50,12 +48,17 @@ func main() {
 		cli.StringFlag{
 			Name:   "DATABASE_NAME",
 			EnvVar: "DATABASE_NAME",
-			Value:  "test",
+			Value:  "bara",
 			Usage:  "DB url",
+		},
+		cli.StringFlag{
+			Name:   "PORT",
+			EnvVar: "PORT",
+			Value:  "8080",
+			Usage:  "Web app port",
 		},
 	}
 	app.Action = func(ctx *cli.Context) error {
-		port := defaultPort
 
 		c := cors.New(cors.Options{
 			AllowedOrigins: []string{"*"},
@@ -68,6 +71,8 @@ func main() {
 			Addr:     fmt.Sprintf("%s:%s", ctx.String("DB_HOST"), ctx.String("DB_PORT")),
 			Database: ctx.String("DATABASE_NAME"),
 		})
+
+		port := ctx.String("PORT")
 
 		fs := http.FileServer(http.Dir("out"))
 		http.Handle("/", http.StripPrefix("/", fs))
