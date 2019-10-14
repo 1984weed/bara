@@ -9,8 +9,8 @@ import (
 )
 
 type CodeArg struct {
-	Type TestCaseArgType `json:"type"`
-	Name string          `json:"name"`
+	Type string `json:"type"`
+	Name string `json:"name"`
 }
 
 type CodeResult struct {
@@ -34,6 +34,7 @@ type NewQuestion struct {
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
 	FunctionName string       `json:"functionName"`
+	OutputType   string       `json:"outputType"`
 	LanguageID   CodeLanguage `json:"languageID"`
 	ArgsNum      int          `json:"argsNum"`
 	Args         []*CodeArg   `json:"args"`
@@ -94,48 +95,5 @@ func (e *CodeLanguage) UnmarshalGQL(v interface{}) error {
 }
 
 func (e CodeLanguage) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type TestCaseArgType string
-
-const (
-	TestCaseArgTypeNumber TestCaseArgType = "NUMBER"
-	TestCaseArgTypeString TestCaseArgType = "STRING"
-	TestCaseArgTypeList   TestCaseArgType = "LIST"
-)
-
-var AllTestCaseArgType = []TestCaseArgType{
-	TestCaseArgTypeNumber,
-	TestCaseArgTypeString,
-	TestCaseArgTypeList,
-}
-
-func (e TestCaseArgType) IsValid() bool {
-	switch e {
-	case TestCaseArgTypeNumber, TestCaseArgTypeString, TestCaseArgTypeList:
-		return true
-	}
-	return false
-}
-
-func (e TestCaseArgType) String() string {
-	return string(e)
-}
-
-func (e *TestCaseArgType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TestCaseArgType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TestCaseArgType", str)
-	}
-	return nil
-}
-
-func (e TestCaseArgType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

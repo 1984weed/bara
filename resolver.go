@@ -72,7 +72,7 @@ func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) 
 	for i, arg := range input.Args {
 		args[i] = remote.QuestionArgs{
 			Name: arg.Name,
-			Type: arg.Type.String(),
+			Type: arg.Type,
 		}
 	}
 	return &Question{
@@ -150,12 +150,23 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 		return nil, err
 	}
 	defer tx.Rollback()
+	language := new(remote.CodeLanguage)
+
+	err = r.DB.Model(language).
+		Where("slug = ?", input.LanguageID.String()).
+		Select()
+
+	if err != nil {
+		return nil, err
+	}
 
 	question := &remote.Question{
 		Slug:         slug.Make(input.Title),
 		Title:        input.Title,
 		Description:  input.Description,
 		FunctionName: input.FunctionName,
+		OutputType:   input.OutputType,
+		LanguageID:   language.ID,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
@@ -168,9 +179,7 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 			QuestionID: question.ID,
 			OrderNo:    i + 1,
 			Name:       arg.Name,
-			Type:       convertArgsType(arg.Type),
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			Type:       arg.Type,
 		})
 		if err != nil {
 			return nil, err
@@ -190,8 +199,6 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 			QuestionID: question.ID,
 			InputText:  inputString,
 			OutputText: testcase.Output,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
 		})
 	}
 	if err != nil {
@@ -204,14 +211,4 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 		Title:       question.Title,
 		Description: question.Description,
 	}, nil
-}
-
-func convertArgsType(argType TestCaseArgType) string {
-	switch argType {
-	case TestCaseArgTypeNumber:
-		return "num"
-	case TestCaseArgTypeString:
-		return "string"
-	}
-	return "num"
 }

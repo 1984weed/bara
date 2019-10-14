@@ -343,12 +343,6 @@ enum CodeLanguage {
   JavaScript
 }
 
-enum TestCaseArgType {
-  NUMBER
-  STRING
-  LIST
-}
-
 input SubmitCode {
   typedCode: String!
   lang: String!
@@ -361,7 +355,7 @@ input TestCase {
 }
 
 input CodeArg {
-  type: TestCaseArgType!
+  type: String!
   name: String!
 }
 
@@ -369,6 +363,7 @@ input NewQuestion {
   title: String!
   description: String!
   functionName: String!
+  outputType: String!
   languageID: CodeLanguage!
   argsNum: Int!
   args: [CodeArg!]!
@@ -2411,7 +2406,7 @@ func (ec *executionContext) unmarshalInputCodeArg(ctx context.Context, obj inter
 		switch k {
 		case "type":
 			var err error
-			it.Type, err = ec.unmarshalNTestCaseArgType2baraᚐTestCaseArgType(ctx, v)
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2448,6 +2443,12 @@ func (ec *executionContext) unmarshalInputNewQuestion(ctx context.Context, obj i
 		case "functionName":
 			var err error
 			it.FunctionName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "outputType":
+			var err error
+			it.OutputType, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3295,15 +3296,6 @@ func (ec *executionContext) unmarshalNTestCase2ᚖbaraᚐTestCase(ctx context.Co
 	}
 	res, err := ec.unmarshalNTestCase2baraᚐTestCase(ctx, v)
 	return &res, err
-}
-
-func (ec *executionContext) unmarshalNTestCaseArgType2baraᚐTestCaseArgType(ctx context.Context, v interface{}) (TestCaseArgType, error) {
-	var res TestCaseArgType
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNTestCaseArgType2baraᚐTestCaseArgType(ctx context.Context, sel ast.SelectionSet, v TestCaseArgType) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

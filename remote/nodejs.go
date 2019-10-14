@@ -38,10 +38,17 @@ type Question struct {
 	Title        string
 	Description  string
 	FunctionName string
-	ArgID        int
-	AuthorID     int
+	OutputType   string
+	LanguageID   int64
+	AuthorID     int64
 	CreatedAt    time.Time `pg:"default:now()"`
 	UpdatedAt    time.Time `pg:"default:now()"`
+}
+
+type CodeLanguage struct {
+	ID   int64
+	Name string
+	Slug string
 }
 
 type QuestionArgs struct {
@@ -50,8 +57,6 @@ type QuestionArgs struct {
 	OrderNo    int
 	Name       string
 	Type       string
-	CreatedAt  time.Time `pg:"default:now()"`
-	UpdatedAt  time.Time `pg:"default:now()"`
 }
 
 type QuestionTestcases struct {
@@ -59,8 +64,6 @@ type QuestionTestcases struct {
 	QuestionID int64
 	InputText  string `pg:",notnull"`
 	OutputText string
-	CreatedAt  time.Time `pg:"default:now()"`
-	UpdatedAt  time.Time `pg:"default:now()"`
 }
 
 func (n *NodeJSClient) Exec(questionID int64, functionName string, typedCode string) (*CodeResult, string) {

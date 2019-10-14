@@ -13,7 +13,14 @@ CREATE TABLE users (
   CONSTRAINT user_username_unique UNIQUE (username)
 );
 
-DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS code_languages cascade;
+CREATE TABLE code_languages (
+  id PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  slug  VARCHAR(255) NOT NULL
+);
+
+DROP TABLE IF EXISTS questions cascade;
 
 CREATE TABLE questions (
   id SERIAL PRIMARY KEY,
@@ -21,38 +28,47 @@ CREATE TABLE questions (
   title VARCHAR(300) NOT NULL,
   description TEXT NOT NULL,
   function_name VARCHAR(255),
-  language_id INTEGER,
+  language_id VARCHAR(255) NOT NULL,
   author_id INTEGER,
+  output_type args_t NOT NULL,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   CONSTRAINT questions_slug_unique UNIQUE(slug)
 );
 
-DROP TYPE IF EXISTS args_t;
-CREATE TYPE args_t AS enum('string', 'list', 'num', 'likedList', 'node');
+ALTER TABLE questions ADD CONSTRAINT fk_questions_code_languages FOREIGN KEY (language_id) REFERENCES code_languages (id);
 
-DROP TABLE IF EXISTS question_args;
+DROP TYPE IF EXISTS args_t;
+CREATE TYPE args_t AS enum(
+  'string[][]',
+  'string[]', 
+  'string',
+  'int[][]',
+  'int[]',
+  'int',
+  'double[][]',
+  'double[]',
+  'double');
+
+DROP TABLE IF EXISTS question_args cascade;
 
 CREATE TABLE question_args (
   id SERIAL PRIMARY KEY,
   question_id INTEGER NOT NULL,
   order_no INTEGER NOT NULL,
   name VARCHAR(255) NOT NULL,
-  type args_t NOT NULL,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  constraint fk_question_args_question FOREIGN KEY (question_id) REFERENCES questions (id)
+  var_type args_t NOT NULL
 );
 
-DROP TABLE IF EXISTS question_testcases;
+ALTER TABLE question_args ADD CONSTRAINT fk_question_args_questions FOREIGN KEY (question_id) REFERENCES questions (id);
+
+DROP TABLE IF EXISTS question_testcases cascade;
 
 CREATE TABLE question_testcases (
   id SERIAL PRIMARY KEY,
   question_id INTEGER NOT NULL,
   input_text TEXT,
-  output_text TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  constraint fk_question_testcases_question FOREIGN KEY (question_id) REFERENCES questions (id)
+  output_text TEXT NOT NULL
 );
 
+ALTER TABLE question_testcases ADD CONSTRAINT fk_question_testcases_questions FOREIGN KEY (question_id) REFERENCES questions (id);

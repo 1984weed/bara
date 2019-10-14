@@ -32,12 +32,6 @@ enum CodeLanguage {
   JavaScript
 }
 
-enum TestCaseArgType {
-  NUMBER
-  STRING
-  LIST
-}
-
 input SubmitCode {
   typedCode: String!
   lang: String!
@@ -50,7 +44,7 @@ input TestCase {
 }
 
 input CodeArg {
-  type: TestCaseArgType!
+  type: String!
   name: String!
 }
 
@@ -58,6 +52,7 @@ input NewQuestion {
   title: String!
   description: String!
   functionName: String!
+  outputType: String!
   languageID: CodeLanguage!
   argsNum: Int!
   args: [CodeArg!]!
