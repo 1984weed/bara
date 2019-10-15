@@ -56,7 +56,7 @@ type QuestionArgs struct {
 	QuestionID int64
 	OrderNo    int
 	Name       string
-	Type       string
+	VarType    string
 }
 
 type QuestionTestcases struct {

@@ -59,7 +59,7 @@ func (r *queryResolver) Question(ctx context.Context, slug *string) (*Question, 
 		Description: question.Description,
 		CodeSnippets: []*CodeSnippet{
 			{
-				Code: makeSnippets(question.FunctionName, args, "number"),
+				Code: makeSnippets(question.FunctionName, args, question.OutputType),
 				Lang: CodeLanguageJavaScript,
 			},
 		},
@@ -71,8 +71,8 @@ func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) 
 	args := make([]remote.QuestionArgs, len(input.Args))
 	for i, arg := range input.Args {
 		args[i] = remote.QuestionArgs{
-			Name: arg.Name,
-			Type: arg.Type,
+			Name:    arg.Name,
+			VarType: arg.Type,
 		}
 	}
 	return &Question{
@@ -89,7 +89,7 @@ func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) 
 
 }
 
-func makeSnippets(functionName string, args *[]remote.QuestionArgs, output string) string {
+func makeSnippets(functionName string, args *[]remote.QuestionArgs, outputType string) string {
 	argsString := ""
 	explainArgs := ""
 	for i, a := range *args {
@@ -97,17 +97,35 @@ func makeSnippets(functionName string, args *[]remote.QuestionArgs, output strin
 		if i == 0 {
 			separator = ""
 		}
-		explainArgs += fmt.Sprintf("* @param {%s} %s", a.Type, a.Name)
+		explainArgs += fmt.Sprintln(fmt.Sprintf("* @param {%s} %s", convertJSTypeFromType(a.VarType), a.Name))
 		argsString += fmt.Sprintf("%s%s", separator, a.Name)
 	}
-	explainArgs += fmt.Sprintf("* @return {%s}", output)
+	explainArgs += fmt.Sprintf("* @return {%s}", convertJSTypeFromType(outputType))
 
 	return fmt.Sprintf(`/**
-	%s */
+%s 
+*/
 function %s(%s) {
 	
 }`, explainArgs, functionName, argsString)
+}
 
+func convertJSTypeFromType(typeStr string) string {
+	switch typeStr {
+	case "int", "double":
+		return "number"
+	case "int[]", "double[]":
+		return "number[]"
+	case "int[][]", "double[][]":
+		return "number[][]"
+	case "string":
+		return "string"
+	case "string[]":
+		return "string[]"
+	case "string[][]":
+		return "string[][]"
+	}
+	return ""
 }
 
 func (r *Resolver) Mutation() MutationResolver {
@@ -179,7 +197,7 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 			QuestionID: question.ID,
 			OrderNo:    i + 1,
 			Name:       arg.Name,
-			Type:       arg.Type,
+			VarType:    arg.Type,
 		})
 		if err != nil {
 			return nil, err
