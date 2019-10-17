@@ -8,6 +8,8 @@ require (
 	github.com/aclements/perflock v0.0.0-20180319185109-8402f33a418d // indirect
 	github.com/codegangsta/envy v0.0.0-20141216192214-4b78388c8ce4 // indirect
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
+	github.com/elastic/go-seccomp-bpf v1.1.0
+	github.com/elastic/go-ucfg v0.7.0
 	github.com/fsouza/go-dockerclient v1.4.4 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20190923054218-35076c1b2bea

@@ -5,10 +5,13 @@ RUN apk add make \
     g++
 ADD . /src
 RUN cd /src && make build
+RUN cd /src && make build-sandbox
 
 # final stage
-FROM alpine
+FROM node:12.12.0-alpine
 WORKDIR /app
 COPY --from=builder /src/bara /app/
+COPY --from=builder /src/sandbox-cli /app/
 RUN chmod +x ./bara
+RUN chmod +x ./sandbox-cli
 CMD ./bara
