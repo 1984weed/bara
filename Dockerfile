@@ -12,6 +12,7 @@ FROM node:12.12.0-alpine
 WORKDIR /app
 COPY --from=builder /src/bara /app/
 COPY --from=builder /src/sandbox-cli /app/
-RUN chmod +x ./bara
+RUN adduser -D execUser
+RUN chmod 700 ./bara
 RUN chmod +x ./sandbox-cli
 CMD ./bara

@@ -1,12 +1,13 @@
 package remote
 
 import (
+	"bara/utils"
 	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"os/exec"
+	"os"
 	"strings"
 	"time"
 
@@ -18,11 +19,12 @@ type ConfigNode struct {
 }
 
 type NodeJSClient struct {
-	store *pg.DB
+	store            *pg.DB
+	withoutContainer bool
 }
 
-func NewNodeJsClient(store *pg.DB) *NodeJSClient {
-	return &NodeJSClient{store: store}
+func NewNodeJsClient(store *pg.DB, withoutContainer bool) *NodeJSClient {
+	return &NodeJSClient{store: store, withoutContainer: withoutContainer}
 }
 
 type CodeResult struct {
@@ -99,15 +101,23 @@ func (n *NodeJSClient) Exec(questionID int64, functionName string, typedCode str
 		testcase += fmt.Sprintln(qt.OutputText)
 	}
 
-	execFile := fmt.Sprintf(nodeJsTemplate, typedCode, functionName)
-	inputCommand := fmt.Sprintf(`echo -e %q > ./temp && echo -e %q | node temp`, execFile, testcase)
-
-	fmt.Println(inputCommand)
-	out, err := exec.Command("docker", "run", "node:12.10.0-alpine", "/bin/ash", "-c", inputCommand).Output()
-
+	dir, err := os.Getwd()
 	if err != nil {
 		return nil, ""
 	}
+
+	codeCompile := CodeCompileMap[JavaScript]
+	var machine MachineType
+	if n.withoutContainer {
+		machine = LocalMac
+	} else {
+		machine = Container
+	}
+	machineType := MachineExecMap[machine]
+	execStr := fmt.Sprintf(codeCompile.PrepareCode, typedCode, functionName)
+
+	sandbox := NewSandBoxRunner(dir, fmt.Sprintf(`folder-%s`, utils.RandomString(10)), codeCompile.Command, codeCompile.FileName, testcase, machineType, execStr, 600, JavaScript)
+	out, err := sandbox.Exec()
 
 	bytesReader := bytes.NewReader(out)
 	reader := bufio.NewReader(bytesReader)

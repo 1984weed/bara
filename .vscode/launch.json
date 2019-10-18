@@ -4,6 +4,8 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    
+
 
         {
             "name": "Launch",
@@ -12,7 +14,8 @@
             "mode": "debug",
             "program": "${workspaceRoot}/server/server.go",
             "env": {
-                "DATABASE_NAME": "bara"
+                "DATABASE_NAME": "bara",
+                "WITHOUT_CONTAINER": true
             },
             "args": ["server"],
             "showLog": true

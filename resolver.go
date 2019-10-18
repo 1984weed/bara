@@ -11,7 +11,8 @@ import (
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct {
-	DB *pg.DB
+	DB               *pg.DB
+	WithoutContainer bool
 }
 
 func (r *Resolver) Query() QueryResolver {
@@ -135,7 +136,7 @@ func (r *Resolver) Mutation() MutationResolver {
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*CodeResult, error) {
-	jsClient := remote.NewNodeJsClient(r.DB)
+	jsClient := remote.NewNodeJsClient(r.DB, r.WithoutContainer)
 
 	question := new(remote.Question)
 

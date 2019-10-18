@@ -1,3 +1,4 @@
+BEGIN;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
@@ -15,30 +16,14 @@ CREATE TABLE users (
 
 DROP TABLE IF EXISTS code_languages cascade;
 CREATE TABLE code_languages (
-  id PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   slug  VARCHAR(255) NOT NULL
 );
 
-DROP TABLE IF EXISTS questions cascade;
 
-CREATE TABLE questions (
-  id SERIAL PRIMARY KEY,
-  slug VARCHAR(255) NOT NULL,
-  title VARCHAR(300) NOT NULL,
-  description TEXT NOT NULL,
-  function_name VARCHAR(255),
-  language_id VARCHAR(255) NOT NULL,
-  author_id INTEGER,
-  output_type args_t NOT NULL,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  CONSTRAINT questions_slug_unique UNIQUE(slug)
-);
 
-ALTER TABLE questions ADD CONSTRAINT fk_questions_code_languages FOREIGN KEY (language_id) REFERENCES code_languages (id);
-
-DROP TYPE IF EXISTS args_t;
+DROP TYPE IF EXISTS args_t cascade;
 CREATE TYPE args_t AS enum(
   'string[][]',
   'string[]', 
@@ -49,6 +34,24 @@ CREATE TYPE args_t AS enum(
   'double[][]',
   'double[]',
   'double');
+
+DROP TABLE IF EXISTS questions cascade;
+
+CREATE TABLE questions (
+  id SERIAL PRIMARY KEY,
+  slug VARCHAR(255) NOT NULL,
+  title VARCHAR(300) NOT NULL,
+  description TEXT NOT NULL,
+  function_name VARCHAR(255),
+  language_id INTEGER NOT NULL,
+  author_id INTEGER,
+  output_type args_t NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
+  CONSTRAINT questions_slug_unique UNIQUE(slug)
+);
+ALTER TABLE questions ADD CONSTRAINT fk_questions_code_languages FOREIGN KEY (language_id) REFERENCES code_languages (id);
+
 
 DROP TABLE IF EXISTS question_args cascade;
 
@@ -72,3 +75,5 @@ CREATE TABLE question_testcases (
 );
 
 ALTER TABLE question_testcases ADD CONSTRAINT fk_question_testcases_questions FOREIGN KEY (question_id) REFERENCES questions (id);
+
+COMMIT;

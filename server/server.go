@@ -57,6 +57,11 @@ func main() {
 			Value:  "8080",
 			Usage:  "Web app port",
 		},
+		cli.BoolFlag{
+			Name:   "WITHOUT_CONTAINER",
+			EnvVar: "WITHOUT_CONTAINER",
+			Usage:  "Can define the application is running on local",
+		},
 	}
 	app.Action = func(ctx *cli.Context) error {
 
@@ -78,7 +83,7 @@ func main() {
 		http.Handle("/", http.StripPrefix("/", fs))
 
 		http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
-		http.Handle("/query", c.Handler(handler.GraphQL(bara.NewExecutableSchema(bara.Config{Resolvers: &bara.Resolver{DB: db}}),
+		http.Handle("/query", c.Handler(handler.GraphQL(bara.NewExecutableSchema(bara.Config{Resolvers: &bara.Resolver{DB: db, WithoutContainer: ctx.Bool("WITHOUT_CONTAINER")}}),
 			handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
 				debug.PrintStack()
 				return errors.New("user message on panic")
