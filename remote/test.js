@@ -1,18 +1,11 @@
 var readline = require("readline");
 
-var twoSum = function(nums, target) {
-  const map = {};
-  for (let i = 0; i < nums.length; i++) {
-    map[nums[i]] = i;
-  }
-  for (let i = 0; i < nums.length; i++) {
-    if (map[target - nums[i]] != null && i != map[target - nums[i]]) {
-      return [i, map[target - nums[i]]];
-    }
-  }
+function twoSum(nums, target) {
+  console.log("==========aaa")
+  console.log(process.env);
+  return 9
 
-  return null;
-};
+}
 
 async function main() {
   var rl = readline.createInterface({
@@ -39,14 +32,17 @@ async function main() {
     } else if (lineCount === 1) {
       inputNum = parseInt(line);
     } else if ((inputNum + 1) * countTestCase + 1 === lineCount) {
+        debugger;
       const expected = JSON.stringify(JSON.parse(line));
       const resultStr = JSON.stringify(result);
       if (resultStr !== expected) {
         successFlag = false;
+        debugger;
         console.log(
           JSON.stringify({
             status: "fail",
             result: resultStr,
+            input: inputs.join("\n"),
             expected
           })
         );

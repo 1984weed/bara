@@ -30,6 +30,7 @@ func NewNodeJsClient(store *pg.DB, withoutContainer bool) *NodeJSClient {
 type CodeResult struct {
 	Status   string
 	Result   string
+	Input    string
 	Expected string
 	Time     int
 }
@@ -89,12 +90,12 @@ func (n *NodeJSClient) Exec(questionID int64, functionName string, typedCode str
 	}
 
 	testcase := ""
-	inputCount := strings.Count((*qts)[0].InputText, "\\n") + 1
+	inputCount := strings.Count((*qts)[0].InputText, "\n") + 1
 
 	testcase += fmt.Sprintln(len(*qts))
 	testcase += fmt.Sprintln(inputCount)
 	for _, qt := range *qts {
-		inputCases := strings.Split(qt.InputText, "\\n")
+		inputCases := strings.Split(qt.InputText, "\n")
 		for _, in := range inputCases {
 			testcase += fmt.Sprintln(in)
 		}

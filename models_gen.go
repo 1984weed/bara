@@ -19,10 +19,11 @@ type CodeResult struct {
 }
 
 type CodeResultDetail struct {
-	Expected string `json:"expected"`
-	Result   string `json:"result"`
-	Status   string `json:"status"`
-	Time     int    `json:"time"`
+	Expected string  `json:"expected"`
+	Input    *string `json:"input"`
+	Result   string  `json:"result"`
+	Status   string  `json:"status"`
+	Time     int     `json:"time"`
 }
 
 type CodeSnippet struct {

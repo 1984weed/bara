@@ -70,7 +70,6 @@ func (s *SandBoxRunner) run() ([]byte, error) {
 	}
 	inputCommand := fmt.Sprintf(`cat %s | %s %s %s`, s.TestcaseFile, sandboxCommand, s.Command, s.File)
 
-	fmt.Println(inputCommand)
 	defer os.RemoveAll(s.Folder)
 	return exec.Command(s.ExeCommand, "-c", inputCommand).Output()
 }

@@ -5,6 +5,7 @@ type CodeResult {
 
 type CodeResultDetail {
   expected: String!
+  input: String
   result: String!
   status: String!
   time: Int!

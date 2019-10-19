@@ -49,6 +49,7 @@ type ComplexityRoot struct {
 
 	CodeResultDetail struct {
 		Expected func(childComplexity int) int
+		Input    func(childComplexity int) int
 		Result   func(childComplexity int) int
 		Status   func(childComplexity int) int
 		Time     func(childComplexity int) int
@@ -123,6 +124,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CodeResultDetail.Expected(childComplexity), true
+
+	case "CodeResultDetail.input":
+		if e.complexity.CodeResultDetail.Input == nil {
+			break
+		}
+
+		return e.complexity.CodeResultDetail.Input(childComplexity), true
 
 	case "CodeResultDetail.result":
 		if e.complexity.CodeResultDetail.Result == nil {
@@ -316,6 +324,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type CodeResultDetail {
   expected: String!
+  input: String
   result: String!
   status: String!
   time: Int!
@@ -617,6 +626,40 @@ func (ec *executionContext) _CodeResultDetail_expected(ctx context.Context, fiel
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CodeResultDetail_input(ctx context.Context, field graphql.CollectedField, obj *CodeResultDetail) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CodeResultDetail",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Input, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CodeResultDetail_result(ctx context.Context, field graphql.CollectedField, obj *CodeResultDetail) (ret graphql.Marshaler) {
@@ -2592,6 +2635,8 @@ func (ec *executionContext) _CodeResultDetail(ctx context.Context, sel ast.Selec
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "input":
+			out.Values[i] = ec._CodeResultDetail_input(ctx, field, obj)
 		case "result":
 			out.Values[i] = ec._CodeResultDetail_result(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

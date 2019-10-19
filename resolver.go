@@ -150,14 +150,13 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 
 	result, stdout := jsClient.Exec(question.ID, question.FunctionName, input.TypedCode)
 
-	fmt.Println(result)
-
 	return &CodeResult{
 		Result: &CodeResultDetail{
 			Expected: result.Expected,
 			Result:   result.Result,
 			Status:   result.Status,
 			Time:     result.Time,
+			Input:    &result.Input,
 		},
 		Stdout: stdout,
 	}, nil
@@ -226,7 +225,7 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 	tx.Commit()
 
 	return &Question{
-		Slug:        "testtest",
+		Slug:        slug.Make(input.Title),
 		Title:       question.Title,
 		Description: question.Description,
 	}, nil

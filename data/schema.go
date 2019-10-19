@@ -1,7 +1,6 @@
 package data
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -171,7 +170,6 @@ func init() {
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					fmt.Println("ki------------ta")
 					// nodeClient := remoteNewNodeJsClient()
 					result := SubmitCode{
 						TypedCode: p.Args["typedCode"].(string),

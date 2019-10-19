@@ -38,8 +38,9 @@ async function main() {
           JSON.stringify({
             status: "fail",
             result: resultStr,
-			expected,
-			time: 0
+            input: inputs.join("\n"),
+            expected,
+            time: 0
           })
         );
         break;
@@ -61,7 +62,8 @@ async function main() {
     console.log(
       JSON.stringify({
 		status: "success",
-		result: "",
+    result: "",
+    input: "", 
 		expected: "",
         time: new Date() - start
       })
