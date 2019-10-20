@@ -2,7 +2,10 @@ package remote
 
 import (
 	"bara/utils"
+	"bytes"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"os/exec"
 )
@@ -44,8 +47,8 @@ func (s *SandBoxRunner) Exec() ([]byte, error) {
 }
 
 func (s *SandBoxRunner) prepare() error {
-
 	err := os.MkdirAll(s.Folder, os.ModePerm)
+
 	if err != nil {
 		return err
 	}
@@ -63,13 +66,37 @@ func (s *SandBoxRunner) prepare() error {
 }
 
 func (s *SandBoxRunner) run() ([]byte, error) {
-	var _, err = os.Stat(s.SandboxFile)
-	sandboxCommand := s.SandboxFile
+	_, err := os.Stat(s.SandboxFile)
+	sandboxCommand := "" //s.SandboxFile
 	if os.IsNotExist(err) {
 		sandboxCommand = ""
 	}
-	inputCommand := fmt.Sprintf(`cat %s | %s %s %s`, s.TestcaseFile, sandboxCommand, s.Command, s.File)
+
+	log.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
+
+	// return exec.Command("cat", s.TestcaseFile).Output()
+	c1 := exec.Command("cat", s.TestcaseFile)
+	c2 := exec.Command(s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
+	log.Println(c2)
+	c2.Env = []string{}
+
+	r, w := io.Pipe()
+	c1.Stdout = w
+	c2.Stdin = r
+
+	var b2 bytes.Buffer
+	c2.Stdout = &b2
+
+	c1.Start()
+	c2.Start()
+	c1.Wait()
+	w.Close()
+	c2.Wait()
 
 	defer os.RemoveAll(s.Folder)
-	return exec.Command(s.ExeCommand, "-c", inputCommand).Output()
+
+	log.Println("========================")
+	log.Println("out", b2.String())
+	log.Println("========================")
+	return b2.Bytes(), nil
 }

@@ -150,6 +150,10 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 
 	result, stdout := jsClient.Exec(question.ID, question.FunctionName, input.TypedCode)
 
+	if result == nil {
+		return nil, nil
+	}
+
 	return &CodeResult{
 		Result: &CodeResultDetail{
 			Expected: result.Expected,
