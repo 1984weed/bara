@@ -2,12 +2,15 @@ package remote
 
 import (
 	"bara/utils"
-	"bytes"
+	"context"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
+	"strconv"
+	"syscall"
+	"time"
 )
 
 type SandBoxRunner struct {
@@ -66,37 +69,30 @@ func (s *SandBoxRunner) prepare() error {
 }
 
 func (s *SandBoxRunner) run() ([]byte, error) {
-	_, err := os.Stat(s.SandboxFile)
-	sandboxCommand := "" //s.SandboxFile
-	if os.IsNotExist(err) {
+	sandboxCommand := s.SandboxFile
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+
+	if _, err := os.Stat(s.SandboxFile); os.IsNotExist(err) {
 		sandboxCommand = ""
+		return exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File)).Output()
 	}
 
+	u, _ := user.Lookup("execUser")
+
+	uid, _ := strconv.Atoi(u.Uid)
+	gid, _ := strconv.Atoi(u.Gid)
+
 	log.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
-
-	// return exec.Command("cat", s.TestcaseFile).Output()
-	c1 := exec.Command("cat", s.TestcaseFile)
-	c2 := exec.Command(s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
-	log.Println(c2)
-	c2.Env = []string{}
-
-	r, w := io.Pipe()
-	c1.Stdout = w
-	c2.Stdin = r
-
-	var b2 bytes.Buffer
-	c2.Stdout = &b2
-
-	c1.Start()
-	c2.Start()
-	c1.Wait()
-	w.Close()
-	c2.Wait()
-
+	defer cancel()
 	defer os.RemoveAll(s.Folder)
 
-	log.Println("========================")
-	log.Println("out", b2.String())
-	log.Println("========================")
-	return b2.Bytes(), nil
+	cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File))
+	cmd.Env = []string{
+		"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+	}
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid),
+		Gid: uint32(gid)}
+
+	return cmd.Output()
 }

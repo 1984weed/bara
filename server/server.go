@@ -80,13 +80,26 @@ func main() {
 		port := ctx.String("PORT")
 
 		fs := http.FileServer(http.Dir("out"))
+		// authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
+		// ar := _articleRepo.NewMysqlArticleRepository(dbConn)
+
+		// timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
+		// au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
+		// _articleHttpDeliver.NewArticleHandler(e, au)
+
 		http.Handle("/", http.StripPrefix("/", fs))
 
 		http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
-		http.Handle("/query", c.Handler(handler.GraphQL(bara.NewExecutableSchema(bara.Config{Resolvers: &bara.Resolver{DB: db, WithoutContainer: ctx.Bool("WITHOUT_CONTAINER")}}),
+		http.Handle("/query", c.Handler(handler.GraphQL(bara.NewExecutableSchema(
+			bara.Config{
+				Resolvers: &bara.Resolver{
+					DB:               db,
+					WithoutContainer: ctx.Bool("WITHOUT_CONTAINER"),
+				},
+			}),
 			handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
 				debug.PrintStack()
-				return errors.New("user message on panic")
+				return errors.New("An error happens")
 			}),
 		)))
 

@@ -28,6 +28,6 @@ var CodeCompileMap = map[CompileLanguage]CompileInfo{
 }
 
 var MachineExecMap = map[MachineType]string{
-	Container: "ash",
+	Container: "sh",
 	LocalMac:  "bash",
 }

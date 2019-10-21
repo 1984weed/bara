@@ -40,6 +40,7 @@ func main() {
 					"listen",
 					"getpid",
 					"kill",
+					"fork",
 				},
 			},
 		},

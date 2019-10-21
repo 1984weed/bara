@@ -6,6 +6,7 @@ require (
 	github.com/0xAX/notificator v0.0.0-20181105090803-d81462e38c21 // indirect
 	github.com/99designs/gqlgen v0.9.3
 	github.com/aclements/perflock v0.0.0-20180319185109-8402f33a418d // indirect
+	github.com/bxcodec/go-clean-arch v2.0.1+incompatible
 	github.com/codegangsta/envy v0.0.0-20141216192214-4b78388c8ce4 // indirect
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
 	github.com/elastic/go-seccomp-bpf v1.1.0
