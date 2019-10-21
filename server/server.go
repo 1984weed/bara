@@ -2,6 +2,11 @@ package main
 
 import (
 	"bara"
+	"bara/generated"
+	"bara/problem/repository"
+	"bara/problem/resolver"
+	"bara/problem/usecase"
+
 	"bara/store"
 	"context"
 	"errors"
@@ -10,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"time"
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/go-pg/pg/v9"
@@ -78,8 +84,12 @@ func main() {
 		})
 
 		port := ctx.String("PORT")
+		timeoutContext := time.Duration(40) * time.Second
 
 		fs := http.FileServer(http.Dir("out"))
+		problemRepo := repository.NewProblemRepository(db)
+		problemUc := usecase.NewProblemUsecase(problemRepo, timeoutContext)
+		problemResolver := resolver.NewProblemResolver(problemUc)
 		// authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
 		// ar := _articleRepo.NewMysqlArticleRepository(dbConn)
 
@@ -90,10 +100,11 @@ func main() {
 		http.Handle("/", http.StripPrefix("/", fs))
 
 		http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
-		http.Handle("/query", c.Handler(handler.GraphQL(bara.NewExecutableSchema(
-			bara.Config{
+		http.Handle("/query", c.Handler(handler.GraphQL(generated.NewExecutableSchema(
+			generated.Config{
 				Resolvers: &bara.Resolver{
 					DB:               db,
+					ProblemResolver:  problemResolver,
 					WithoutContainer: ctx.Bool("WITHOUT_CONTAINER"),
 				},
 			}),

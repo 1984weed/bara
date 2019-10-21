@@ -7,6 +7,6 @@ import (
 
 // Repository represent the article's repository contract
 type Repository interface {
-	GetBySlug(ctx context.Context, slug string) (*model.Problem, error)
+	GetBySlug(ctx context.Context, slug string) (*model.ProblemsWithArgs, error)
 	GetProblemArgsByID(ctx context.Context, problemID int64) ([]model.ProblemArgs, error)
 }

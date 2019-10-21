@@ -1,6 +1,9 @@
 package bara
 
 import (
+	"bara/generated"
+	"bara/graphql_model"
+	"bara/problem"
 	"bara/remote"
 	"context"
 	"fmt"
@@ -12,16 +15,17 @@ import (
 
 type Resolver struct {
 	DB               *pg.DB
+	ProblemResolver  problem.Resolver
 	WithoutContainer bool
 }
 
-func (r *Resolver) Query() QueryResolver {
+func (r *Resolver) Query() generated.QueryResolver {
 	return &queryResolver{r}
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Questions(ctx context.Context, limit *int, offset *int) ([]*Question, error) {
+func (r *queryResolver) Questions(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Question, error) {
 	// jsClient := remote.NewNodeJsClient(r.DB)
 	// question := &Question{ID: 1}
 	// result := jsClient.Exec("", "function helloWorld(){ console.log('Hellow world') }")
@@ -31,44 +35,49 @@ func (r *queryResolver) Questions(ctx context.Context, limit *int, offset *int) 
 	// 	Lang:      "",
 	// 	Slug:      "",
 	// }, nil
-	return []*Question{}, nil
+	return []*graphql_model.Question{}, nil
 }
 
-func (r *queryResolver) Question(ctx context.Context, slug *string) (*Question, error) {
-	question := new(remote.Question)
+func (r *queryResolver) Question(ctx context.Context, slug *string) (*graphql_model.Question, error) {
+	return r.ProblemResolver.GetBySlug(ctx, *slug)
+	// p, err := r.problemResolver.GetBySlug(ctx, *slug)
 
-	err := r.DB.Model(question).
-		Where("slug = ?", *slug).
-		Select()
+	// if err != nil {
+	// 	return &Question{}, err
+	// }
+	// // question := new(remote.Question)
 
-	if err != nil {
-		return nil, err
-	}
+	// // err := r.DB.Model(question).
+	// // 	Where("slug = ?", *slug).
+	// // 	Select()
 
-	args := new([]remote.QuestionArgs)
+	// // if err != nil {
+	// // 	return nil, err
+	// // }
 
-	err = r.DB.Model(args).
-		Where("question_args.question_id = ?", question.ID).
-		Select()
-	if err != nil {
-		return nil, err
-	}
+	// // args := new([]remote.QuestionArgs)
 
-	return &Question{
-		Slug:        question.Slug,
-		Title:       question.Title,
-		Description: question.Description,
-		CodeSnippets: []*CodeSnippet{
-			{
-				Code: makeSnippets(question.FunctionName, args, question.OutputType),
-				Lang: CodeLanguageJavaScript,
-			},
-		},
-	}, nil
+	// // err = r.DB.Model(args).
+	// // 	Where("question_args.question_id = ?", question.ID).
+	// // 	Select()
+	// // if err != nil {
+	// // 	return nil, err
+	// // }
 
+	// return &Question{
+	// 	Slug:        p.Slug,
+	// 	Title:       p.Title,
+	// 	Description: p.Description,
+	// 	CodeSnippets: []*CodeSnippet{
+	// 		{
+	// 			Code: p.MakeCodeSnippets(), //makeSnippets(question.FunctionName, args, question.OutputType),
+	// 			Lang: p.LanguageSlug,
+	// 		},
+	// 	},
+	// }, nil
 }
 
-func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) (*Question, error) {
+func (r *queryResolver) TestNewQuestion(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
 	args := make([]remote.QuestionArgs, len(input.Args))
 	for i, arg := range input.Args {
 		args[i] = remote.QuestionArgs{
@@ -76,14 +85,14 @@ func (r *queryResolver) TestNewQuestion(ctx context.Context, input NewQuestion) 
 			VarType: arg.Type,
 		}
 	}
-	return &Question{
+	return &graphql_model.Question{
 		Slug:        slug.Make(input.Title),
 		Title:       input.Title,
 		Description: input.Description,
-		CodeSnippets: []*CodeSnippet{
+		CodeSnippets: []*graphql_model.CodeSnippet{
 			{
 				Code: makeSnippets(input.FunctionName, &args, "number"),
-				Lang: CodeLanguageJavaScript,
+				Lang: graphql_model.CodeLanguageJavaScript,
 			},
 		},
 	}, nil
@@ -129,13 +138,13 @@ func convertJSTypeFromType(typeStr string) string {
 	return ""
 }
 
-func (r *Resolver) Mutation() MutationResolver {
+func (r *Resolver) Mutation() generated.MutationResolver {
 	return &mutationResolver{r}
 }
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*CodeResult, error) {
+func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
 	jsClient := remote.NewNodeJsClient(r.DB, r.WithoutContainer)
 
 	question := new(remote.Question)
@@ -154,8 +163,8 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 		return nil, nil
 	}
 
-	return &CodeResult{
-		Result: &CodeResultDetail{
+	return &graphql_model.CodeResult{
+		Result: &graphql_model.CodeResultDetail{
 			Expected: result.Expected,
 			Result:   result.Result,
 			Status:   result.Status,
@@ -166,7 +175,7 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input SubmitCode) (*C
 	}, nil
 }
 
-func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion) (*Question, error) {
+func (r *mutationResolver) CreateQuestion(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
 	tx, err := r.DB.Begin()
 	if err != nil {
 		return nil, err
@@ -228,7 +237,7 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input NewQuestion
 	}
 	tx.Commit()
 
-	return &Question{
+	return &graphql_model.Question{
 		Slug:        slug.Make(input.Title),
 		Title:       question.Title,
 		Description: question.Description,
