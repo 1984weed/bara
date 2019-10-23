@@ -1,3 +1,2 @@
-\encoding UTF-8
-drop database bara;
-create database bara;
+DROP DATABASE IF EXISTS bara;
+CREATE DATABASE bara;

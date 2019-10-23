@@ -6,8 +6,6 @@ import (
 	"bara/problem/domain"
 	"context"
 	"time"
-	// "github.com/bxcodec/go-clean-arch/article"
-	// "github.com/bxcodec/go-clean-arch/author"
 )
 
 type problemUsecase struct {

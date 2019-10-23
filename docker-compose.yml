@@ -16,7 +16,7 @@ services:
       DB_HOST: postgresql 
   bara.db:
     image: postgres:11.5-alpine
-    container_name: postgresql
+    container_name: bara.db
     ports:
       - 5432:5432
     volumes:
@@ -24,4 +24,14 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    restart: always
+  bara.db-test:
+    image: postgres:11.5-alpine
+    container_name: bara.db-test
+    ports:
+      - 5555:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bara
     restart: always

@@ -18,3 +18,10 @@ build-sandbox:
 
 generate: 
 	go run github.com/99designs/gqlgen -v
+
+integration-test: 
+	@go test -v ./...
+
+docker-up-for-test:
+	@docker-compose up -d bara.db-test
+

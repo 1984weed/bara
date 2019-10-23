@@ -90,12 +90,6 @@ func main() {
 		problemRepo := repository.NewProblemRepository(db)
 		problemUc := usecase.NewProblemUsecase(problemRepo, timeoutContext)
 		problemResolver := resolver.NewProblemResolver(problemUc)
-		// authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
-		// ar := _articleRepo.NewMysqlArticleRepository(dbConn)
-
-		// timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
-		// au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
-		// _articleHttpDeliver.NewArticleHandler(e, au)
 
 		http.Handle("/", http.StripPrefix("/", fs))
 
