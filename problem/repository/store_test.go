@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"bara/store"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -22,7 +21,7 @@ type RepositoryTestSuite struct {
 func (s *RepositoryTestSuite) SetupSuite() {
 	var err error
 
-	s.DB = store.NewStore(s.Config)
+	s.DB = pg.Connect(s.Config)
 	// Check DB has already waken up
 	_, err = s.DB.Exec("SELECT 1")
 	require.NoError(s.T(), err)

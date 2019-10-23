@@ -7,7 +7,6 @@ import (
 	"bara/problem/resolver"
 	"bara/problem/usecase"
 
-	"bara/store"
 	"context"
 	"errors"
 	"fmt"
@@ -75,13 +74,14 @@ func main() {
 			AllowedOrigins: []string{"*"},
 		})
 
-		db := store.NewStore(&pg.Options{
-			User:     ctx.String("DB_USER"),
-			Password: ctx.String("DB_PASSWORD"),
-			Network:  "tcp",
-			Addr:     fmt.Sprintf("%s:%s", ctx.String("DB_HOST"), ctx.String("DB_PORT")),
-			Database: ctx.String("DATABASE_NAME"),
-		})
+		db := pg.Connect(
+			&pg.Options{
+				User:     ctx.String("DB_USER"),
+				Password: ctx.String("DB_PASSWORD"),
+				Network:  "tcp",
+				Addr:     fmt.Sprintf("%s:%s", ctx.String("DB_HOST"), ctx.String("DB_PORT")),
+				Database: ctx.String("DATABASE_NAME"),
+			})
 
 		port := ctx.String("PORT")
 		timeoutContext := time.Duration(40) * time.Second
