@@ -1,81 +1,99 @@
 package repository_test
 
 import (
-	"fmt"
-	"os"
+	"bara/model"
+	"bara/problem/repository"
+	"bara/repository_suite"
+	"context"
 	"testing"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
-type articleRepositoryTest struct {
-	RepositoryTestSuite
+type problemRepositoryTest struct {
+	repository_suite.RepositoryTestSuite
 }
 
 func TestCategorySuite(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skip category mysql repository test")
-	}
-	dsn := os.Getenv("MYSQL_TEST_URL")
-	if dsn == "" {
-		dsn = "root:root-pass@tcp(localhost:33060)/testing?parseTime=1&loc=Asia%2FJakarta&charset=utf8mb4&collation=utf8mb4_unicode_ci"
+		t.Skip("Skip repository test")
 	}
 
-	categorySuite := &articleRepositoryTest{
-		RepositoryTestSuite{
-			Config: &pg.Options{
-				User:     "postgres",
-				Password: "postgres",
-				Network:  "tcp",
-				Addr:     "0.0.0.0:5555",
-				Database: "bara",
-			},
-		},
+	categorySuite := &problemRepositoryTest{
+		repository_suite.RepositoryTestSuite{},
 	}
 
 	suite.Run(t, categorySuite)
 }
 
-func (s *articleRepositoryTest) TearDownTest() {
-	s.RepositoryTestSuite.ClearDatabase()
+func (a *problemRepositoryTest) SetupTest() {
+	seedProblemData(a.T(), a.DB)
+}
+func (a *problemRepositoryTest) TearDownTest() {
+	a.RepositoryTestSuite.ClearDatabase()
 }
 
-func (m *articleRepositoryTest) TestStore() {
-	fmt.Println("=========================Test====================")
+// TestGetBySlug...
+func (a *problemRepositoryTest) TestGetBySlug() {
+	repo := repository.NewProblemRepository(a.DB)
+
+	res, err := repo.GetBySlug(context.Background(), "test-slug")
+
+	mockProblem := getMockProblems()[0]
+	require.NoError(a.T(), err)
+	assert.Equal(a.T(), mockProblem.ID, res.ID)
+	assert.Equal(a.T(), mockProblem.Title, res.Title)
+	assert.Equal(a.T(), mockProblem.Slug, res.Slug)
 }
 
-// func TestGetBySlug(t *testing.T) {
-// 	db, mock, err := sqlmock.New()
-// 	if err != nil {
-// 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-// 	}
-// 	mockProblems := []model.Problems{
-// 		{
-// 			ID:           1,
-// 			Slug:         "test-slug",
-// 			Title:        "title",
-// 			Description:  "description",
-// 			FunctionName: "helloWorld",
-// 			LanguageID:   0,
-// 			OutputType:   "int",
-// 			AuthorID:     0,
-// 			CreatedAt:    time.Now(),
-// 			UpdatedAt:    time.Now(),
-// 		},
-// 	}
-// 	rows := sqlmock.NewRows([]string{"id", "slug", "title", "description", "function_name", "language_id", "output_type", "author_id", "created_at", "update_at"}).
-// 		AddRow(1, "test-slug", "test-title",
-// 			"test-description", "helloWorld", 0, "int", 0, time.Now(), time.Now())
+func seedProblemData(t *testing.T, db *pg.DB) {
+	languages := getMockLanguages()
+	for _, l := range languages {
+		err := db.Insert(&l)
+		require.NoError(t, err)
+	}
+	problems := getMockProblems()
 
-// 	query := "SELECT id,title,content, author_id, updated_at, created_at FROM article WHERE created_at > \\? ORDER BY created_at LIMIT \\?"
+	for _, p := range problems {
+		err := db.Insert(&p)
+		require.NoError(t, err)
+	}
+}
 
-// 	mock.ExpectQuery(query).WillReturnRows(rows)
-// 	a := repository.NewProblemRepository(db)
-// 	cursor := articleRepo.EncodeCursor(mockArticles[1].CreatedAt)
-// 	num := int64(2)
-// 	list, nextCursor, err := a.Fetch(context.TODO(), cursor, num)
-// 	assert.NotEmpty(t, nextCursor)
-// 	assert.NoError(t, err)
-// 	assert.Len(t, list, 2)
-// }
+func getMockLanguages() []model.CodeLanguages {
+	return []model.CodeLanguages{
+		{
+			ID:   1,
+			Name: "JavaScript",
+			Slug: "javascript",
+		},
+	}
+}
+
+func getMockProblems() []model.Problems {
+	return []model.Problems{
+		{
+			ID:           1,
+			Slug:         "test-slug",
+			Title:        "title",
+			Description:  "description",
+			FunctionName: "helloWorld",
+			LanguageID:   1,
+			OutputType:   "int",
+			AuthorID:     0,
+		},
+		{
+			ID:           2,
+			Slug:         "test-slug-2",
+			Title:        "title-2",
+			Description:  "description-2",
+			FunctionName: "calcSum",
+			LanguageID:   1,
+			OutputType:   "int",
+			AuthorID:     0,
+		},
+	}
+}

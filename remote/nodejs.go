@@ -122,7 +122,7 @@ func (n *NodeJSClient) Exec(questionID int64, functionName string, typedCode str
 	sandbox := NewSandBoxRunner(dir, fmt.Sprintf(`folder-%s`, utils.RandomString(10)), codeCompile.Command, codeCompile.FileName, testcase, machineType, execStr, 600, JavaScript)
 	out, err := sandbox.Exec()
 
-	log.Printf("output from command", string(out))
+	log.Print("output from command", string(out))
 
 	bytesReader := bytes.NewReader(out)
 	reader := bufio.NewReader(bytesReader)

@@ -17,10 +17,13 @@ build-sandbox:
 	$(GOBUILD) -o $(SANDBOX_BINARY_NAME) -v $(SANDBOX_MAIN_FILE) 
 
 generate: 
-	go run github.com/99designs/gqlgen -v
+	@go run github.com/99designs/gqlgen -v
 
 integration-test: 
 	@go test -v ./...
+
+unit-test: 
+	@go test -v -short ./...
 
 docker-up-for-test:
 	@docker-compose up -d bara.db-test

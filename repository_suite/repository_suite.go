@@ -1,4 +1,4 @@
-package repository_test
+package repository_suite
 
 import (
 	"fmt"
@@ -13,21 +13,25 @@ import (
 
 type RepositoryTestSuite struct {
 	suite.Suite
-	DB     *pg.DB
-	Config *pg.Options
+	DB *pg.DB
 }
 
 // SetupSuite setup at the beginning of test
 func (s *RepositoryTestSuite) SetupSuite() {
 	var err error
 
-	s.DB = pg.Connect(s.Config)
-	// Check DB has already waken up
+	s.DB = pg.Connect(
+		&pg.Options{
+			User:     "postgres",
+			Password: "postgres",
+			Network:  "tcp",
+			Addr:     "0.0.0.0:5555",
+			Database: "bara",
+		},
+	)
 	_, err = s.DB.Exec("SELECT 1")
 	require.NoError(s.T(), err)
 
-	// file, err := ioutil.ReadAll(strings.NewReader("./db/createdatabase.sql"))
-	// scanner := &Scanner{}
 	dir, err := os.Getwd()
 	require.NoError(s.T(), err)
 
@@ -46,6 +50,7 @@ func (s *RepositoryTestSuite) SetupSuite() {
 
 }
 
+// ClearDatabase ...
 func (s *RepositoryTestSuite) ClearDatabase() {
 	var tableNames []string
 	_, err := s.DB.Query(&tableNames, "SELECT table_name FROM information_schema.tables WHERE table_schema='public'")

@@ -35,17 +35,6 @@ func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Pr
 			VarType: arg.VarType,
 		}
 	}
-	// type ProblemArgs struct {
-	// 	Name    string
-	// 	VarType string
-	// }
-	// args, err := p.problemRepo.GetProblemArgsByID(ctx, problem.ID)
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// language, err := p.problemRepo.get
 
 	return &domain.Problem{
 		Slug:          problem.Slug,
@@ -56,34 +45,4 @@ func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Pr
 		ProblemArgs:   args,
 		OutputType:    problem.OutputType,
 	}, nil
-	// question := new(remote.Question)
-
-	// err := r.DB.Model(question).
-	// 	Where("slug = ?", *slug).
-	// 	Select()
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// args := new([]remote.QuestionArgs)
-
-	// err = r.DB.Model(args).
-	// 	Where("question_args.question_id = ?", question.ID).
-	// 	Select()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// return &Question{
-	// 	Slug:        question.Slug,
-	// 	Title:       question.Title,
-	// 	Description: question.Description,
-	// 	CodeSnippets: []*CodeSnippet{
-	// 		{
-	// 			Code: makeSnippets(question.FunctionName, args, question.OutputType),
-	// 			Lang: CodeLanguageJavaScript,
-	// 		},
-	// 	},
-	// }, nil
 }
