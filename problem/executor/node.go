@@ -1,11 +1,9 @@
+package executor
+
+const Node = `
 var readline = require("readline");
 
-function twoSum(nums, target) {
-  console.log("==========aaa")
-  console.log(process.env);
-  return 9
-
-}
+%s
 
 async function main() {
   var rl = readline.createInterface({
@@ -23,27 +21,26 @@ async function main() {
   var successFlag = false;
   var countTestCase = 1;
 
-  debugger;
   for await (const line of rl) {
-    // Each line in the readline input will be successively available here as
-    // `line`.
+    if(line === "") {
+      break;
+    }
     if (lineCount === 0) {
       testCaseNum = parseInt(line);
     } else if (lineCount === 1) {
       inputNum = parseInt(line);
     } else if ((inputNum + 1) * countTestCase + 1 === lineCount) {
-        debugger;
       const expected = JSON.stringify(JSON.parse(line));
       const resultStr = JSON.stringify(result);
       if (resultStr !== expected) {
         successFlag = false;
-        debugger;
         console.log(
           JSON.stringify({
             status: "fail",
             result: resultStr,
             input: inputs.join("\n"),
-            expected
+            expected,
+            time: 0
           })
         );
         break;
@@ -56,7 +53,7 @@ async function main() {
       inputs.push(JSON.parse(line));
 
       if (inputs.length === inputNum) {
-        result = twoSum(...inputs);
+        result = %s(...inputs);
       }
     }
     lineCount++;
@@ -64,10 +61,14 @@ async function main() {
   if (successFlag) {
     console.log(
       JSON.stringify({
-        status: "success",
+		status: "success",
+    result: "",
+    input: "", 
+		expected: "",
         time: new Date() - start
       })
     );
   }
 }
 main();
+`

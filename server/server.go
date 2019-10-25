@@ -2,6 +2,7 @@ package main
 
 import (
 	"bara"
+	"bara/problem/executor"
 	"bara/generated"
 	"bara/problem/repository"
 	"bara/problem/resolver"
@@ -18,7 +19,6 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/rs/cors"
 	"github.com/urfave/cli"
 )
@@ -88,13 +88,10 @@ func main() {
 		timeoutContext := time.Duration(40) * time.Second
 
 		fs := http.FileServer(http.Dir("out"))
-		problemRepo := repository.NewProblemRepository(db, func(tx interface{}) orm.DB {
-			if tx == nil {
-				return interface{}(db).(orm.DB)
-			}
-			return tx.(orm.DB)
-		})
-		problemUc := usecase.NewProblemUsecase(problemRepo, timeoutContext, db.RunInTransaction)
+		problemRepo := repository.NewProblemRepositoryRunner(db)
+		codeExecutor := executor.NewExecutorClient(ctx.Bool("WITHOUT_CONTAINER"), 10)
+
+		problemUc := usecase.NewProblemUsecase(problemRepo, codeExecutor, timeoutContext)
 		problemResolver := resolver.NewProblemResolver(problemUc)
 
 		http.Handle("/", http.StripPrefix("/", fs))
@@ -103,9 +100,8 @@ func main() {
 		http.Handle("/query", c.Handler(handler.GraphQL(generated.NewExecutableSchema(
 			generated.Config{
 				Resolvers: &bara.Resolver{
-					DB:               db,
-					ProblemResolver:  problemResolver,
-					WithoutContainer: ctx.Bool("WITHOUT_CONTAINER"),
+					DB:              db,
+					ProblemResolver: problemResolver,
 				},
 			}),
 			handler.RecoverFunc(func(ctx context.Context, err interface{}) error {

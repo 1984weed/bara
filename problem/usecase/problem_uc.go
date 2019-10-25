@@ -4,25 +4,25 @@ import (
 	"bara/model"
 	"bara/problem"
 	"bara/problem/domain"
+	"bara/problem/executor"
 	"context"
 	"time"
-
-	"github.com/go-pg/pg/v9"
 )
 
 type problemUsecase struct {
-	problemRepo      problem.Repository
-	runInTransaction func(fn func(*pg.Tx) error) error
-	contextTimeout   time.Duration
+	runner         problem.RepositoryRunner
+	codeExecutor   executor.Client
+	contextTimeout time.Duration
 }
 
 // NewProblemUsecase creates new a problemUsecase object of problem.Usecase interface
-func NewProblemUsecase(p problem.Repository, timeout time.Duration, runInTransaction func(fn func(*pg.Tx) error) error) problem.Usecase {
-	return &problemUsecase{problemRepo: p, runInTransaction: runInTransaction, contextTimeout: timeout}
+func NewProblemUsecase(runner problem.RepositoryRunner, codeExecutor executor.Client, contextTimeout time.Duration) problem.Usecase {
+	return &problemUsecase{runner, codeExecutor, contextTimeout}
 }
 
 func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Problem, error) {
-	problem, err := p.problemRepo.GetBySlug(ctx, slug)
+	rep := p.runner.GetRepository()
+	problem, err := rep.GetBySlug(ctx, slug)
 
 	if err != nil {
 		return nil, err
@@ -50,21 +50,90 @@ func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Pr
 func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain.NewProblem) (*domain.Problem, error) {
 	newProblem := &model.Problems{
 		Title:        inputProblem.Title,
-		Slug:         inputProblem.Slug,
+		Slug:         inputProblem.GetSlug(),
 		Description:  inputProblem.Description,
 		FunctionName: inputProblem.FunctionName,
 		LanguageID:   1,
 		OutputType:   inputProblem.OutputType,
 		AuthorID:     0,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
 	}
+	err := p.runner.RunInTransaction(func(repo problem.Repository) error {
+		err := repo.SaveProblem(ctx, newProblem)
 
-	err := p.runInTransaction(func(tx *pg.Tx) error {
-		return p.problemRepo.SaveProblem(ctx, tx, newProblem)
+		if err != nil {
+			return err
+		}
+		for i, arg := range inputProblem.ProblemArgs {
+			err = repo.SaveProblemArgs(ctx, &model.ProblemArgs{
+				ProblemID: newProblem.ID,
+				OrderNo:   i + 1,
+				Name:      arg.Name,
+				VarType:   arg.VarType,
+			})
+			if err != nil {
+				return err
+			}
+		}
+		for _, testcase := range inputProblem.Testcases {
+			err = repo.SaveProblemTestcase(ctx, &model.ProblemTestcases{
+				ProblemID:  newProblem.ID,
+				InputText:  testcase.GetInput(),
+				OutputText: testcase.Output,
+			})
+
+			if err != nil {
+				return err
+			}
+
+		}
+
+		return nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return &domain.Problem{
+		Slug:          newProblem.Slug,
+		Title:         newProblem.Title,
+		Description:   newProblem.Description,
+		LanguageSlugs: []model.CodeLanguageSlug{model.JavaScript},
+		FunctionName:  newProblem.FunctionName,
+		ProblemArgs:   inputProblem.ProblemArgs,
+		OutputType:    newProblem.OutputType,
+	}, nil
+}
+
+func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitCode) (*domain.CodeResult, error) {
+	repo := p.runner.GetRepository()
+	problem, err := repo.GetBySlug(ctx, code.ProblemSlug)
+
+	if err != nil {
+		return nil, err
+	}
+
+	testcases, err := repo.GetTestcaseByProblemID(ctx, problem.ID)
+
+	if err != nil {
+		return nil, err
+	}
+	domainTestcases := make([]domain.Testcase, len(testcases))
+
+	for i, t := range testcases {
+		domainTestcases[i] = domain.Testcase{
+			Input:  t.InputText,
+			Output: t.OutputText,
+		}
+	}
+	testcaseStr := domain.CreateTestcase(domainTestcases)
+	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, testcaseStr, problem.FunctionName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return codeResult, nil
 }

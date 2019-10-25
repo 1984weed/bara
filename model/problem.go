@@ -12,8 +12,8 @@ type Problems struct {
 	LanguageID   int64
 	OutputType   string
 	AuthorID     int64
-	CreatedAt    time.Time `pg:"default:now()"`
-	UpdatedAt    time.Time `pg:"default:now()"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // ProblemsWithArgs represents Problems with many ProblemArgs
@@ -26,8 +26,8 @@ type ProblemsWithArgs struct {
 	Args         []ProblemArgs
 	OutputType   string
 	AuthorID     int64
-	CreatedAt    time.Time `pg:"default:now()"`
-	UpdatedAt    time.Time `pg:"default:now()"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // ProblemArgs table data
@@ -37,4 +37,12 @@ type ProblemArgs struct {
 	OrderNo   int
 	Name      string
 	VarType   string
+}
+
+// ProblemTestcases table data
+type ProblemTestcases struct {
+	ID         int64
+	ProblemID  int64
+	InputText  string
+	OutputText string
 }

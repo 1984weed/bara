@@ -3,6 +3,9 @@ package domain
 import (
 	"bara/model"
 	"fmt"
+	"strings"
+
+	"github.com/gosimple/slug"
 )
 
 // Problem represents the problem model
@@ -19,23 +22,6 @@ type Problem struct {
 type ProblemArgs struct {
 	Name    string
 	VarType string
-}
-
-// NewProblem represents a new problem
-type NewProblem struct {
-	Slug         string
-	Title        string
-	Description  string
-	OutputType   string
-	FunctionName string
-	ProblemArgs  []ProblemArgs
-	Testcases    []Testcase
-}
-
-// Testcase ...
-type Testcase struct {
-	Input  string
-	Output string
 }
 
 var mapDefaultCodeSnippet = map[model.CodeLanguageSlug]func(functionName string, args []ProblemArgs, outputType string) string{
@@ -88,4 +74,73 @@ func convertJSTypeFromType(typeStr string) string {
 		return "string[][]"
 	}
 	return ""
+}
+
+// NewProblem represents a new problem
+type NewProblem struct {
+	Title        string
+	Description  string
+	OutputType   string
+	FunctionName string
+	ProblemArgs  []ProblemArgs
+	Testcases    []Testcase
+}
+
+// GetSlug returns slug from problem title
+func (np *NewProblem) GetSlug() string {
+	return slug.Make(np.Title)
+}
+
+// Testcase ...
+type Testcase struct {
+	InputArray []string
+	Input      string
+	Output     string
+}
+
+// GetInput returns all inputs with \n
+func (t *Testcase) GetInput() string {
+	inputString := ""
+
+	for i, input := range t.InputArray {
+		if i == 0 {
+			inputString += fmt.Sprintf("%s", input)
+		} else {
+			inputString += fmt.Sprintf("%s\n", input)
+		}
+	}
+
+	return inputString
+}
+
+func CreateTestcase(testcases []Testcase) string {
+	testcase := ""
+	inputCount := strings.Count(testcases[0].Input, "\n") + 1
+
+	testcase += fmt.Sprintln(len(testcases))
+	testcase += fmt.Sprintln(inputCount)
+	for _, qt := range testcases {
+		inputCases := strings.Split(qt.Input, "\n")
+		for _, in := range inputCases {
+			testcase += fmt.Sprintln(in)
+		}
+		testcase += fmt.Sprintln(qt.Output)
+	}
+
+	return testcase
+}
+
+type SubmitCode struct {
+	LanguageSlug model.CodeLanguageSlug
+	TypedCode    string
+	ProblemSlug  string
+}
+
+type CodeResult struct {
+	Status   string
+	Result   string
+	Input    string
+	Expected string
+	Time     int
+	Output   string
 }

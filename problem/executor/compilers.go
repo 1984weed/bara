@@ -1,9 +1,7 @@
-package remote
+package executor
 
-type CompileLanguage string
-
-const (
-	JavaScript CompileLanguage = "javascript"
+import (
+	"bara/model"
 )
 
 type MachineType string
@@ -19,11 +17,11 @@ type CompileInfo struct {
 	PrepareCode string
 }
 
-var CodeCompileMap = map[CompileLanguage]CompileInfo{
-	JavaScript: {
+var CodeCompileMap = map[model.CodeLanguageSlug]CompileInfo{
+	model.JavaScript: {
 		FileName:    "file.js",
 		Command:     "node",
-		PrepareCode: nodeJsTemplate,
+		PrepareCode: Node,
 	},
 }
 

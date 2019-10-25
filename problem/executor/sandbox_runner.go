@@ -1,4 +1,4 @@
-package remote
+package executor
 
 import (
 	"bara/utils"
@@ -22,11 +22,10 @@ type SandBoxRunner struct {
 	TestcaseFile  string
 	Testcase      string
 	ExeCommand    string
-	Timeout       int
-	Language      CompileLanguage
+	Timeout       time.Duration
 }
 
-func NewSandBoxRunner(path, folder, command, file, testcase, exeCommand, submittedCode string, timeout int, language CompileLanguage) *SandBoxRunner {
+func NewSandBoxRunner(path, folder, command, file, testcase, exeCommand, submittedCode string, timeout time.Duration) *SandBoxRunner {
 	return &SandBoxRunner{
 		Folder:        fmt.Sprintf("%s/%s", path, folder),
 		SandboxFile:   fmt.Sprintf("%s/sandbox-cli", path),
@@ -37,7 +36,6 @@ func NewSandBoxRunner(path, folder, command, file, testcase, exeCommand, submitt
 		TestcaseFile:  fmt.Sprintf("%s/%s/testcase", path, folder),
 		Testcase:      testcase,
 		Timeout:       timeout,
-		Language:      language,
 	}
 }
 
@@ -70,7 +68,7 @@ func (s *SandBoxRunner) prepare() error {
 
 func (s *SandBoxRunner) run() ([]byte, error) {
 	sandboxCommand := s.SandboxFile
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
 
 	if _, err := os.Stat(s.SandboxFile); os.IsNotExist(err) {
 		sandboxCommand = ""
