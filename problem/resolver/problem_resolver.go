@@ -83,5 +83,18 @@ func (pr *problemResolver) GetTestNewProblem(ctx context.Context, input graphql_
 }
 
 func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
+	problem := &domain.NewProblem{}
+	p, err := pr.uc.CreateProblem(ctx, problem)
 
+	if err != nil {
+		return nil, err
+	}
+
+	return &graphql_model.Question{
+		Title: p.Title,
+	}, nil
+}
+
+func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
+	return nil, nil
 }

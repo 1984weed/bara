@@ -18,6 +18,7 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 	"github.com/rs/cors"
 	"github.com/urfave/cli"
 )
@@ -87,8 +88,13 @@ func main() {
 		timeoutContext := time.Duration(40) * time.Second
 
 		fs := http.FileServer(http.Dir("out"))
-		problemRepo := repository.NewProblemRepository(db)
-		problemUc := usecase.NewProblemUsecase(problemRepo, timeoutContext)
+		problemRepo := repository.NewProblemRepository(db, func(tx interface{}) orm.DB {
+			if tx == nil {
+				return interface{}(db).(orm.DB)
+			}
+			return tx.(orm.DB)
+		})
+		problemUc := usecase.NewProblemUsecase(problemRepo, timeoutContext, db.RunInTransaction)
 		problemResolver := resolver.NewProblemResolver(problemUc)
 
 		http.Handle("/", http.StripPrefix("/", fs))

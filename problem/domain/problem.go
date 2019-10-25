@@ -21,6 +21,23 @@ type ProblemArgs struct {
 	VarType string
 }
 
+// NewProblem represents a new problem
+type NewProblem struct {
+	Slug         string
+	Title        string
+	Description  string
+	OutputType   string
+	FunctionName string
+	ProblemArgs  []ProblemArgs
+	Testcases    []Testcase
+}
+
+// Testcase ...
+type Testcase struct {
+	Input  string
+	Output string
+}
+
 var mapDefaultCodeSnippet = map[model.CodeLanguageSlug]func(functionName string, args []ProblemArgs, outputType string) string{
 	model.JavaScript: makeJSCodeSnippets,
 }

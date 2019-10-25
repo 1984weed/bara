@@ -6,11 +6,8 @@ import (
 	"bara/problem"
 	"bara/remote"
 	"context"
-	"fmt"
-	"time"
 
 	pg "github.com/go-pg/pg/v9"
-	"github.com/gosimple/slug"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct {
@@ -76,70 +73,71 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.S
 }
 
 func (r *mutationResolver) CreateQuestion(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
-	tx, err := r.DB.Begin()
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
-	language := new(remote.CodeLanguage)
+	return r.ProblemResolver.CreateProblem(ctx, input)
+	// tx, err := r.DB.Begin()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer tx.Rollback()
+	// language := new(remote.CodeLanguage)
 
-	err = r.DB.Model(language).
-		Where("slug = ?", input.LanguageID.String()).
-		Select()
+	// err = r.DB.Model(language).
+	// 	Where("slug = ?", input.LanguageID.String()).
+	// 	Select()
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	question := &remote.Question{
-		Slug:         slug.Make(input.Title),
-		Title:        input.Title,
-		Description:  input.Description,
-		FunctionName: input.FunctionName,
-		OutputType:   input.OutputType,
-		LanguageID:   language.ID,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
-	}
-	err = tx.Insert(question)
-	if err != nil {
-		return nil, err
-	}
-	for i, arg := range input.Args {
-		err = tx.Insert(&remote.QuestionArgs{
-			QuestionID: question.ID,
-			OrderNo:    i + 1,
-			Name:       arg.Name,
-			VarType:    arg.Type,
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
+	// question := &remote.Question{
+	// 	Slug:         slug.Make(input.Title),
+	// 	Title:        input.Title,
+	// 	Description:  input.Description,
+	// 	FunctionName: input.FunctionName,
+	// 	OutputType:   input.OutputType,
+	// 	LanguageID:   language.ID,
+	// 	CreatedAt:    time.Now(),
+	// 	UpdatedAt:    time.Now(),
+	// }
+	// err = tx.Insert(question)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// for i, arg := range input.Args {
+	// 	err = tx.Insert(&remote.QuestionArgs{
+	// 		QuestionID: question.ID,
+	// 		OrderNo:    i + 1,
+	// 		Name:       arg.Name,
+	// 		VarType:    arg.Type,
+	// 	})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
-	for _, testcase := range input.TestCases {
-		inputString := ""
-		for i, input := range testcase.Input {
-			if i == 0 {
-				inputString += fmt.Sprintf("%s", *input)
-			} else {
-				inputString += fmt.Sprintf("%s\n", *input)
-			}
-		}
-		err = tx.Insert(&remote.QuestionTestcases{
-			QuestionID: question.ID,
-			InputText:  inputString,
-			OutputText: testcase.Output,
-		})
-	}
-	if err != nil {
-		return nil, err
-	}
-	tx.Commit()
+	// for _, testcase := range input.TestCases {
+	// 	inputString := ""
+	// 	for i, input := range testcase.Input {
+	// 		if i == 0 {
+	// 			inputString += fmt.Sprintf("%s", *input)
+	// 		} else {
+	// 			inputString += fmt.Sprintf("%s\n", *input)
+	// 		}
+	// 	}
+	// 	err = tx.Insert(&remote.QuestionTestcases{
+	// 		QuestionID: question.ID,
+	// 		InputText:  inputString,
+	// 		OutputText: testcase.Output,
+	// 	})
+	// }
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// tx.Commit()
 
-	return &graphql_model.Question{
-		Slug:        slug.Make(input.Title),
-		Title:       question.Title,
-		Description: question.Description,
-	}, nil
+	// return &graphql_model.Question{
+	// 	Slug:        slug.Make(input.Title),
+	// 	Title:       question.Title,
+	// 	Description: question.Description,
+	// }, nil
 }
