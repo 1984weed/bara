@@ -60,7 +60,17 @@ input NewQuestion {
   testCases: [TestCase!]!
 }
 
+type User {
+  id: ID!
+  realName: String!
+  userName: String!
+  email: String!
+  image: String!
+  bio: String!
+}
+
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
   createQuestion(input: NewQuestion!): Question!
+  registerUser(email: String, userName: String, password: String): User! 
 }

@@ -32,6 +32,7 @@ func TestCategorySuite(t *testing.T) {
 func (a *problemRepositoryTest) SetupTest() {
 	seedProblemData(a.T(), a.DB)
 }
+
 func (a *problemRepositoryTest) TearDownTest() {
 	a.RepositoryTestSuite.ClearDatabase()
 }

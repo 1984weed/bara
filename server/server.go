@@ -2,11 +2,14 @@ package main
 
 import (
 	"bara"
-	"bara/problem/executor"
 	"bara/generated"
-	"bara/problem/repository"
-	"bara/problem/resolver"
-	"bara/problem/usecase"
+	"bara/problem/executor"
+	problem_repository "bara/problem/repository"
+	problem_resolver "bara/problem/resolver"
+	problem_usecase "bara/problem/usecase"
+	user_repository "bara/user/repository"
+	user_resolver "bara/user/resolver"
+	user_usecase "bara/user/usecase"
 
 	"context"
 	"errors"
@@ -87,14 +90,17 @@ func main() {
 		port := ctx.String("PORT")
 		timeoutContext := time.Duration(40) * time.Second
 
-		fs := http.FileServer(http.Dir("out"))
-		problemRepo := repository.NewProblemRepositoryRunner(db)
 		codeExecutor := executor.NewExecutorClient(ctx.Bool("WITHOUT_CONTAINER"), 10)
 
-		problemUc := usecase.NewProblemUsecase(problemRepo, codeExecutor, timeoutContext)
-		problemResolver := resolver.NewProblemResolver(problemUc)
+		// Problem
+		problemRepo := problem_repository.NewProblemRepositoryRunner(db)
+		problemUc := problem_usecase.NewProblemUsecase(problemRepo, codeExecutor, timeoutContext)
+		problemResolver := problem_resolver.NewProblemResolver(problemUc)
 
-		http.Handle("/", http.StripPrefix("/", fs))
+		// User
+		userRepoRunner := user_repository.NewUserRepositoryRunner(db)
+		userUc := user_usecase.NewUserUsecase(userRepoRunner, timeoutContext)
+		userResolver := user_resolver.NewUserResolver(userUc)
 
 		http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
 		http.Handle("/query", c.Handler(handler.GraphQL(generated.NewExecutableSchema(
@@ -102,6 +108,7 @@ func main() {
 				Resolvers: &bara.Resolver{
 					DB:              db,
 					ProblemResolver: problemResolver,
+					UserResolver:    userResolver,
 				},
 			}),
 			handler.RecoverFunc(func(ctx context.Context, err interface{}) error {

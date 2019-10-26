@@ -13,6 +13,7 @@ type userUsecase struct {
 	contextTimeout time.Duration
 }
 
+// NewUserUsecase creates user usecase
 func NewUserUsecase(runner user.RepositoryRunner, contextTimeout time.Duration) user.Usecase {
 	return &userUsecase{runner, contextTimeout}
 }
@@ -44,10 +45,11 @@ func (u *userUsecase) Register(ctx context.Context, userName string, email strin
 		UserName:  userName,
 		Password:  password,
 		Email:     email,
-		UpdatedAt: time.Now(),
-		CreatedAt: time.Now(),
+		UpdatedAt: time.Now().UTC(),
+		CreatedAt: time.Now().UTC(),
 	}
 
-	return repo.Register(ctx, user)
+	_, err = repo.Register(ctx, user)
 
+	return err
 }

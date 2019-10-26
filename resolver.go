@@ -4,6 +4,7 @@ import (
 	"bara/generated"
 	"bara/graphql_model"
 	"bara/problem"
+	"bara/user"
 	"context"
 
 	pg "github.com/go-pg/pg/v9"
@@ -12,6 +13,7 @@ import (
 type Resolver struct {
 	DB              *pg.DB
 	ProblemResolver problem.Resolver
+	UserResolver    user.Resolver
 }
 
 func (r *Resolver) Query() generated.QueryResolver {
@@ -45,4 +47,8 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.S
 
 func (r *mutationResolver) CreateQuestion(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
 	return r.ProblemResolver.CreateProblem(ctx, input)
+}
+
+func (r *mutationResolver) RegisterUser(ctx context.Context, email *string, userName *string, password *string) (*graphql_model.User, error) {
+	return nil, r.UserResolver.Register(ctx, *email, *userName, *password)
 }

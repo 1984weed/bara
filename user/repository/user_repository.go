@@ -5,8 +5,8 @@ import (
 	"bara/user"
 	"context"
 
-	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/orm"
+	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 )
 
 type userRepositoryRunner struct {
@@ -64,6 +64,12 @@ func (u *userRepository) GetUserByUserName(ctx context.Context, userName string)
 	return user, nil
 }
 
-func (u *userRepository) Resister(ctx context.Context, user *model.Users) error {
-	return u.Conn.Insert(user)
+func (u *userRepository) Register(ctx context.Context, user *model.Users) (*model.Users, error) {
+	err := u.Conn.Insert(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return u.GetUserByUserName(ctx, user.UserName)
 }

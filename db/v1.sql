@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   user_name VARCHAR(255) NOT NULL,
-  real_name VARCHAR(255) NOT NULL,
+  real_name VARCHAR(255),
   password VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   bio VARCHAR(1024),
@@ -12,7 +12,7 @@ CREATE TABLE users (
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT user_email_unique UNIQUE (email),
-  CONSTRAINT user_username_unique UNIQUE (username)
+  CONSTRAINT user_username_unique UNIQUE (user_name)
 );
 
 DROP TABLE IF EXISTS code_languages cascade;

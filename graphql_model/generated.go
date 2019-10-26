@@ -60,6 +60,15 @@ type TestCase struct {
 	Output string    `json:"output"`
 }
 
+type User struct {
+	ID       string `json:"id"`
+	RealName string `json:"realName"`
+	UserName string `json:"userName"`
+	Email    string `json:"email"`
+	Image    string `json:"image"`
+	Bio      string `json:"bio"`
+}
+
 type CodeLanguage string
 
 const (
