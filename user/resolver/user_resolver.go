@@ -17,5 +17,15 @@ func NewUserResolver(uc user.Usecase) user.Resolver {
 }
 
 func (u *userResolver) Register(ctx context.Context, userName string, email string, password string) error {
-	return u.uc.Register(ctx, userName, email, password)
+	_, err := u.uc.Register(ctx, userName, email, password)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userResolver) Login(ctx context.Context, email string, userName string, password string) error {
+	return nil
 }

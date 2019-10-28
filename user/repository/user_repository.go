@@ -38,6 +38,21 @@ func newProblemRepository(Conn orm.DB) user.Repository {
 	return &userRepository{Conn}
 }
 
+func (u *userRepository) GetUserByID(ctx context.Context, userID int64) (*model.Users, error) {
+	var user = &model.Users{ID: userID}
+
+	err := u.Conn.Select(user)
+
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (u *userRepository) GetUserByEmail(ctx context.Context, email string) (*model.Users, error) {
 	var user = new(model.Users)
 	err := u.Conn.Model(user).
@@ -45,6 +60,9 @@ func (u *userRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 		Select()
 
 	if err != nil {
+		if err == pg.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -58,6 +76,9 @@ func (u *userRepository) GetUserByUserName(ctx context.Context, userName string)
 		Select()
 
 	if err != nil {
+		if err == pg.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 

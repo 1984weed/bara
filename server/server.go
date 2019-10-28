@@ -2,11 +2,13 @@ package main
 
 import (
 	"bara"
+	"bara/auth"
 	"bara/generated"
 	"bara/problem/executor"
 	problem_repository "bara/problem/repository"
 	problem_resolver "bara/problem/resolver"
 	problem_usecase "bara/problem/usecase"
+	user_endpoint "bara/user/endpoint"
 	user_repository "bara/user/repository"
 	user_resolver "bara/user/resolver"
 	user_usecase "bara/user/usecase"
@@ -21,9 +23,17 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/handler"
+	"github.com/go-chi/chi"
 	"github.com/go-pg/pg/v9"
+	"github.com/gorilla/sessions"
 	"github.com/rs/cors"
 	"github.com/urfave/cli"
+)
+
+var (
+	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+	key   = []byte("super-secret-key")
+	store = sessions.NewCookieStore(key)
 )
 
 func main() {
@@ -101,9 +111,13 @@ func main() {
 		userRepoRunner := user_repository.NewUserRepositoryRunner(db)
 		userUc := user_usecase.NewUserUsecase(userRepoRunner, timeoutContext)
 		userResolver := user_resolver.NewUserResolver(userUc)
+		userEndpoint := user_endpoint.NewUserEndpoint(userUc, store)
 
-		http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
-		http.Handle("/query", c.Handler(handler.GraphQL(generated.NewExecutableSchema(
+		router := chi.NewRouter()
+		router.Use(auth.Middleware(userRepoRunner, store))
+
+		router.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
+		router.Handle("/query", c.Handler(handler.GraphQL(generated.NewExecutableSchema(
 			generated.Config{
 				Resolvers: &bara.Resolver{
 					DB:              db,
@@ -117,8 +131,13 @@ func main() {
 			}),
 		)))
 
+		router.HandleFunc("/signup", userEndpoint.SignUp)
+		router.HandleFunc("/login", userEndpoint.Login)
+		router.HandleFunc("/logout", userEndpoint.Logout)
+
 		log.Printf("connect to http://localhost:%s/payground for GraphQL playground", port)
-		log.Fatal(http.ListenAndServe(":"+port, nil))
+		log.Fatal(http.ListenAndServe(":"+port, router))
+
 		return nil
 	}
 

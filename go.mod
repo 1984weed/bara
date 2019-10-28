@@ -16,9 +16,11 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20190923054218-35076c1b2bea
 	github.com/gin-gonic/gin v1.4.0
+	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-pg/pg/v9 v9.0.0-beta.11
 	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/gorilla/sessions v1.2.0
 	github.com/gosimple/slug v1.7.0
 	github.com/graphql-go/graphql v0.7.8
 	github.com/graphql-go/handler v0.2.3

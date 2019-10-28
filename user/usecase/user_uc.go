@@ -4,6 +4,7 @@ import (
 	"bara/model"
 	"bara/user"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -18,27 +19,27 @@ func NewUserUsecase(runner user.RepositoryRunner, contextTimeout time.Duration) 
 	return &userUsecase{runner, contextTimeout}
 }
 
-func (u *userUsecase) Register(ctx context.Context, userName string, email string, password string) error {
+func (u *userUsecase) Register(ctx context.Context, userName string, email string, password string) (*model.Users, error) {
 	repo := u.runner.GetRepository()
 
 	user, err := repo.GetUserByEmail(ctx, email)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if user != nil {
-		return fmt.Errorf("Email: %s is already exists", email)
+		return nil, fmt.Errorf("Email: %s is already exists", email)
 	}
 
 	user, err = repo.GetUserByUserName(ctx, userName)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if user != nil {
-		return fmt.Errorf("UserName: %s is already exists", userName)
+		return nil, fmt.Errorf("UserName: %s is already exists", userName)
 	}
 
 	user = &model.Users{
@@ -49,7 +50,38 @@ func (u *userUsecase) Register(ctx context.Context, userName string, email strin
 		CreatedAt: time.Now().UTC(),
 	}
 
-	_, err = repo.Register(ctx, user)
+	me, err := repo.Register(ctx, user)
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return me, err
+}
+func (u *userUsecase) Login(ctx context.Context, userName string, email string, password string) (*model.Users, error) {
+	repo := u.runner.GetRepository()
+
+	user, err := repo.GetUserByUserName(ctx, userName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user != nil {
+		if user.Password == password {
+			return user, nil
+		}
+	}
+
+	user, err = repo.GetUserByEmail(ctx, email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Password == password {
+		return user, nil
+	}
+
+	return nil, errors.New("Not found")
 }
