@@ -3,6 +3,7 @@ package user_uc
 import (
 	"bara/model"
 	"bara/user"
+	"bara/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -42,9 +43,15 @@ func (u *userUsecase) Register(ctx context.Context, userName string, email strin
 		return nil, fmt.Errorf("UserName: %s is already exists", userName)
 	}
 
+	hashedPass, err := utils.HashPassword(password)
+
+	if user != nil {
+		return nil, err
+	}
+
 	user = &model.Users{
 		UserName:  userName,
-		Password:  password,
+		Password:  hashedPass,
 		Email:     email,
 		UpdatedAt: time.Now().UTC(),
 		CreatedAt: time.Now().UTC(),
@@ -79,9 +86,9 @@ func (u *userUsecase) Login(ctx context.Context, userName string, email string, 
 		return nil, err
 	}
 
-	if user.Password == password {
-		return user, nil
+	if !utils.CheckPasswordHash(password, user.Password) {
+		return nil, errors.New("Not found")
 	}
 
-	return nil, errors.New("Not found")
+	return user, nil
 }

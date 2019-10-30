@@ -84,10 +84,6 @@ func main() {
 	}
 	app.Action = func(ctx *cli.Context) error {
 
-		c := cors.New(cors.Options{
-			AllowedOrigins: []string{"*"},
-		})
-
 		db := pg.Connect(
 			&pg.Options{
 				User:     ctx.String("DB_USER"),
@@ -114,10 +110,19 @@ func main() {
 		userEndpoint := user_endpoint.NewUserEndpoint(userUc, store)
 
 		router := chi.NewRouter()
+		cors := cors.New(cors.Options{
+			AllowedOrigins:   []string{"http://localhost:3000"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: true,
+			MaxAge:           300, // Maximum value not ignored by any of major browsers
+		})
+		router.Use(cors.Handler)
 		router.Use(auth.Middleware(userRepoRunner, store))
 
 		router.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
-		router.Handle("/query", c.Handler(handler.GraphQL(generated.NewExecutableSchema(
+		router.Handle("/query", cors.Handler(handler.GraphQL(generated.NewExecutableSchema(
 			generated.Config{
 				Resolvers: &bara.Resolver{
 					DB:              db,

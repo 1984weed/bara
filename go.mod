@@ -17,6 +17,7 @@ require (
 	github.com/gin-gonic/contrib v0.0.0-20190923054218-35076c1b2bea
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-chi/chi v4.0.2+incompatible
+	github.com/go-chi/cors v1.0.0 // indirect
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-pg/pg/v9 v9.0.0-beta.11
 	github.com/golang/protobuf v1.3.2 // indirect
@@ -36,7 +37,7 @@ require (
 	github.com/ugorji/go v1.1.7 // indirect
 	github.com/urfave/cli v1.22.1
 	github.com/vektah/gqlparser v1.1.2
-	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7 // indirect
+	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7
 	golang.org/x/net v0.0.0-20190918130420-a8b05e9114ab
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20190919044723-0c1ff786ef13 // indirect

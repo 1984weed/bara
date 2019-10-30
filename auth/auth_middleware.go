@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"bara"
 	"bara/model"
 	"bara/user"
 	"context"
@@ -22,7 +23,7 @@ type contextKey struct {
 func Middleware(user user.RepositoryRunner, store *sessions.CookieStore) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			session, err := store.Get(r, "cookie-name")
+			session, err := store.Get(r, bara.CookieAuthName)
 
 			// if session == nil {
 			// next.ServeHTTP(w, r)
