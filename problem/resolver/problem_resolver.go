@@ -1,11 +1,13 @@
 package resolver
 
 import (
+	"bara/auth"
 	"bara/graphql_model"
 	"bara/model"
 	"bara/problem"
 	"bara/problem/domain"
 	"context"
+	"errors"
 
 	"github.com/gosimple/slug"
 )
@@ -29,6 +31,9 @@ var graphQlToCodeSlug = map[graphql_model.CodeLanguage]model.CodeLanguageSlug{
 
 // GetBySlug retrieves one problem by its slug
 func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql_model.Question, error) {
+	if user := auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
 	p, err := pr.uc.GetBySlug(ctx, slug)
 
 	if err != nil {
@@ -125,6 +130,10 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 }
 
 func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
+	if user := auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
+
 	domainCode := &domain.SubmitCode{
 		LanguageSlug: graphQlToCodeSlug[graphql_model.CodeLanguage(input.Lang)],
 		TypedCode:    input.TypedCode,
