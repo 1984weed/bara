@@ -7,6 +7,7 @@ import (
 
 // Repository represent the problem's store
 type Repository interface {
+	GetProblems(ctx context.Context, limit, offset int) ([]model.Problems, error)
 	GetBySlug(ctx context.Context, slug string) (*model.ProblemsWithArgs, error)
 	GetTestcaseByProblemID(ctx context.Context, problemID int64) ([]model.ProblemTestcases, error)
 	SaveProblem(ctx context.Context, problem *model.Problems) error

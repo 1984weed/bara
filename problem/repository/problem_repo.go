@@ -37,6 +37,14 @@ type problemRepository struct {
 func newProblemRepository(Conn orm.DB) problem.Repository {
 	return &problemRepository{Conn}
 }
+func (r *problemRepository) GetProblems(ctx context.Context, limit, offset int) ([]model.Problems, error) {
+	problems := new([]model.Problems)
+
+	err := r.Conn.Model(problems).
+		Select()
+
+	return *problems, err
+}
 
 func (r *problemRepository) GetBySlug(ctx context.Context, slug string) (*model.ProblemsWithArgs, error) {
 	var problem model.Problems

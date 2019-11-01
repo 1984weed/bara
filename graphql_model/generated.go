@@ -31,7 +31,7 @@ type CodeSnippet struct {
 	Lang CodeLanguage `json:"lang"`
 }
 
-type NewQuestion struct {
+type NewProblem struct {
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
 	FunctionName string       `json:"functionName"`
@@ -42,7 +42,7 @@ type NewQuestion struct {
 	TestCases    []*TestCase  `json:"testCases"`
 }
 
-type Question struct {
+type Problem struct {
 	Slug         string         `json:"slug"`
 	Title        string         `json:"title"`
 	Description  string         `json:"description"`

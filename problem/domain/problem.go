@@ -19,6 +19,16 @@ type Problem struct {
 	OutputType    string
 }
 
+func ConvertProblemFromTableModel(p model.Problems) *Problem {
+	return &Problem{
+		Slug:         p.Slug,
+		Title:        p.Title,
+		Description:  p.Description,
+		FunctionName: p.FunctionName,
+		OutputType:   p.OutputType,
+	}
+}
+
 type ProblemArgs struct {
 	Name    string
 	VarType string

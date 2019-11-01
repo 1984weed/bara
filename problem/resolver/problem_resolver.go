@@ -29,8 +29,29 @@ var graphQlToCodeSlug = map[graphql_model.CodeLanguage]model.CodeLanguageSlug{
 	graphql_model.CodeLanguageJavaScript: model.JavaScript,
 }
 
+func (pr *problemResolver) GetProblems(ctx context.Context, limit int, offset int) ([]*graphql_model.Problem, error) {
+	problems, err := pr.uc.GetProblems(ctx, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+
+	graphProblems := make([]*graphql_model.Problem, len(problems))
+
+	for i, p := range problems {
+		graphProblems[i] = &graphql_model.Problem{
+			Slug:         p.Slug,
+			Title:        p.Title,
+			Description:  p.Description,
+			CodeSnippets: []*graphql_model.CodeSnippet{},
+		}
+	}
+
+	return graphProblems, nil
+}
+
 // GetBySlug retrieves one problem by its slug
-func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql_model.Question, error) {
+func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql_model.Problem, error) {
 	if user := auth.ForContext(ctx); user == nil {
 		return nil, errors.New("Forbidden")
 	}
@@ -49,7 +70,7 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 		}
 	}
 
-	return &graphql_model.Question{
+	return &graphql_model.Problem{
 		Slug:         p.Slug,
 		Title:        p.Title,
 		Description:  p.Description,
@@ -58,7 +79,7 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 }
 
 // GetTestNewProblem does dry-run to create test new question
-func (pr *problemResolver) GetTestNewProblem(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
+func (pr *problemResolver) GetTestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	languages := []model.CodeLanguageSlug{model.JavaScript}
 
 	codeSnippets := make([]*graphql_model.CodeSnippet, len(languages))
@@ -82,7 +103,7 @@ func (pr *problemResolver) GetTestNewProblem(ctx context.Context, input graphql_
 			Lang: codeSlugToGraphQL[slug],
 		}
 	}
-	return &graphql_model.Question{
+	return &graphql_model.Problem{
 		Slug:         slug.Make(input.Title),
 		Title:        input.Title,
 		Description:  input.Description,
@@ -91,7 +112,7 @@ func (pr *problemResolver) GetTestNewProblem(ctx context.Context, input graphql_
 
 }
 
-func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
+func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	args := make([]domain.ProblemArgs, input.ArgsNum)
 	for i, a := range input.Args {
 		args[i] = domain.ProblemArgs{
@@ -124,7 +145,7 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 		return nil, err
 	}
 
-	return &graphql_model.Question{
+	return &graphql_model.Problem{
 		Title: p.Title,
 	}, nil
 }

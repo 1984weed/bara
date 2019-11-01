@@ -25,13 +25,6 @@ func Middleware(user user.RepositoryRunner, store *sessions.CookieStore) func(ht
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			session, err := store.Get(r, bara.CookieAuthName)
 
-			// if session == nil {
-			// next.ServeHTTP(w, r)
-
-			// r = r.WithContext(ctx)
-			// next.ServeHTTP(w, r)
-			// }
-
 			if err != nil {
 				http.Error(w, "Invalid cookie", http.StatusForbidden)
 				return
@@ -45,7 +38,7 @@ func Middleware(user user.RepositoryRunner, store *sessions.CookieStore) func(ht
 				return
 			}
 
-			userID, ok := session.Values["userId"].(int64)
+			userID, ok := session.Values["userID"].(int64)
 			if !ok {
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return

@@ -20,6 +20,23 @@ func NewProblemUsecase(runner problem.RepositoryRunner, codeExecutor executor.Cl
 	return &problemUsecase{runner, codeExecutor, contextTimeout}
 }
 
+func (p *problemUsecase) GetProblems(ctx context.Context, limit, offset int) ([]domain.Problem, error) {
+	rep := p.runner.GetRepository()
+
+	problems, err := rep.GetProblems(ctx, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+
+	modelProblems := make([]domain.Problem, len(problems))
+	for i, p := range problems {
+		modelProblems[i] = *domain.ConvertProblemFromTableModel(p)
+	}
+
+	return modelProblems, nil
+}
+
 func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Problem, error) {
 	rep := p.runner.GetRepository()
 	problem, err := rep.GetBySlug(ctx, slug)

@@ -23,16 +23,23 @@ func NewUserEndpoint(uc user.Usecase, store *sessions.CookieStore) user.Endpoint
 	}
 }
 
+type signUpType struct {
+	UserName string
+	Email    string
+	Password string
+}
+
 func (u *userEndpoint) SignUp(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		fmt.Fprintf(w, "ParseForm() err: %v", err)
+	decoder := json.NewDecoder(r.Body)
+	var signUp signUpType
+	err := decoder.Decode(&signUp)
+
+	if err != nil {
 		return
 	}
-	email := r.FormValue("email")
-	userName := r.FormValue("userName")
-	password := r.FormValue("password")
 
-	me, err := u.uc.Register(r.Context(), userName, email, password)
+	me, err := u.uc.Register(r.Context(), signUp.UserName, signUp.Email, signUp.Password)
+
 	if err != nil {
 		fmt.Fprintf(w, "ParseForm() err: %v", err)
 		return
@@ -54,7 +61,7 @@ func (u *userEndpoint) Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var loginInfo loginType
 	err := decoder.Decode(&loginInfo)
-	fmt.Println(err)
+
 	if err != nil {
 		return
 	}

@@ -22,15 +22,15 @@ func (r *Resolver) Query() generated.QueryResolver {
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Questions(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Question, error) {
-	return []*graphql_model.Question{}, nil
+func (r *queryResolver) Problems(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Problem, error) {
+	return r.ProblemResolver.GetProblems(ctx, *limit, *offset)
 }
 
-func (r *queryResolver) Question(ctx context.Context, slug *string) (*graphql_model.Question, error) {
+func (r *queryResolver) Problem(ctx context.Context, slug *string) (*graphql_model.Problem, error) {
 	return r.ProblemResolver.GetBySlug(ctx, *slug)
 }
 
-func (r *queryResolver) TestNewQuestion(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
+func (r *queryResolver) TestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	return r.ProblemResolver.GetTestNewProblem(ctx, input)
 }
 
@@ -45,7 +45,7 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.S
 	return r.ProblemResolver.SubmitProblem(ctx, input)
 }
 
-func (r *mutationResolver) CreateQuestion(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error) {
+func (r *mutationResolver) CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	return r.ProblemResolver.CreateProblem(ctx, input)
 }
 

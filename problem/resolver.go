@@ -7,8 +7,9 @@ import (
 
 // Resolver represent the problem's resolver interface
 type Resolver interface {
-	GetBySlug(ctx context.Context, slug string) (*graphql_model.Question, error)
-	GetTestNewProblem(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error)
-	CreateProblem(ctx context.Context, input graphql_model.NewQuestion) (*graphql_model.Question, error)
+	GetProblems(ctx context.Context, limit int, offset int) ([]*graphql_model.Problem, error)
+	GetBySlug(ctx context.Context, slug string) (*graphql_model.Problem, error)
+	GetTestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
+	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 }
