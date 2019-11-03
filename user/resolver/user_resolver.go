@@ -1,8 +1,13 @@
 package resolver
 
 import (
+	"bara/auth"
+	"bara/graphql_model"
+	"bara/model"
 	"bara/user"
+	"bara/user/domain"
 	"context"
+	"errors"
 )
 
 type userResolver struct {
@@ -26,6 +31,31 @@ func (u *userResolver) Register(ctx context.Context, userName string, email stri
 	return nil
 }
 
-func (u *userResolver) Login(ctx context.Context, email string, userName string, password string) error {
-	return nil
+func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
+	var user *model.Users
+	if user = auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
+
+	user, err := u.uc.GetUserByID(ctx, user.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	role := graphql_model.UserRoleNormal
+
+	if domain.IsAdmin(user.UserName) {
+		role = graphql_model.UserRoleAdmin
+	}
+
+	return &graphql_model.User{
+		ID:       string(user.ID),
+		RealName: user.RealName,
+		UserName: user.UserName,
+		Email:    user.Email,
+		Image:    user.Image,
+		Role:     &role,
+		Bio:      user.Bio,
+	}, nil
 }

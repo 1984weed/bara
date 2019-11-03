@@ -24,6 +24,7 @@ type ProblemsWithArgs struct {
 	Description  string
 	FunctionName string
 	Args         []ProblemArgs
+	Testcases    []ProblemTestcases
 	OutputType   string
 	AuthorID     int64
 	CreatedAt    time.Time

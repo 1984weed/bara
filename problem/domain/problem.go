@@ -10,13 +10,14 @@ import (
 
 // Problem represents the problem model
 type Problem struct {
-	Slug          string
-	Title         string
-	Description   string
-	LanguageSlugs []model.CodeLanguageSlug
-	FunctionName  string
-	ProblemArgs   []ProblemArgs
-	OutputType    string
+	Slug             string
+	Title            string
+	Description      string
+	LanguageSlugs    []model.CodeLanguageSlug
+	FunctionName     string
+	ProblemArgs      []ProblemArgs
+	ProblemTestcases []Testcase
+	OutputType       string
 }
 
 func ConvertProblemFromTableModel(p model.Problems) *Problem {
@@ -121,6 +122,12 @@ func (t *Testcase) GetInput() string {
 	}
 
 	return inputString
+}
+
+func (t *Testcase) ConvertInputArray() []string {
+	inputCases := strings.Split(t.Input, "\n")
+
+	return inputCases
 }
 
 func CreateTestcase(testcases []Testcase) string {

@@ -65,6 +65,11 @@ func (r *problemRepository) GetBySlug(ctx context.Context, slug string) (*model.
 	if err != nil {
 		return nil, err
 	}
+	testcases := new([]model.ProblemTestcases)
+
+	err = r.Conn.Model(testcases).
+		Where("problem_testcases.problem_id = ?", problem.ID).
+		Select()
 
 	return &model.ProblemsWithArgs{
 		ID:           problem.ID,
@@ -77,6 +82,7 @@ func (r *problemRepository) GetBySlug(ctx context.Context, slug string) (*model.
 		CreatedAt:    problem.CreatedAt,
 		UpdatedAt:    problem.UpdatedAt,
 		Args:         *args,
+		Testcases:    *testcases,
 	}, nil
 }
 
@@ -84,7 +90,7 @@ func (r *problemRepository) GetTestcaseByProblemID(ctx context.Context, problemI
 	qts := new([]model.ProblemTestcases)
 
 	err := r.Conn.Model(qts).
-		Where("question_testcases.question_id = ?", problemID).
+		Where("problem_testcases.problem_id = ?", problemID).
 		Select()
 
 	if err != nil {

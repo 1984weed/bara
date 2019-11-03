@@ -53,14 +53,24 @@ func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Pr
 		}
 	}
 
+	problemTestcases := make([]domain.Testcase, len(problem.Testcases))
+
+	for i, test := range problem.Testcases {
+		problemTestcases[i] = domain.Testcase{
+			Input:  test.InputText,
+			Output: test.OutputText,
+		}
+	}
+
 	return &domain.Problem{
-		Slug:          problem.Slug,
-		Title:         problem.Title,
-		Description:   problem.Description,
-		LanguageSlugs: []model.CodeLanguageSlug{model.JavaScript},
-		FunctionName:  problem.FunctionName,
-		ProblemArgs:   args,
-		OutputType:    problem.OutputType,
+		Slug:             problem.Slug,
+		Title:            problem.Title,
+		Description:      problem.Description,
+		LanguageSlugs:    []model.CodeLanguageSlug{model.JavaScript},
+		FunctionName:     problem.FunctionName,
+		ProblemArgs:      args,
+		ProblemTestcases: problemTestcases,
+		OutputType:       problem.OutputType,
 	}, nil
 }
 

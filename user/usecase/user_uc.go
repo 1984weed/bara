@@ -92,3 +92,13 @@ func (u *userUsecase) Login(ctx context.Context, userName string, email string, 
 
 	return user, nil
 }
+
+func (u *userUsecase) GetUserByID(ctx context.Context, userID int64) (*model.Users, error) {
+	user, err := u.runner.GetRepository().GetUserByID(ctx, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

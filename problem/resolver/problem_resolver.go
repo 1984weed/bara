@@ -69,12 +69,43 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 			Lang: codeSlugToGraphQL[slug],
 		}
 	}
+	codeArg := make([]*graphql_model.CodeArgType, len(p.ProblemArgs))
+
+	for i, p := range p.ProblemArgs {
+		codeArg[i] = &graphql_model.CodeArgType{
+			Name: p.Name,
+			Type: p.VarType,
+		}
+	}
+
+	testcases := make([]*graphql_model.TestCaseType, len(p.ProblemTestcases))
+
+	for i, p := range p.ProblemTestcases {
+		inputArray := p.ConvertInputArray()
+		inputGraphqlArray := make([]*string, len(inputArray))
+
+		for j, input := range inputArray {
+			inputGraphqlArray[j] = &input
+		}
+
+		testcases[i] = &graphql_model.TestCaseType{
+			Input:  inputGraphqlArray,
+			Output: p.Output,
+		}
+	}
 
 	return &graphql_model.Problem{
 		Slug:         p.Slug,
 		Title:        p.Title,
 		Description:  p.Description,
 		CodeSnippets: codeSnippets,
+		ProblemDetailInfo: &graphql_model.ProblemDetailInfo{
+			FunctionName: p.FunctionName,
+			OutputType:   p.OutputType,
+			ArgsNum:      len(p.ProblemArgs),
+			Args:         codeArg,
+			TestCases:    testcases,
+		},
 	}, nil
 }
 
