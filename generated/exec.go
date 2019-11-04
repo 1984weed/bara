@@ -67,6 +67,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		ChangeProblem func(childComplexity int, slug *string, input graphql_model.NewProblem) int
 		CreateProblem func(childComplexity int, input graphql_model.NewProblem) int
 		RegisterUser  func(childComplexity int, email *string, userName *string, password *string) int
 		SubmitCode    func(childComplexity int, input graphql_model.SubmitCode) int
@@ -114,6 +115,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	SubmitCode(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
+	ChangeProblem(ctx context.Context, slug *string, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	RegisterUser(ctx context.Context, email *string, userName *string, password *string) (*graphql_model.User, error)
 }
 type QueryResolver interface {
@@ -214,6 +216,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CodeSnippet.Lang(childComplexity), true
+
+	case "Mutation.changeProblem":
+		if e.complexity.Mutation.ChangeProblem == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_changeProblem_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ChangeProblem(childComplexity, args["slug"].(*string), args["input"].(graphql_model.NewProblem)), true
 
 	case "Mutation.createProblem":
 		if e.complexity.Mutation.CreateProblem == nil {
@@ -588,6 +602,7 @@ type User {
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
+  changeProblem(slug: String, input: NewProblem!): Problem!
   registerUser(email: String, userName: String, password: String): User! 
 }`},
 )
@@ -595,6 +610,28 @@ type Mutation {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_changeProblem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["slug"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["slug"] = arg0
+	var arg1 graphql_model.NewProblem
+	if tmp, ok := rawArgs["input"]; ok {
+		arg1, err = ec.unmarshalNNewProblem2baraᚋgraphql_modelᚐNewProblem(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createProblem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1229,6 +1266,50 @@ func (ec *executionContext) _Mutation_createProblem(ctx context.Context, field g
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateProblem(rctx, args["input"].(graphql_model.NewProblem))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.Problem)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNProblem2ᚖbaraᚋgraphql_modelᚐProblem(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_changeProblem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_changeProblem_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ChangeProblem(rctx, args["slug"].(*string), args["input"].(graphql_model.NewProblem))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3678,6 +3759,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createProblem":
 			out.Values[i] = ec._Mutation_createProblem(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "changeProblem":
+			out.Values[i] = ec._Mutation_changeProblem(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

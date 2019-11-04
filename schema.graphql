@@ -97,5 +97,6 @@ type User {
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
+  changeProblem(slug: String, input: NewProblem!): Problem!
   registerUser(email: String, userName: String, password: String): User! 
 }

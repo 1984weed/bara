@@ -29,6 +29,7 @@ var graphQlToCodeSlug = map[graphql_model.CodeLanguage]model.CodeLanguageSlug{
 	graphql_model.CodeLanguageJavaScript: model.JavaScript,
 }
 
+// GetProblems get problem list
 func (pr *problemResolver) GetProblems(ctx context.Context, limit int, offset int) ([]*graphql_model.Problem, error) {
 	problems, err := pr.uc.GetProblems(ctx, limit, offset)
 
@@ -84,8 +85,8 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 		inputArray := p.ConvertInputArray()
 		inputGraphqlArray := make([]*string, len(inputArray))
 
-		for j, input := range inputArray {
-			inputGraphqlArray[j] = &input
+		for j := range inputArray {
+			inputGraphqlArray[j] = &inputArray[j]
 		}
 
 		testcases[i] = &graphql_model.TestCaseType{
