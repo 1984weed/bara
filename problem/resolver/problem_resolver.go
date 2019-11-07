@@ -181,6 +181,48 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 		Title: p.Title,
 	}, nil
 }
+func (pr *problemResolver) ChangeProblem(ctx context.Context, slug string, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
+	if user := auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
+
+	args := make([]domain.ProblemArgs, input.ArgsNum)
+	for i, a := range input.Args {
+		args[i] = domain.ProblemArgs{
+			Name:    a.Name,
+			VarType: a.Type,
+		}
+	}
+	testcases := make([]domain.Testcase, len(input.TestCases))
+	for i, t := range input.TestCases {
+		input := make([]string, len(t.Input))
+		for i, in := range t.Input {
+			input[i] = *in
+		}
+		testcases[i] = domain.Testcase{
+			InputArray: input,
+			Output:     t.Output,
+		}
+	}
+	problem := &domain.NewProblem{
+		Title:        input.Title,
+		Description:  input.Description,
+		OutputType:   input.OutputType,
+		FunctionName: input.FunctionName,
+		ProblemArgs:  args,
+		Testcases:    testcases,
+	}
+	p, err := pr.uc.CreateProblem(ctx, problem)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &graphql_model.Problem{
+		Title: p.Title,
+	}, nil
+	return nil, nil
+}
 
 func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
 	if user := auth.ForContext(ctx); user == nil {

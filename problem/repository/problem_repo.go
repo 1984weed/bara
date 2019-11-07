@@ -101,7 +101,18 @@ func (r *problemRepository) GetTestcaseByProblemID(ctx context.Context, problemI
 }
 
 func (r *problemRepository) SaveProblem(ctx context.Context, problem *model.Problems) error {
-	return r.Conn.Insert(problem)
+	_, err := r.Conn.Model(problem).
+		OnConflict("(id) DO UPDATE").
+		Set("title = EXCLUDED.title").
+		Set("slug = EXCLUDED.slug").
+		Set("description = EXCLUDED.description").
+		Set("function_name = EXCLUDED.function_name").
+		Set("output_type = EXCLUDED.output_type").
+		Set("author_id = EXCLUDED.author_id").
+		Set("updated_at = EXCLUDED.updated_at").
+		Insert()
+
+	return err
 }
 
 func (r *problemRepository) SaveProblemArgs(ctx context.Context, args *model.ProblemArgs) error {

@@ -33,7 +33,7 @@ func (r *queryResolver) Problem(ctx context.Context, slug *string) (*graphql_mod
 func (r *queryResolver) TestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	return r.ProblemResolver.GetTestNewProblem(ctx, input)
 }
-func (r *queryResolver)Me(ctx context.Context) (*graphql_model.User, error){
+func (r *queryResolver) Me(ctx context.Context) (*graphql_model.User, error) {
 	return r.UserResolver.GetMe(ctx)
 }
 
@@ -50,6 +50,10 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.S
 
 func (r *mutationResolver) CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	return r.ProblemResolver.CreateProblem(ctx, input)
+}
+
+func (r *mutationResolver) ChangeProblem(ctx context.Context, slug *string, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
+	return r.ProblemResolver.ChangeProblem(ctx, *slug, input)
 }
 
 func (r *mutationResolver) RegisterUser(ctx context.Context, email *string, userName *string, password *string) (*graphql_model.User, error) {

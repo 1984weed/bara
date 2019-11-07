@@ -9,7 +9,6 @@ type Problems struct {
 	Title        string
 	Description  string
 	FunctionName string
-	LanguageID   int64
 	OutputType   string
 	AuthorID     int64
 	CreatedAt    time.Time

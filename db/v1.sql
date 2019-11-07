@@ -44,15 +44,12 @@ CREATE TABLE problems (
   title VARCHAR(300) NOT NULL,
   description TEXT NOT NULL,
   function_name VARCHAR(255),
-  language_id INTEGER NOT NULL,
   author_id INTEGER,
   output_type args_t NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT problems_slug_unique UNIQUE(slug)
 );
-ALTER TABLE problems ADD CONSTRAINT fk_problems_code_languages FOREIGN KEY (language_id) REFERENCES code_languages (id);
-
 
 DROP TABLE IF EXISTS problem_args cascade;
 

@@ -80,7 +80,6 @@ func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain
 		Slug:         inputProblem.GetSlug(),
 		Description:  inputProblem.Description,
 		FunctionName: inputProblem.FunctionName,
-		LanguageID:   1,
 		OutputType:   inputProblem.OutputType,
 		AuthorID:     0,
 		CreatedAt:    time.Now(),
@@ -134,6 +133,67 @@ func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain
 	}, nil
 }
 
+func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inputProblem *domain.NewProblem) (*domain.Problem, error) {
+	newProblem := &model.Problems{
+		ID:           problemID,
+		Title:        inputProblem.Title,
+		Slug:         inputProblem.GetSlug(),
+		Description:  inputProblem.Description,
+		FunctionName: inputProblem.FunctionName,
+		OutputType:   inputProblem.OutputType,
+		AuthorID:     0,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+
+	err := p.runner.RunInTransaction(func(repo problem.Repository) error {
+		err := repo.SaveProblem(ctx, newProblem)
+
+		if err != nil {
+			return err
+		}
+		for i, arg := range inputProblem.ProblemArgs {
+			err = repo.SaveProblemArgs(ctx, &model.ProblemArgs{
+				ProblemID: newProblem.ID,
+				OrderNo:   i + 1,
+				Name:      arg.Name,
+				VarType:   arg.VarType,
+			})
+			if err != nil {
+				return err
+			}
+		}
+		for _, testcase := range inputProblem.Testcases {
+			err = repo.SaveProblemTestcase(ctx, &model.ProblemTestcases{
+				ProblemID:  newProblem.ID,
+				InputText:  testcase.GetInput(),
+				OutputText: testcase.Output,
+			})
+
+			if err != nil {
+				return err
+			}
+
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.Problem{
+		Slug:          newProblem.Slug,
+		Title:         newProblem.Title,
+		Description:   newProblem.Description,
+		LanguageSlugs: []model.CodeLanguageSlug{model.JavaScript},
+		FunctionName:  newProblem.FunctionName,
+		ProblemArgs:   inputProblem.ProblemArgs,
+		OutputType:    newProblem.OutputType,
+	}, nil
+
+}
 func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitCode) (*domain.CodeResult, error) {
 	repo := p.runner.GetRepository()
 	problem, err := repo.GetBySlug(ctx, code.ProblemSlug)
