@@ -53,9 +53,9 @@ func (pr *problemResolver) GetProblems(ctx context.Context, limit int, offset in
 
 // GetBySlug retrieves one problem by its slug
 func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql_model.Problem, error) {
-	if user := auth.ForContext(ctx); user == nil {
-		return nil, errors.New("Forbidden")
-	}
+	// if user := auth.ForContext(ctx); user == nil {
+	// 	return nil, errors.New("Forbidden")
+	// }
 	p, err := pr.uc.GetBySlug(ctx, slug)
 
 	if err != nil {
@@ -96,6 +96,7 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 	}
 
 	return &graphql_model.Problem{
+		ID:           int(p.ProblemID),
 		Slug:         p.Slug,
 		Title:        p.Title,
 		Description:  p.Description,
@@ -178,13 +179,14 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 	}
 
 	return &graphql_model.Problem{
+		ID:    int(p.ProblemID),
 		Title: p.Title,
 	}, nil
 }
-func (pr *problemResolver) ChangeProblem(ctx context.Context, slug string, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
-	if user := auth.ForContext(ctx); user == nil {
-		return nil, errors.New("Forbidden")
-	}
+func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
+	// if user := auth.ForContext(ctx); user == nil {
+	// 	return nil, errors.New("Forbidden")
+	// }
 
 	args := make([]domain.ProblemArgs, input.ArgsNum)
 	for i, a := range input.Args {
@@ -212,16 +214,16 @@ func (pr *problemResolver) ChangeProblem(ctx context.Context, slug string, input
 		ProblemArgs:  args,
 		Testcases:    testcases,
 	}
-	p, err := pr.uc.CreateProblem(ctx, problem)
+	p, err := pr.uc.UpdateProblem(ctx, problemID, problem)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &graphql_model.Problem{
+		ID:    int(p.ProblemID),
 		Title: p.Title,
 	}, nil
-	return nil, nil
 }
 
 func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {

@@ -119,6 +119,17 @@ func (r *problemRepository) SaveProblemArgs(ctx context.Context, args *model.Pro
 	return r.Conn.Insert(args)
 }
 
+func (r *problemRepository) DeleteProblemArgs(ctx context.Context, args *model.ProblemArgs) error {
+	_, err := r.Conn.Model(args).Where("problem_id = ?problem_id").Delete()
+
+	return err
+}
+
 func (r *problemRepository) SaveProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error {
 	return r.Conn.Insert(testcase)
+}
+
+func (r *problemRepository) DeleteProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error {
+	_, err := r.Conn.Model(testcase).Where("problem_id = ?problem_id").Delete()
+	return err
 }

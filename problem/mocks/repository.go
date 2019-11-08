@@ -8,8 +8,19 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// NewRepositoryRunnerMock ...
+func NewRepositoryRunnerMock() (*RepositoryRunner, *ProblemRepository) {
+	mockProblemRunner := new(RepositoryRunner)
+	mockProblemRepo := new(ProblemRepository)
+	mockProblemRunner.On("GetRepository").Return(mockProblemRepo)
+	mockProblemRunner.mockRepo = mockProblemRepo
+
+	return mockProblemRunner, mockProblemRepo
+}
+
 // RepositoryRunner mock
 type RepositoryRunner struct {
+	mockRepo problem.Repository
 	mock.Mock
 }
 
@@ -31,18 +42,7 @@ func (r *RepositoryRunner) GetRepository() problem.Repository {
 
 // RunInTransaction ...
 func (r *RepositoryRunner) RunInTransaction(fn func(r problem.Repository) error) error {
-	ret := r.Called(fn)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(func(r problem.Repository) error) error); ok {
-		r0 = rf(fn)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(error)
-		}
-	}
-
-	return r0
+	return fn(r.mockRepo)
 }
 
 // ProblemRepository mock
@@ -147,8 +147,40 @@ func (p *ProblemRepository) SaveProblemArgs(ctx context.Context, args *model.Pro
 	return r0
 }
 
+// DeleteProblemArgs ...
+func (p *ProblemRepository) DeleteProblemArgs(ctx context.Context, args *model.ProblemArgs) error {
+	ret := p.Called(ctx, args)
+	var r0 error
+
+	if rf, ok := ret.Get(0).(func(context.Context, *model.ProblemArgs) error); ok {
+		r0 = rf(ctx, args)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(error)
+		}
+	}
+
+	return r0
+}
+
 // SaveProblemTestcase ...
 func (p *ProblemRepository) SaveProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error {
+	ret := p.Called(ctx, testcase)
+	var r0 error
+
+	if rf, ok := ret.Get(0).(func(context.Context, *model.ProblemTestcases) error); ok {
+		r0 = rf(ctx, testcase)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(error)
+		}
+	}
+
+	return r0
+}
+
+// DeleteProblemTestcase ...
+func (p *ProblemRepository) DeleteProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error {
 	ret := p.Called(ctx, testcase)
 	var r0 error
 

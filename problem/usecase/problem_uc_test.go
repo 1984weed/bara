@@ -8,6 +8,7 @@ import (
 	"bara/problem/usecase"
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -140,5 +141,74 @@ func TestGetProblems(t *testing.T) {
 		assert.Error(t, err)
 
 		mockProblemRepo.AssertExpectations(t)
+	})
+}
+
+func TestUpdateProblem(t *testing.T) {
+	runner, repo := mocks.NewRepositoryRunnerMock()
+
+	t.Run("success", func(t *testing.T) {
+		repo.On("SaveProblem", mock.Anything, mock.Anything).Return(nil).Once()
+		repo.On("DeleteProblemArgs", mock.Anything, mock.Anything).Return(nil).Twice()
+		repo.On("SaveProblemArgs", mock.Anything, mock.Anything).Return(nil).Twice()
+		repo.On("DeleteProblemArgs", mock.Anything, mock.Anything).Return(nil).Twice()
+		repo.On("SaveProblemArgs", mock.Anything, mock.Anything).Return(nil).Twice()
+		repo.On("DeleteProblemTestcase", mock.Anything, mock.Anything).Return(nil).Twice()
+		repo.On("SaveProblemTestcase", mock.Anything, mock.Anything).Return(nil).Twice()
+
+		u := usecase.NewProblemUsecase(runner, executor.NewExecutorClient(false, time.Second*30), time.Second*2)
+		pArgs := []domain.ProblemArgs{
+			{
+				Name:    "target",
+				VarType: "int",
+			},
+			{
+				Name:    "num",
+				VarType: "int[]",
+			},
+		}
+		pTestCases := []domain.Testcase{
+			{
+				InputArray: []string{"5", "1,2,3,4,5"},
+				Output:     "7",
+			},
+			{
+				InputArray: []string{"99", "100,101,102,103,104"},
+				Output:     "7",
+			},
+		}
+
+		updatedProblem := &domain.NewProblem{
+			Title:        "Updated title",
+			Description:  "Updated description",
+			OutputType:   "int",
+			FunctionName: "helloWorld",
+			ProblemArgs:  pArgs,
+			Testcases:    pTestCases,
+		}
+
+		p, err := u.UpdateProblem(context.TODO(), 1, updatedProblem)
+
+		expectProblem := &domain.Problem{
+			Slug:             "updated-title",
+			Title:            updatedProblem.Title,
+			Description:      updatedProblem.Description,
+			LanguageSlugs:    []model.CodeLanguageSlug{model.JavaScript},
+			FunctionName:     updatedProblem.FunctionName,
+			ProblemArgs:      updatedProblem.ProblemArgs,
+			ProblemTestcases: updatedProblem.Testcases,
+			OutputType:       updatedProblem.OutputType,
+		}
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectProblem.Title, p.Title)
+		assert.Equal(t, expectProblem.Slug, p.Slug)
+		assert.Equal(t, expectProblem.Description, p.Description)
+		assert.Equal(t, expectProblem.FunctionName, p.FunctionName)
+		assert.Equal(t, expectProblem.ProblemArgs, p.ProblemArgs)
+		assert.Equal(t, []domain.Testcase(nil), p.ProblemTestcases)
+
+		fmt.Println(p)
+
 	})
 }

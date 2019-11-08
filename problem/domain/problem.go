@@ -10,6 +10,7 @@ import (
 
 // Problem represents the problem model
 type Problem struct {
+	ProblemID        int64
 	Slug             string
 	Title            string
 	Description      string

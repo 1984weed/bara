@@ -63,6 +63,7 @@ func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Pr
 	}
 
 	return &domain.Problem{
+		ProblemID:        problem.ID,
 		Slug:             problem.Slug,
 		Title:            problem.Title,
 		Description:      problem.Description,
@@ -123,6 +124,7 @@ func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain
 	}
 
 	return &domain.Problem{
+		ProblemID:     newProblem.ID,
 		Slug:          newProblem.Slug,
 		Title:         newProblem.Title,
 		Description:   newProblem.Description,
@@ -153,6 +155,12 @@ func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inp
 			return err
 		}
 		for i, arg := range inputProblem.ProblemArgs {
+			err = repo.DeleteProblemArgs(ctx, &model.ProblemArgs{
+				ProblemID: problemID,
+			})
+			if err != nil {
+				return err
+			}
 			err = repo.SaveProblemArgs(ctx, &model.ProblemArgs{
 				ProblemID: newProblem.ID,
 				OrderNo:   i + 1,
@@ -164,6 +172,14 @@ func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inp
 			}
 		}
 		for _, testcase := range inputProblem.Testcases {
+			err = repo.DeleteProblemTestcase(ctx, &model.ProblemTestcases{
+				ProblemID: problemID,
+			})
+
+			if err != nil {
+				return err
+			}
+
 			err = repo.SaveProblemTestcase(ctx, &model.ProblemTestcases{
 				ProblemID:  newProblem.ID,
 				InputText:  testcase.GetInput(),
@@ -184,6 +200,7 @@ func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inp
 	}
 
 	return &domain.Problem{
+		ProblemID:     newProblem.ID,
 		Slug:          newProblem.Slug,
 		Title:         newProblem.Title,
 		Description:   newProblem.Description,

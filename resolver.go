@@ -52,8 +52,8 @@ func (r *mutationResolver) CreateProblem(ctx context.Context, input graphql_mode
 	return r.ProblemResolver.CreateProblem(ctx, input)
 }
 
-func (r *mutationResolver) ChangeProblem(ctx context.Context, slug *string, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
-	return r.ProblemResolver.ChangeProblem(ctx, *slug, input)
+func (r *mutationResolver) UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
+	return r.ProblemResolver.UpdateProblem(ctx, int64(problemID), input)
 }
 
 func (r *mutationResolver) RegisterUser(ctx context.Context, email *string, userName *string, password *string) (*graphql_model.User, error) {

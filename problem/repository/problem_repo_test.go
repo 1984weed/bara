@@ -124,7 +124,6 @@ func (a *problemRepositoryTest) TestSaveUpdateProblem() {
 
 	// Get a problem by target slug
 	updatedProblem, _ := repo.GetBySlug(context.Background(), problem.Slug)
-	fmt.Println(updatedProblem)
 
 	assert.Equal(a.T(), problem.ID, updatedProblem.ID)
 	assert.Equal(a.T(), problem.Slug, updatedProblem.Slug)
@@ -132,6 +131,18 @@ func (a *problemRepositoryTest) TestSaveUpdateProblem() {
 	assert.Equal(a.T(), problem.Description, updatedProblem.Description)
 	assert.Equal(a.T(), problem.FunctionName, updatedProblem.FunctionName)
 	assert.Equal(a.T(), problem.OutputType, updatedProblem.OutputType)
+}
+
+// TestDeleteProblemArgs ...
+func (a *problemRepositoryTest) TestDeleteProblemArgs() {
+	repo := repository.NewProblemRepositoryRunner(a.DB).GetRepository()
+	problems, _ := repo.GetProblems(context.Background(), 0, 10)
+
+	args := getMockArgs(problems[0].ID)
+
+	err := repo.DeleteProblemArgs(context.Background(), &args[0])
+
+	require.NoError(a.T(), err)
 }
 
 func seedProblemData(t *testing.T, db *pg.DB) {
@@ -144,7 +155,12 @@ func seedProblemData(t *testing.T, db *pg.DB) {
 
 	for _, p := range problems {
 		err := db.Insert(&p)
-
+		args := getMockArgs(p.ID)
+		for _, arg := range args {
+			fmt.Println(arg)
+			err = db.Insert(&arg)
+			require.NoError(t, err)
+		}
 		testCases := getMockProblemTestCases(p.ID)
 		for _, tc := range testCases {
 			err = db.Insert(&tc)
@@ -192,4 +208,22 @@ func getMockProblemTestCases(problemID int64) []model.ProblemTestcases {
 		InputText:  "9\n8",
 		OutputText: "10",
 	}}
+}
+
+func getMockArgs(problemID int64) []model.ProblemArgs {
+	return []model.ProblemArgs{
+		{
+			ProblemID: problemID,
+			OrderNo:   1,
+			Name:      "target",
+			VarType:   "int",
+		},
+		{
+			ProblemID: problemID,
+			OrderNo:   2,
+			Name:      "nums",
+			VarType:   "int[]",
+		},
+	}
+
 }
