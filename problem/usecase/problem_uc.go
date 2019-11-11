@@ -211,15 +211,16 @@ func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inp
 	}, nil
 
 }
-func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitCode) (*domain.CodeResult, error) {
+
+func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitCode, userID int64) (*domain.CodeResult, error) {
 	repo := p.runner.GetRepository()
-	problem, err := repo.GetBySlug(ctx, code.ProblemSlug)
+	problemWithArgs, err := repo.GetBySlug(ctx, code.ProblemSlug)
 
 	if err != nil {
 		return nil, err
 	}
 
-	testcases, err := repo.GetTestcaseByProblemID(ctx, problem.ID)
+	testcases, err := repo.GetTestcaseByProblemID(ctx, problemWithArgs.ID)
 
 	if err != nil {
 		return nil, err
@@ -233,7 +234,29 @@ func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitC
 		}
 	}
 	testcaseStr := domain.CreateTestcase(domainTestcases)
-	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, testcaseStr, problem.FunctionName)
+	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, testcaseStr, problemWithArgs.FunctionName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Record the result by the user
+	err = p.runner.RunInTransaction(func(repo problem.Repository) error {
+		result := &model.ProblemUserResults{
+			ProblemID:     problemWithArgs.ID,
+			UserID:        userID,
+			SubmittedCode: code.TypedCode,
+			ExecTime:      codeResult.Time,
+			Status:        codeResult.Status,
+		}
+		err = repo.SaveProblemResult(ctx, result)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return nil, err

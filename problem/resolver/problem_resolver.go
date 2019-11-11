@@ -227,7 +227,8 @@ func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, i
 }
 
 func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
-	if user := auth.ForContext(ctx); user == nil {
+	var user *model.Users
+	if user = auth.ForContext(ctx); user == nil {
 		return nil, errors.New("Forbidden")
 	}
 
@@ -236,7 +237,7 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 		TypedCode:    input.TypedCode,
 		ProblemSlug:  input.Slug,
 	}
-	result, err := pr.uc.SubmitProblem(ctx, domainCode)
+	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.ID)
 
 	if err != nil {
 		return nil, err

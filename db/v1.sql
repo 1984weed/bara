@@ -74,4 +74,18 @@ CREATE TABLE problem_testcases (
 
 ALTER TABLE problem_testcases ADD CONSTRAINT fk_problem_testcases_problems FOREIGN KEY (problem_id) REFERENCES problems (id);
 
+DROP TABLE IF EXISTS problem_user_results cascade;
+CREATE TABLE problem_user_results (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  problem_id INTEGER NOT NULL,
+  submitted_code TEXT NOT NULL,
+  status VARCHAR(10) NOT NULL,
+  exec_time INTEGER NOT NULL
+);
+
+ALTER TABLE problem_user_results ADD CONSTRAINT fk_problem_user_results_uses FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE problem_user_results ADD CONSTRAINT fk_problem_user_results_problems FOREIGN KEY (problem_id) REFERENCES problems (id);
+
+
 COMMIT;

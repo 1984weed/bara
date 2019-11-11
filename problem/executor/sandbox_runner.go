@@ -70,6 +70,8 @@ func (s *SandBoxRunner) run() ([]byte, error) {
 	sandboxCommand := s.SandboxFile
 	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
 
+	defer os.RemoveAll(s.Folder)
+
 	if _, err := os.Stat(s.SandboxFile); os.IsNotExist(err) {
 		sandboxCommand = ""
 		return exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File)).Output()

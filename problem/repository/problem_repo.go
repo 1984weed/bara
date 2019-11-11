@@ -115,6 +115,10 @@ func (r *problemRepository) SaveProblem(ctx context.Context, problem *model.Prob
 	return err
 }
 
+func (r *problemRepository) SaveProblemResult(ctx context.Context, result *model.ProblemUserResults) error {
+	return r.Conn.Insert(result)
+}
+
 func (r *problemRepository) SaveProblemArgs(ctx context.Context, args *model.ProblemArgs) error {
 	return r.Conn.Insert(args)
 }

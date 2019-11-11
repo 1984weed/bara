@@ -12,6 +12,7 @@ type Repository interface {
 	GetTestcaseByProblemID(ctx context.Context, problemID int64) ([]model.ProblemTestcases, error)
 	SaveProblem(ctx context.Context, problem *model.Problems) error
 	SaveProblemArgs(ctx context.Context, args *model.ProblemArgs) error
+	SaveProblemResult(ctx context.Context, result *model.ProblemUserResults) error
 	DeleteProblemArgs(ctx context.Context, args *model.ProblemArgs) error
 	SaveProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error
 	DeleteProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error

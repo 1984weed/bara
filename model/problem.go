@@ -46,3 +46,13 @@ type ProblemTestcases struct {
 	InputText  string
 	OutputText string
 }
+
+// ProblemUserResults table data
+type ProblemUserResults struct {
+	ID            int64
+	ProblemID     int64
+	UserID        int64
+	SubmittedCode string
+	Status        string
+	ExecTime      int
+}
