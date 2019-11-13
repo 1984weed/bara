@@ -148,12 +148,15 @@ func (a *problemRepositoryTest) TestDeleteProblemArgs() {
 // TestGetProblemResult ...
 func (a *problemRepositoryTest) TestGetProblemResult() {
 	repo := repository.NewProblemRepositoryRunner(a.DB).GetRepository()
+	userID := 1
+
 	mockProblem = getMockProblems()[0]
-	repo.GetProblemResult(context.Background(), mockProblem.Slug, userID int64, limit, offset int) ([]model.ProblemUserResults, error)
+	repo.GetProblemResult(context.Background(), mockProblem.Slug, userID, 10, 0)([]model.ProblemUserResults, error)
 
 	fmt.Println("aaaaaaaaaaaaaa")
 
 }
+
 func seedProblemData(t *testing.T, db *pg.DB) {
 	languages := getMockLanguages()
 	for _, l := range languages {
@@ -216,6 +219,37 @@ func getMockProblemTestCases(problemID int64) []model.ProblemTestcases {
 		InputText:  "9\n8",
 		OutputText: "10",
 	}}
+}
+
+func mockUserData() []model.Users {
+	return []model.Users{
+		{
+			UserName:  "user-1",
+			RealName:  "James Smith",
+			Password:  "user-1-password",
+			Email:     "user-1-email@testtest.com",
+			Bio:       "user-1-bio",
+			Image:     "user-1-image",
+			UpdatedAt: time.Now().UTC(),
+			CreatedAt: time.Now().UTC(),
+		},
+		{
+			UserName:  "user-2",
+			RealName:  "Maria Garcia",
+			Password:  "user-2-password",
+			Email:     "user-2-email@testtest.com",
+			Bio:       "user-2-bio",
+			Image:     "user-2-image",
+			UpdatedAt: time.Now().UTC(),
+			CreatedAt: time.Now().UTC(),
+		},
+	}
+}
+func getMockUsserResults() []model.ProblemUserResults {
+	return []model.ProblemUserResults{
+		{},
+		{},
+	}
 }
 
 func getMockArgs(problemID int64) []model.ProblemArgs {

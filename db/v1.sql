@@ -75,6 +75,7 @@ CREATE TABLE problem_testcases (
 ALTER TABLE problem_testcases ADD CONSTRAINT fk_problem_testcases_problems FOREIGN KEY (problem_id) REFERENCES problems (id);
 
 DROP TABLE IF EXISTS problem_user_results cascade;
+
 CREATE TABLE problem_user_results (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
