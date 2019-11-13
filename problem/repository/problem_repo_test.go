@@ -145,6 +145,15 @@ func (a *problemRepositoryTest) TestDeleteProblemArgs() {
 	require.NoError(a.T(), err)
 }
 
+// TestGetProblemResult ...
+func (a *problemRepositoryTest) TestGetProblemResult() {
+	repo := repository.NewProblemRepositoryRunner(a.DB).GetRepository()
+	mockProblem = getMockProblems()[0]
+	repo.GetProblemResult(context.Background(), mockProblem.Slug, userID int64, limit, offset int) ([]model.ProblemUserResults, error)
+
+	fmt.Println("aaaaaaaaaaaaaa")
+
+}
 func seedProblemData(t *testing.T, db *pg.DB) {
 	languages := getMockLanguages()
 	for _, l := range languages {
@@ -157,7 +166,6 @@ func seedProblemData(t *testing.T, db *pg.DB) {
 		err := db.Insert(&p)
 		args := getMockArgs(p.ID)
 		for _, arg := range args {
-			fmt.Println(arg)
 			err = db.Insert(&arg)
 			require.NoError(t, err)
 		}

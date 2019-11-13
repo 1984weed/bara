@@ -33,8 +33,13 @@ func (r *queryResolver) Problem(ctx context.Context, slug *string) (*graphql_mod
 func (r *queryResolver) TestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	return r.ProblemResolver.GetTestNewProblem(ctx, input)
 }
+
 func (r *queryResolver) Me(ctx context.Context) (*graphql_model.User, error) {
 	return r.UserResolver.GetMe(ctx)
+}
+
+func (r *queryResolver) SubmissionList(ctx context.Context, problemSlug string, limit *int, offset *int) ([]*graphql_model.Submission, error) {
+	return nil, nil
 }
 
 // Mutation ...

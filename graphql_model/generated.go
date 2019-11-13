@@ -63,6 +63,15 @@ type ProblemDetailInfo struct {
 	TestCases    []*TestCaseType `json:"testCases"`
 }
 
+type Submission struct {
+	ID            string       `json:"id"`
+	Lang          CodeLanguage `json:"lang"`
+	RuntimeMs     int          `json:"runtimeMS"`
+	StatusDisplay string       `json:"statusDisplay"`
+	URL           string       `json:"url"`
+	Timestamp     string       `json:"timestamp"`
+}
+
 type SubmitCode struct {
 	TypedCode string `json:"typedCode"`
 	Lang      string `json:"lang"`

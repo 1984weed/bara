@@ -119,6 +119,20 @@ func (r *problemRepository) SaveProblemResult(ctx context.Context, result *model
 	return r.Conn.Insert(result)
 }
 
+func (r *problemRepository) GetProblemResult(ctx context.Context, problemSlug string, userID int64, limit, offset int) ([]model.ProblemUserResults, error) {
+	problemUserResuts := new([]model.ProblemUserResults)
+
+	err := r.Conn.Model(problemUserResuts).
+		Where("problems.slug = ?", problemSlug).
+		Where("problem_user_results.user_id = ?", userID).
+		Join("JOIN problems AS p ON p.id = problem_user_results.problem_id").
+		Limit(limit).
+		Offset(offset).
+		Select()
+
+	return *problemUserResuts, err
+}
+
 func (r *problemRepository) SaveProblemArgs(ctx context.Context, args *model.ProblemArgs) error {
 	return r.Conn.Insert(args)
 }

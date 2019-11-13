@@ -13,6 +13,7 @@ type Repository interface {
 	SaveProblem(ctx context.Context, problem *model.Problems) error
 	SaveProblemArgs(ctx context.Context, args *model.ProblemArgs) error
 	SaveProblemResult(ctx context.Context, result *model.ProblemUserResults) error
+	GetProblemResult(ctx context.Context, problemSlug string, userID int64, limit, offset int) ([]model.ProblemUserResults, error)
 	DeleteProblemArgs(ctx context.Context, args *model.ProblemArgs) error
 	SaveProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error
 	DeleteProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error

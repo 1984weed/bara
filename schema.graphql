@@ -43,11 +43,21 @@ type CodeArgType {
   name: String!
 }
 
+type Submission {
+  id: ID!
+  lang: CodeLanguage!
+  runtimeMS: Int!
+  statusDisplay: String!
+  url: String!
+  timestamp: String!
+}
+
 type Query {
   problems(limit: Int = 25, offset: Int = 0): [Problem!]!
   problem(slug: String): Problem!
   me: User
   testNewProblem(input: NewProblem!): Problem!
+  submissionList(problemSlug: String!, limit: Int = 25, offset: Int = 0): [Submission!]!
 }
 
 enum CodeLanguage {

@@ -2,8 +2,8 @@ BEGIN;
 
 INSERT INTO code_languages (id, name, slug) VALUES (1 ,'JavaScript', 'javascript');
 
-INSERT INTO problems (slug, title, description, function_name, output_type, language_id, author_id)
-    VALUES ('two-sum', 'Two Sum', 'test-description you have to create a code', 'twoSum', 'int[]', 1, 1);
+INSERT INTO problems (slug, title, description, function_name, output_type, author_id)
+    VALUES ('two-sum', 'Two Sum', 'test-description you have to create a code', 'twoSum', 'int[]', 1);
 
 INSERT INTO problem_args (problem_id, order_no, name, var_type) VALUES
     (currval(pg_get_serial_sequence('problems', 'id')), 1, 'nums', 'int[]');
