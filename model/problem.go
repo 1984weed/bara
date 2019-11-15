@@ -54,5 +54,17 @@ type ProblemUserResults struct {
 	UserID        int64
 	SubmittedCode string
 	Status        string
+	CodeLangID    int64
 	ExecTime      int
+	CreatedAt     time.Time
+}
+
+// ProblemUserSubmission for retreving the submission data
+type ProblemUserSubmission struct {
+	ID            int64
+	SubmittedCode string
+	Status        string
+	CodeLangSlug  CodeLanguageSlug
+	ExecTime      int
+	CreatedAt     time.Time
 }

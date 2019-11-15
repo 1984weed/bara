@@ -35,3 +35,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: bara
     restart: always
+  bara.redis:
+    image: "redis:latest"
+    ports:
+      - 6379:6379
+    volumes:
+      - "./data/reis:/data"

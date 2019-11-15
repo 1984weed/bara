@@ -8,7 +8,6 @@ import (
 	"bara/problem/usecase"
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -207,8 +206,50 @@ func TestUpdateProblem(t *testing.T) {
 		assert.Equal(t, expectProblem.FunctionName, p.FunctionName)
 		assert.Equal(t, expectProblem.ProblemArgs, p.ProblemArgs)
 		assert.Equal(t, []domain.Testcase(nil), p.ProblemTestcases)
+	})
+}
 
-		fmt.Println(p)
+func TestGetUsersSubmissionByProblemID(t *testing.T) {
+	runner, repo := mocks.NewRepositoryRunnerMock()
+	t.Run("success", func(t *testing.T) {
+		u := usecase.NewProblemUsecase(runner, executor.NewExecutorClient(false, time.Second*30), time.Second*2)
 
+		problemSlug, userID, limit, offset := "problem-slug", 1, 10, 0
+		mockSubmissions := []model.ProblemUserSubmission{
+			{
+				ID:            9999,
+				SubmittedCode: "function test(){}",
+				Status:        "success",
+				CodeLangSlug:  model.JavaScript,
+				ExecTime:      10,
+				CreatedAt:     time.Now(),
+			},
+			{
+				ID:            10000,
+				SubmittedCode: "function test(){console.log('-----------')}",
+				Status:        "fail",
+				CodeLangSlug:  model.JavaScript,
+				ExecTime:      0,
+				CreatedAt:     time.Now(),
+			},
+		}
+
+		repo.On("GetProblemUserResult", mock.Anything, problemSlug, int64(userID), limit, offset).Return(mockSubmissions, nil).Once()
+
+		actual, err := u.GetUsersSubmissionByProblemID(context.TODO(), int64(userID), problemSlug, limit, offset)
+		expected := make([]domain.CodeSubmission, len(mockSubmissions))
+
+		for i, s := range mockSubmissions {
+			expected[i] = domain.CodeSubmission{
+				ID:           s.ID,
+				StatusSlug:   s.Status,
+				CodeLangSlug: s.CodeLangSlug,
+				ExecTime:     s.ExecTime,
+				Timestamp:    actual[i].Timestamp,
+			}
+		}
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected, actual)
 	})
 }

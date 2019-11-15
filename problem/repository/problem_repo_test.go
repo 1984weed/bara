@@ -5,7 +5,6 @@ import (
 	"bara/problem/repository"
 	"bara/repository_suite"
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -145,16 +144,32 @@ func (a *problemRepositoryTest) TestDeleteProblemArgs() {
 	require.NoError(a.T(), err)
 }
 
-// TestGetProblemResult ...
-func (a *problemRepositoryTest) TestGetProblemResult() {
+// TestGetProblemUserResult ...
+func (a *problemRepositoryTest) TestGetProblemUserResult() {
 	repo := repository.NewProblemRepositoryRunner(a.DB).GetRepository()
-	userID := 1
 
-	mockProblem = getMockProblems()[0]
-	repo.GetProblemResult(context.Background(), mockProblem.Slug, userID, 10, 0)([]model.ProblemUserResults, error)
+	mockProblem := getMockProblems()[0]
+	mockUser := getMockUsers()[0]
+	language := getMockLanguages()[0]
 
-	fmt.Println("aaaaaaaaaaaaaa")
+	problemResult, err := repo.GetProblemUserResult(context.Background(), mockProblem.Slug, mockUser.ID, 10, 0)
 
+	expectedResult := getMockUserResults(mockUser.ID, mockProblem.ID, language.ID)
+	submissions := make([]model.ProblemUserSubmission, len(expectedResult))
+
+	for i, r := range expectedResult {
+		submissions[i] = model.ProblemUserSubmission{
+			ID:            r.ID,
+			SubmittedCode: r.SubmittedCode,
+			Status:        r.Status,
+			CodeLangSlug:  language.Slug,
+			ExecTime:      r.ExecTime,
+			CreatedAt:     problemResult[i].CreatedAt,
+		}
+	}
+
+	require.NoError(a.T(), err)
+	assert.Equal(a.T(), submissions, problemResult)
 }
 
 func seedProblemData(t *testing.T, db *pg.DB) {
@@ -164,6 +179,12 @@ func seedProblemData(t *testing.T, db *pg.DB) {
 		require.NoError(t, err)
 	}
 	problems := getMockProblems()
+	users := getMockUsers()
+
+	for _, u := range users {
+		err := db.Insert(&u)
+		require.NoError(t, err)
+	}
 
 	for _, p := range problems {
 		err := db.Insert(&p)
@@ -178,6 +199,15 @@ func seedProblemData(t *testing.T, db *pg.DB) {
 			require.NoError(t, err)
 		}
 
+		require.NoError(t, err)
+	}
+
+	problemID := problems[0].ID
+	userID := users[0].ID
+	userResults := getMockUserResults(userID, problemID, languages[0].ID)
+
+	for _, u := range userResults {
+		err := db.Insert(&u)
 		require.NoError(t, err)
 	}
 }
@@ -195,6 +225,7 @@ func getMockLanguages() []model.CodeLanguages {
 func getMockProblems() []model.Problems {
 	return []model.Problems{
 		{
+			ID:           1,
 			Slug:         "test-slug",
 			Title:        "title",
 			Description:  "description",
@@ -203,6 +234,7 @@ func getMockProblems() []model.Problems {
 			AuthorID:     0,
 		},
 		{
+			ID:           2,
 			Slug:         "test-slug-2",
 			Title:        "title-2",
 			Description:  "description-2",
@@ -221,9 +253,10 @@ func getMockProblemTestCases(problemID int64) []model.ProblemTestcases {
 	}}
 }
 
-func mockUserData() []model.Users {
+func getMockUsers() []model.Users {
 	return []model.Users{
 		{
+			ID:        1,
 			UserName:  "user-1",
 			RealName:  "James Smith",
 			Password:  "user-1-password",
@@ -234,6 +267,7 @@ func mockUserData() []model.Users {
 			CreatedAt: time.Now().UTC(),
 		},
 		{
+			ID:        2,
 			UserName:  "user-2",
 			RealName:  "Maria Garcia",
 			Password:  "user-2-password",
@@ -245,10 +279,36 @@ func mockUserData() []model.Users {
 		},
 	}
 }
-func getMockUsserResults() []model.ProblemUserResults {
+
+func getMockUserResults(userID, problemID, langID int64) []model.ProblemUserResults {
 	return []model.ProblemUserResults{
-		{},
-		{},
+		{
+			ID:            1,
+			ProblemID:     problemID,
+			UserID:        userID,
+			SubmittedCode: "test submitted code one",
+			CodeLangID:    langID,
+			Status:        "success",
+			ExecTime:      9,
+		},
+		{
+			ID:            2,
+			ProblemID:     problemID,
+			UserID:        userID,
+			SubmittedCode: "test submitted code two",
+			CodeLangID:    langID,
+			Status:        "fail",
+			ExecTime:      1,
+		},
+		{
+			ID:            3,
+			ProblemID:     problemID,
+			UserID:        userID,
+			SubmittedCode: "test submitted code three",
+			CodeLangID:    langID,
+			Status:        "success",
+			ExecTime:      10,
+		},
 	}
 }
 

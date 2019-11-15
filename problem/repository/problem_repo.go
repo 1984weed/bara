@@ -119,18 +119,31 @@ func (r *problemRepository) SaveProblemResult(ctx context.Context, result *model
 	return r.Conn.Insert(result)
 }
 
-func (r *problemRepository) GetProblemResult(ctx context.Context, problemSlug string, userID int64, limit, offset int) ([]model.ProblemUserResults, error) {
-	problemUserResuts := new([]model.ProblemUserResults)
+func (r *problemRepository) GetProblemUserResult(ctx context.Context, problemSlug string, userID int64, limit, offset int) ([]model.ProblemUserSubmission, error) {
+	var problemUserResuts []model.ProblemUserSubmission
 
-	err := r.Conn.Model(problemUserResuts).
-		Where("problems.slug = ?", problemSlug).
-		Where("problem_user_results.user_id = ?", userID).
-		Join("JOIN problems AS p ON p.id = problem_user_results.problem_id").
-		Limit(limit).
-		Offset(offset).
-		Select()
+	_, err := r.Conn.Query(
+		&problemUserResuts, `
+			SELECT 
+				pur.id as id,
+				pur.submitted_code,
+				pur.status,
+				l.slug as code_lang_slug,
+				pur.exec_time,
+				pur.created_at
+			FROM problem_user_results pur, problems p, code_languages l
+			WHERE user_id = ?
+			AND pur.problem_id = p.id 
+			AND p.slug = ?
+			AND l.ID = pur.code_lang_id
+			LIMIT ? OFFSET ?
+		`, userID, problemSlug, limit, offset)
 
-	return *problemUserResuts, err
+	if err != nil {
+		return []model.ProblemUserSubmission{}, err
+	}
+
+	return problemUserResuts, err
 }
 
 func (r *problemRepository) SaveProblemArgs(ctx context.Context, args *model.ProblemArgs) error {

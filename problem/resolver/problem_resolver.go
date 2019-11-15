@@ -8,6 +8,7 @@ import (
 	"bara/problem/domain"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/gosimple/slug"
 )
@@ -53,9 +54,6 @@ func (pr *problemResolver) GetProblems(ctx context.Context, limit int, offset in
 
 // GetBySlug retrieves one problem by its slug
 func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql_model.Problem, error) {
-	// if user := auth.ForContext(ctx); user == nil {
-	// 	return nil, errors.New("Forbidden")
-	// }
 	p, err := pr.uc.GetBySlug(ctx, slug)
 
 	if err != nil {
@@ -253,4 +251,31 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 		},
 		Stdout: result.Output,
 	}, nil
+}
+
+func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, problemSlug string, limit, offset int) ([]*graphql_model.Submission, error) {
+	var user *model.Users
+	if user = auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
+
+	submissions, err := pr.uc.GetUsersSubmissionByProblemID(ctx, user.ID, problemSlug, limit, offset)
+	if err != nil {
+		return []*graphql_model.Submission{}, err
+	}
+
+	results := make([]*graphql_model.Submission, len(submissions))
+
+	for i, s := range submissions {
+		results[i] = &graphql_model.Submission{
+			ID:         fmt.Sprintln("%s", s.ID),
+			LangSlug:   codeSlugToGraphQL[s.CodeLangSlug],
+			RuntimeMs:  s.ExecTime,
+			StatusSlug: s.StatusSlug,
+			URL:        "undefined",
+			Timestamp:  s.Timestamp.String(),
+		}
+	}
+
+	return results, nil
 }

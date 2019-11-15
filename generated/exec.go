@@ -99,12 +99,12 @@ type ComplexityRoot struct {
 	}
 
 	Submission struct {
-		ID            func(childComplexity int) int
-		Lang          func(childComplexity int) int
-		RuntimeMs     func(childComplexity int) int
-		StatusDisplay func(childComplexity int) int
-		Timestamp     func(childComplexity int) int
-		URL           func(childComplexity int) int
+		ID         func(childComplexity int) int
+		LangSlug   func(childComplexity int) int
+		RuntimeMs  func(childComplexity int) int
+		StatusSlug func(childComplexity int) int
+		Timestamp  func(childComplexity int) int
+		URL        func(childComplexity int) int
 	}
 
 	TestCaseType struct {
@@ -416,12 +416,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Submission.ID(childComplexity), true
 
-	case "Submission.lang":
-		if e.complexity.Submission.Lang == nil {
+	case "Submission.langSlug":
+		if e.complexity.Submission.LangSlug == nil {
 			break
 		}
 
-		return e.complexity.Submission.Lang(childComplexity), true
+		return e.complexity.Submission.LangSlug(childComplexity), true
 
 	case "Submission.runtimeMS":
 		if e.complexity.Submission.RuntimeMs == nil {
@@ -430,12 +430,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Submission.RuntimeMs(childComplexity), true
 
-	case "Submission.statusDisplay":
-		if e.complexity.Submission.StatusDisplay == nil {
+	case "Submission.statusSlug":
+		if e.complexity.Submission.StatusSlug == nil {
 			break
 		}
 
-		return e.complexity.Submission.StatusDisplay(childComplexity), true
+		return e.complexity.Submission.StatusSlug(childComplexity), true
 
 	case "Submission.timestamp":
 		if e.complexity.Submission.Timestamp == nil {
@@ -623,9 +623,9 @@ type CodeArgType {
 
 type Submission {
   id: ID!
-  lang: CodeLanguage!
+  langSlug: CodeLanguage!
   runtimeMS: Int!
-  statusDisplay: String!
+  statusSlug: String!
   url: String!
   timestamp: String!
 }
@@ -2211,7 +2211,7 @@ func (ec *executionContext) _Submission_id(ctx context.Context, field graphql.Co
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Submission_lang(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Submission) (ret graphql.Marshaler) {
+func (ec *executionContext) _Submission_langSlug(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Submission) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2230,7 +2230,7 @@ func (ec *executionContext) _Submission_lang(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Lang, nil
+		return obj.LangSlug, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2285,7 +2285,7 @@ func (ec *executionContext) _Submission_runtimeMS(ctx context.Context, field gra
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Submission_statusDisplay(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Submission) (ret graphql.Marshaler) {
+func (ec *executionContext) _Submission_statusSlug(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Submission) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2304,7 +2304,7 @@ func (ec *executionContext) _Submission_statusDisplay(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.StatusDisplay, nil
+		return obj.StatusSlug, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4409,8 +4409,8 @@ func (ec *executionContext) _Submission(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "lang":
-			out.Values[i] = ec._Submission_lang(ctx, field, obj)
+		case "langSlug":
+			out.Values[i] = ec._Submission_langSlug(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4419,8 +4419,8 @@ func (ec *executionContext) _Submission(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "statusDisplay":
-			out.Values[i] = ec._Submission_statusDisplay(ctx, field, obj)
+		case "statusSlug":
+			out.Values[i] = ec._Submission_statusSlug(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

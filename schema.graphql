@@ -45,9 +45,9 @@ type CodeArgType {
 
 type Submission {
   id: ID!
-  lang: CodeLanguage!
+  langSlug: CodeLanguage!
   runtimeMS: Int!
-  statusDisplay: String!
+  statusSlug: String!
   url: String!
   timestamp: String!
 }

@@ -4,6 +4,7 @@ import (
 	"bara/model"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gosimple/slug"
 )
@@ -161,4 +162,12 @@ type CodeResult struct {
 	Expected string
 	Time     int
 	Output   string
+}
+
+type CodeSubmission struct {
+	ID           int64
+	StatusSlug   string
+	CodeLangSlug model.CodeLanguageSlug
+	ExecTime     int
+	Timestamp    time.Time
 }

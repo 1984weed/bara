@@ -64,12 +64,12 @@ type ProblemDetailInfo struct {
 }
 
 type Submission struct {
-	ID            string       `json:"id"`
-	Lang          CodeLanguage `json:"lang"`
-	RuntimeMs     int          `json:"runtimeMS"`
-	StatusDisplay string       `json:"statusDisplay"`
-	URL           string       `json:"url"`
-	Timestamp     string       `json:"timestamp"`
+	ID         string       `json:"id"`
+	LangSlug   CodeLanguage `json:"langSlug"`
+	RuntimeMs  int          `json:"runtimeMS"`
+	StatusSlug string       `json:"statusSlug"`
+	URL        string       `json:"url"`
+	Timestamp  string       `json:"timestamp"`
 }
 
 type SubmitCode struct {

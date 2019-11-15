@@ -1,5 +1,5 @@
 BEGIN;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users cascade;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -16,13 +16,12 @@ CREATE TABLE users (
 );
 
 DROP TABLE IF EXISTS code_languages cascade;
+
 CREATE TABLE code_languages (
   id INTEGER PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  slug  VARCHAR(255) NOT NULL
+  slug VARCHAR(255) NOT NULL
 );
-
-
 
 DROP TYPE IF EXISTS args_t cascade;
 CREATE TYPE args_t AS enum(
@@ -82,11 +81,13 @@ CREATE TABLE problem_user_results (
   problem_id INTEGER NOT NULL,
   submitted_code TEXT NOT NULL,
   status VARCHAR(10) NOT NULL,
-  exec_time INTEGER NOT NULL
+  code_lang_id INTEGER NOT NULL,
+  exec_time INTEGER,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE problem_user_results ADD CONSTRAINT fk_problem_user_results_uses FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE problem_user_results ADD CONSTRAINT fk_problem_user_results_problems FOREIGN KEY (problem_id) REFERENCES problems (id);
-
+ALTER TABLE problem_user_results ADD CONSTRAINT fk_problem_user_results_code_languages FOREIGN KEY (code_lang_id) REFERENCES code_languages (id);
 
 COMMIT;

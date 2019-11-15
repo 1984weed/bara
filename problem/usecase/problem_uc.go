@@ -264,3 +264,27 @@ func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitC
 
 	return codeResult, nil
 }
+
+func (p *problemUsecase) GetUsersSubmissionByProblemID(ctx context.Context, userID int64, problemSlug string, limit, offset int) ([]domain.CodeSubmission, error) {
+	repo := p.runner.GetRepository()
+	results, err := repo.GetProblemUserResult(ctx, problemSlug, userID, limit, offset)
+
+	if err != nil {
+		return []domain.CodeSubmission{}, err
+
+	}
+
+	codeSubmissions := make([]domain.CodeSubmission, len(results))
+
+	for i, r := range results {
+		codeSubmissions[i] = domain.CodeSubmission{
+			ID:           r.ID,
+			StatusSlug:   r.Status,
+			CodeLangSlug: r.CodeLangSlug,
+			ExecTime:     r.ExecTime,
+			Timestamp:    r.CreatedAt,
+		}
+	}
+
+	return codeSubmissions, nil
+}

@@ -39,7 +39,19 @@ func (r *queryResolver) Me(ctx context.Context) (*graphql_model.User, error) {
 }
 
 func (r *queryResolver) SubmissionList(ctx context.Context, problemSlug string, limit *int, offset *int) ([]*graphql_model.Submission, error) {
-	return nil, nil
+	var limitNum int
+	if limit == nil {
+		limitNum = 25
+	} else {
+		limitNum = *limit
+	}
+	var offsetNum int
+	if offset == nil {
+		offsetNum = 25
+	} else {
+		offsetNum = *offset
+	}
+	return r.ProblemResolver.GetUsersSubmissionByProblemID(ctx, problemSlug, limitNum, offsetNum)
 }
 
 // Mutation ...

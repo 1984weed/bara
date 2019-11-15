@@ -179,6 +179,23 @@ func (p *ProblemRepository) SaveProblemTestcase(ctx context.Context, testcase *m
 	return r0
 }
 
+// SaveProblemResult ...
+func (p *ProblemRepository) SaveProblemResult(ctx context.Context, result *model.ProblemUserResults) error {
+	ret := p.Called(ctx, result)
+	var r0 error
+
+	if rf, ok := ret.Get(0).(func(context.Context, *model.ProblemUserResults) error); ok {
+		r0 = rf(ctx, result)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(error)
+		}
+	}
+
+	return r0
+
+}
+
 // DeleteProblemTestcase ...
 func (p *ProblemRepository) DeleteProblemTestcase(ctx context.Context, testcase *model.ProblemTestcases) error {
 	ret := p.Called(ctx, testcase)
@@ -193,4 +210,26 @@ func (p *ProblemRepository) DeleteProblemTestcase(ctx context.Context, testcase 
 	}
 
 	return r0
+}
+
+// GetProblemUserResult ...
+func (p *ProblemRepository) GetProblemUserResult(ctx context.Context, problemSlug string, userID int64, limit, offset int) ([]model.ProblemUserSubmission, error) {
+	ret := p.Called(ctx, problemSlug, userID, limit, offset)
+	var r0 []model.ProblemUserSubmission
+
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, int, int) []model.ProblemUserSubmission); ok {
+		r0 = rf(ctx, problemSlug, userID, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.ProblemUserSubmission)
+		}
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64, int, int) error); ok {
+		r1 = rf(ctx, problemSlug, userID, limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

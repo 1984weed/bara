@@ -28,3 +28,6 @@ unit-test:
 docker-up-for-test:
 	@docker-compose up -d bara.db-test
 
+docker-local:
+	@docker-compose up -d bara.db bara.redis
+
