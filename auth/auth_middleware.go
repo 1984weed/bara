@@ -5,13 +5,11 @@ import (
 	"bara/user"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/garyburd/redigo/redis"
-	"github.com/gorilla/sessions"
 )
 
 // A private key for context that only this package can access. This is important
@@ -41,27 +39,16 @@ func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler)
 
 			redisKey := strings.Split(cookie[2:], ".")[0]
 
-			session, err := getSession("sess:", redisKey, pool)
+			userID, err := getSession("sess:", redisKey, pool)
 
 			if err != nil {
 				http.Error(w, "Invalid cookie", http.StatusForbidden)
 				return
 			}
 
-			userID, ok := session["passport"].(int64)
-			if !ok {
-				http.Error(w, "Forbidden", http.StatusForbidden)
-				return
-			}
-
 			repo := user.GetRepository()
 			// get the user from the database
 			user, err := repo.GetUserByID(r.Context(), userID)
-
-			if !ok {
-				http.Error(w, "Forbidden", http.StatusForbidden)
-				return
-			}
 
 			// put it in context
 			ctx := context.WithValue(r.Context(), userCtxKey, user)
@@ -73,46 +60,44 @@ func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler)
 	}
 }
 
-func getSession(prefix string, key string, pool *redis.Pool) (map[string]interface{}, error) {
+func getSession(prefix string, key string, pool *redis.Pool) (int64, error) {
 	conn := pool.Get()
 	defer conn.Close()
 	if err := conn.Err(); err != nil {
-		return nil, err
+		return 0, err
 	}
 	data, err := conn.Do("GET", prefix+key)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	if data == nil {
-		return nil, nil // no data was associated with this key
+		return 0, nil // no data was associated with this key
 	}
 	b, err := redis.Bytes(data, err)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return deserialize(b), nil
+	return getUserID(b), nil
 }
 
-func deserialize(d []byte) map[string]interface{} {
-	m := make(map[string]interface{})
-	err := json.Unmarshal(d, &m)
+func getUserID(d []byte) int64 {
+	var f interface{}
+	err := json.Unmarshal(d, &f)
+
 	if err != nil {
-		fmt.Printf("redistore.JSONSerializer.deserialize() Error: %v", err)
-		return m
+		return 0
 	}
+	m := f.(map[string]interface{})
 
-	return m
+	user := m["passport"]
 
+	v := user.(map[string]interface{})
+
+	return int64(v["user"].(float64))
 }
 
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
 func ForContext(ctx context.Context) *model.Users {
 	raw, _ := ctx.Value(userCtxKey).(*model.Users)
-	return raw
-}
-
-// Todo
-func ForSessionContext(ctx context.Context) *sessions.CookieStore {
-	raw, _ := ctx.Value(sessionCtxKey).(*sessions.CookieStore)
 	return raw
 }
