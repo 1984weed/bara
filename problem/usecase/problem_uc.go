@@ -242,12 +242,17 @@ func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitC
 
 	// Record the result by the user
 	err = p.runner.RunInTransaction(func(repo problem.Repository) error {
+		status := codeResult.Status
+		if status == "" {
+			status = "error"
+		}
 		result := &model.ProblemUserResults{
 			ProblemID:     problemWithArgs.ID,
 			UserID:        userID,
 			SubmittedCode: code.TypedCode,
+			CodeLangID:    1,
 			ExecTime:      codeResult.Time,
-			Status:        codeResult.Status,
+			Status:        status,
 		}
 		err = repo.SaveProblemResult(ctx, result)
 

@@ -8,7 +8,6 @@ import (
 	problem_repository "bara/problem/repository"
 	problem_resolver "bara/problem/resolver"
 	problem_usecase "bara/problem/usecase"
-	user_endpoint "bara/user/endpoint"
 	user_repository "bara/user/repository"
 	user_resolver "bara/user/resolver"
 	user_usecase "bara/user/usecase"
@@ -23,18 +22,18 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/handler"
+	"github.com/garyburd/redigo/redis"
 	"github.com/go-chi/chi"
 	"github.com/go-pg/pg/v9"
-	"github.com/gorilla/sessions"
 	"github.com/rs/cors"
 	"github.com/urfave/cli"
 )
 
-var (
-	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
-	key   = []byte("super-secret-key")
-	store = sessions.NewCookieStore(key)
-)
+// var (
+// 	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+// 	key   = []byte("bara")
+// 	// store = sessions.NewCookieStore(key)
+// )
 
 func main() {
 	app := cli.NewApp()
@@ -93,6 +92,18 @@ func main() {
 				Database: ctx.String("DATABASE_NAME"),
 			})
 
+		redisPool := &redis.Pool{
+			MaxIdle:     10,
+			IdleTimeout: 240 * time.Second,
+			TestOnBorrow: func(c redis.Conn, t time.Time) error {
+				_, err := c.Do("PING")
+				return err
+			},
+			Dial: func() (redis.Conn, error) {
+				return redis.Dial("tcp", ":6379")
+			},
+		}
+
 		port := ctx.String("PORT")
 		timeoutContext := time.Duration(40) * time.Second
 
@@ -107,7 +118,6 @@ func main() {
 		userRepoRunner := user_repository.NewUserRepositoryRunner(db)
 		userUc := user_usecase.NewUserUsecase(userRepoRunner, timeoutContext)
 		userResolver := user_resolver.NewUserResolver(userUc)
-		userEndpoint := user_endpoint.NewUserEndpoint(userUc, store)
 
 		router := chi.NewRouter()
 		cors := cors.New(cors.Options{
@@ -116,10 +126,10 @@ func main() {
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
 			AllowCredentials: true,
-			MaxAge:           300, // Maximum value not ignored by any of major browsers
+			MaxAge:           300,
 		})
 		router.Use(cors.Handler)
-		router.Use(auth.Middleware(userRepoRunner, store))
+		router.Use(auth.Middleware(userRepoRunner, redisPool))
 
 		router.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
 		router.Handle("/query", cors.Handler(handler.GraphQL(generated.NewExecutableSchema(
@@ -135,10 +145,6 @@ func main() {
 				return errors.New("An error happens")
 			}),
 		)))
-
-		router.HandleFunc("/signup", userEndpoint.SignUp)
-		router.HandleFunc("/login", userEndpoint.Login)
-		router.HandleFunc("/logout", userEndpoint.Logout)
 
 		log.Printf("connect to http://localhost:%s/payground for GraphQL playground", port)
 		log.Fatal(http.ListenAndServe(":"+port, router))

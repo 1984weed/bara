@@ -1,4 +1,4 @@
 package bara
 
 // CookieAuthName ...
-const CookieAuthName = "auth"
+const CookieAuthName = "auth-token"
