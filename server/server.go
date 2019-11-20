@@ -29,12 +29,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-// var (
-// 	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
-// 	key   = []byte("bara")
-// 	// store = sessions.NewCookieStore(key)
-// )
-
 func main() {
 	app := cli.NewApp()
 
@@ -80,6 +74,12 @@ func main() {
 			EnvVar: "WITHOUT_CONTAINER",
 			Usage:  "Can define the application is running on local",
 		},
+		cli.StringFlag{
+			Name:   "REDIS_URL",
+			EnvVar: "REDIS_URL",
+			Value:  "redis://127.0.0.1:6379",
+			Usage:  "Redis url",
+		},
 	}
 	app.Action = func(ctx *cli.Context) error {
 
@@ -100,7 +100,7 @@ func main() {
 				return err
 			},
 			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", ":6379")
+				return redis.DialURL(ctx.String("REDIS_URL"))
 			},
 		}
 

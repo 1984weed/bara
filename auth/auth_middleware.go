@@ -5,6 +5,7 @@ import (
 	"bara/user"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -27,13 +28,22 @@ func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler)
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			c, err := r.Cookie("auth-token")
 
+			if err != nil {
+				log.Print("Get auth-token cookie empty")
+				next.ServeHTTP(w, r)
+				return
+			}
 			cookie, err := url.QueryUnescape(c.Value)
 
 			if err != nil {
+				log.Print("auth-token cookie is broken")
+				next.ServeHTTP(w, r)
 				return
 			}
 
 			if cookie[0:2] != "s:" {
+				log.Print("auth-token cookie is broken")
+				next.ServeHTTP(w, r)
 				return
 			}
 

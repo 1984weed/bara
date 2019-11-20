@@ -12,8 +12,10 @@ services:
       - 8080:8080
     depends_on:
       - bara.db
+      - bara.redis
     environment:
       DB_HOST: postgresql 
+      REDIS_URL: "redis://bara.redis:6379"
   bara.db:
     image: postgres:11.5-alpine
     container_name: bara.db
