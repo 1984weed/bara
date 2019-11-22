@@ -80,6 +80,12 @@ func main() {
 			Value:  "redis://127.0.0.1:6379",
 			Usage:  "Redis url",
 		},
+		cli.StringFlag{
+			Name:   "FRONT_URL",
+			EnvVar: "FRONT_URL",
+			Value:  "http://localhost:3000",
+			Usage:  "Front url",
+		},
 	}
 	app.Action = func(ctx *cli.Context) error {
 
@@ -121,7 +127,7 @@ func main() {
 
 		router := chi.NewRouter()
 		cors := cors.New(cors.Options{
-			AllowedOrigins:   []string{"http://localhost:3000"},
+			AllowedOrigins:   []string{ctx.String("FRONT_URL")},
 			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
