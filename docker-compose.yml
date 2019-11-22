@@ -14,8 +14,11 @@ services:
       - bara.db
       - bara.redis
     environment:
-      DB_HOST: postgresql 
       REDIS_URL: "redis://bara.redis:6379"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_HOST: "bara.db"
+      DATABASE_NAME: bara
   bara.db:
     image: postgres:11.5-alpine
     container_name: bara.db

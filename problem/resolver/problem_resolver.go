@@ -256,7 +256,7 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, problemSlug string, limit, offset int) ([]*graphql_model.Submission, error) {
 	var user *model.Users
 	if user = auth.ForContext(ctx); user == nil {
-		return nil, errors.New("Forbidden")
+		return []*graphql_model.Submission{}, nil
 	}
 
 	submissions, err := pr.uc.GetUsersSubmissionByProblemID(ctx, user.ID, problemSlug, limit, offset)
