@@ -26,14 +26,14 @@ type contextKey struct {
 func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			c, err := r.Cookie("auth-token")
+			c := r.Header.Get("Authorization")
 
-			if err != nil {
+			if c == "" {
 				log.Print("Get auth-token cookie empty")
 				next.ServeHTTP(w, r)
 				return
 			}
-			cookie, err := url.QueryUnescape(c.Value)
+			cookie, err := url.QueryUnescape(c)
 
 			if err != nil {
 				log.Print("auth-token cookie is broken")
