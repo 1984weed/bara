@@ -7,8 +7,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"os/user"
-	"strconv"
 	"syscall"
 	"time"
 )
@@ -77,11 +75,6 @@ func (s *SandBoxRunner) run() ([]byte, error) {
 		return exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File)).Output()
 	}
 
-	u, _ := user.Lookup("execUser")
-
-	uid, _ := strconv.Atoi(u.Uid)
-	gid, _ := strconv.Atoi(u.Gid)
-
 	log.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
 	defer cancel()
 	defer os.RemoveAll(s.Folder)
@@ -91,8 +84,6 @@ func (s *SandBoxRunner) run() ([]byte, error) {
 		"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid),
-		Gid: uint32(gid)}
 
 	return cmd.Output()
 }
