@@ -38,6 +38,10 @@ func (r *queryResolver) Me(ctx context.Context) (*graphql_model.User, error) {
 	return r.UserResolver.GetMe(ctx)
 }
 
+func (r *queryResolver) User(ctx context.Context, userName *string) (*graphql_model.User, error) {
+	return r.UserResolver.GetUser(ctx, *userName)
+}
+
 func (r *queryResolver) SubmissionList(ctx context.Context, problemSlug string, limit *int, offset *int) ([]*graphql_model.Submission, error) {
 	var limitNum int
 	if limit == nil {
@@ -71,8 +75,4 @@ func (r *mutationResolver) CreateProblem(ctx context.Context, input graphql_mode
 
 func (r *mutationResolver) UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	return r.ProblemResolver.UpdateProblem(ctx, int64(problemID), input)
-}
-
-func (r *mutationResolver) RegisterUser(ctx context.Context, email *string, userName *string, password *string) (*graphql_model.User, error) {
-	return nil, r.UserResolver.Register(ctx, *email, *userName, *password)
 }

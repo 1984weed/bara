@@ -102,3 +102,14 @@ func (u *userUsecase) GetUserByID(ctx context.Context, userID int64) (*model.Use
 
 	return user, nil
 }
+
+// GetUserByUserName ...
+func (u *userUsecase) GetUserByUserName(ctx context.Context, userName string) (*model.Users, error) {
+	user, err := u.runner.GetRepository().GetUserByUserName(ctx, userName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

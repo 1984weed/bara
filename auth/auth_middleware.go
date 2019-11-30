@@ -29,7 +29,7 @@ func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler)
 			c := r.Header.Get("Authorization")
 
 			if c == "" {
-				log.Print("Get auth-token cookie empty")
+				log.Print("Get Authorization token empty")
 				next.ServeHTTP(w, r)
 				return
 			}

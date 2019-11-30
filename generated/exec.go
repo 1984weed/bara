@@ -68,7 +68,6 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateProblem func(childComplexity int, input graphql_model.NewProblem) int
-		RegisterUser  func(childComplexity int, email *string, userName *string, password *string) int
 		SubmitCode    func(childComplexity int, input graphql_model.SubmitCode) int
 		UpdateProblem func(childComplexity int, problemID int, input graphql_model.NewProblem) int
 	}
@@ -96,6 +95,7 @@ type ComplexityRoot struct {
 		Problems       func(childComplexity int, limit *int, offset *int) int
 		SubmissionList func(childComplexity int, problemSlug string, limit *int, offset *int) int
 		TestNewProblem func(childComplexity int, input graphql_model.NewProblem) int
+		User           func(childComplexity int, userName *string) int
 	}
 
 	Submission struct {
@@ -127,12 +127,12 @@ type MutationResolver interface {
 	SubmitCode(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error)
-	RegisterUser(ctx context.Context, email *string, userName *string, password *string) (*graphql_model.User, error)
 }
 type QueryResolver interface {
 	Problems(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Problem, error)
 	Problem(ctx context.Context, slug *string) (*graphql_model.Problem, error)
 	Me(ctx context.Context) (*graphql_model.User, error)
+	User(ctx context.Context, userName *string) (*graphql_model.User, error)
 	TestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	SubmissionList(ctx context.Context, problemSlug string, limit *int, offset *int) ([]*graphql_model.Submission, error)
 }
@@ -240,18 +240,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateProblem(childComplexity, args["input"].(graphql_model.NewProblem)), true
-
-	case "Mutation.registerUser":
-		if e.complexity.Mutation.RegisterUser == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_registerUser_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RegisterUser(childComplexity, args["email"].(*string), args["userName"].(*string), args["password"].(*string)), true
 
 	case "Mutation.submitCode":
 		if e.complexity.Mutation.SubmitCode == nil {
@@ -408,6 +396,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.TestNewProblem(childComplexity, args["input"].(graphql_model.NewProblem)), true
+
+	case "Query.user":
+		if e.complexity.Query.User == nil {
+			break
+		}
+
+		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.User(childComplexity, args["userName"].(*string)), true
 
 	case "Submission.id":
 		if e.complexity.Submission.ID == nil {
@@ -634,6 +634,7 @@ type Query {
   problems(limit: Int = 25, offset: Int = 0): [Problem!]!
   problem(slug: String): Problem!
   me: User
+  user(userName: String): User
   testNewProblem(input: NewProblem!): Problem!
   submissionList(problemSlug: String!, limit: Int = 25, offset: Int = 0): [Submission!]!
 }
@@ -687,7 +688,6 @@ type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!
-  registerUser(email: String, userName: String, password: String): User! 
 }`},
 )
 
@@ -706,36 +706,6 @@ func (ec *executionContext) field_Mutation_createProblem_args(ctx context.Contex
 		}
 	}
 	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_registerUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["email"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["email"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["userName"]; ok {
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userName"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["password"]; ok {
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["password"] = arg2
 	return args, nil
 }
 
@@ -866,6 +836,20 @@ func (ec *executionContext) field_Query_testNewProblem_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["userName"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userName"] = arg0
 	return args, nil
 }
 
@@ -1441,50 +1425,6 @@ func (ec *executionContext) _Mutation_updateProblem(ctx context.Context, field g
 	return ec.marshalNProblem2ᚖbaraᚋgraphql_modelᚐProblem(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_registerUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_registerUser_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RegisterUser(rctx, args["email"].(*string), args["userName"].(*string), args["password"].(*string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*graphql_model.User)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚖbaraᚋgraphql_modelᚐUser(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Problem_id(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Problem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1997,6 +1937,47 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Me(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOUser2ᚖbaraᚋgraphql_modelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_user_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().User(rctx, args["userName"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4184,11 +4165,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "registerUser":
-			out.Values[i] = ec._Mutation_registerUser(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4348,6 +4324,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_me(ctx, field)
+				return res
+			})
+		case "user":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_user(ctx, field)
 				return res
 			})
 		case "testNewProblem":
@@ -5191,20 +5178,6 @@ func (ec *executionContext) marshalNTestCaseType2ᚖbaraᚋgraphql_modelᚐTestC
 		return graphql.Null
 	}
 	return ec._TestCaseType(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNUser2baraᚋgraphql_modelᚐUser(ctx context.Context, sel ast.SelectionSet, v graphql_model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUser2ᚖbaraᚋgraphql_modelᚐUser(ctx context.Context, sel ast.SelectionSet, v *graphql_model.User) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

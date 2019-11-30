@@ -59,3 +59,24 @@ func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
 		Bio:      user.Bio,
 	}, nil
 }
+
+func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_model.User, error) {
+	user, err := u.uc.GetUserByUserName(ctx, userName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, nil
+	}
+
+	return &graphql_model.User{
+		ID:       string(user.ID),
+		RealName: user.RealName,
+		UserName: user.UserName,
+		Email:    user.Email,
+		Image:    user.Image,
+		Bio:      user.Bio,
+	}, nil
+}
