@@ -7,6 +7,7 @@ require (
 	github.com/99designs/gqlgen v0.9.3
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/aclements/perflock v0.0.0-20180319185109-8402f33a418d // indirect
+	github.com/aws/aws-sdk-go v1.25.43
 	github.com/bxcodec/go-clean-arch v2.0.1+incompatible
 	github.com/codegangsta/envy v0.0.0-20141216192214-4b78388c8ce4 // indirect
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
@@ -33,6 +34,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.6 // indirect
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/rs/cors v1.7.0
+	github.com/rs/xid v1.2.1
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/ugorji/go v1.1.7 // indirect

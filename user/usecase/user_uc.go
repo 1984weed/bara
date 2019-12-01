@@ -3,8 +3,10 @@ package user_uc
 import (
 	"bara/model"
 	"bara/user"
+	"bara/user/repository"
 	"bara/utils"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
@@ -13,11 +15,12 @@ import (
 type userUsecase struct {
 	runner         user.RepositoryRunner
 	contextTimeout time.Duration
+	userImage      repository.UserS3Image
 }
 
 // NewUserUsecase creates user usecase
-func NewUserUsecase(runner user.RepositoryRunner, contextTimeout time.Duration) user.Usecase {
-	return &userUsecase{runner, contextTimeout}
+func NewUserUsecase(runner user.RepositoryRunner, userImage repository.UserS3Image, contextTimeout time.Duration) user.Usecase {
+	return &userUsecase{runner, contextTimeout, userImage}
 }
 
 func (u *userUsecase) Register(ctx context.Context, userName string, email string, password string) (*model.Users, error) {
@@ -112,4 +115,14 @@ func (u *userUsecase) GetUserByUserName(ctx context.Context, userName string) (*
 	}
 
 	return user, nil
+}
+
+func (u *userUsecase) UpdateUser(ctx context.Context, imageStr string) (string, error) {
+	data, err := base64.StdEncoding.DecodeString(imageStr)
+
+	if err != nil {
+		return "", err
+	}
+
+	u.userImage.PutImageFile(ctx, data)
 }
