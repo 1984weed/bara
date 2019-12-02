@@ -106,8 +106,17 @@ type User {
   bio: String!
 }
 
+input UserInput {
+  realName: String
+  userName: String
+  email: String
+  image: String
+  bio: String
+}
+
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!
+  updateUser(input: UserInput!): User
 }

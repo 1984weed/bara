@@ -22,6 +22,9 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/handler"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/garyburd/redigo/redis"
 	"github.com/go-chi/chi"
 	"github.com/go-pg/pg/v9"
@@ -86,6 +89,36 @@ func main() {
 			Value:  "http://localhost:3000",
 			Usage:  "Front url",
 		},
+		cli.StringFlag{
+			Name:   "AWS_S3_ACCESS_TOKEN",
+			EnvVar: "AWS_S3_ACCESS_TOKEN",
+			Value:  "",
+			Usage:  "AWS access token",
+		},
+		cli.StringFlag{
+			Name:   "AWS_S3_SECRET_TOKEN",
+			EnvVar: "AWS_S3_SECRET_TOKEN",
+			Value:  "",
+			Usage:  "AWS secret token",
+		},
+		cli.StringFlag{
+			Name:   "S3_REGION",
+			EnvVar: "S3_REGION",
+			Value:  "test",
+			Usage:  "S3 region",
+		},
+		cli.StringFlag{
+			Name:   "AWS_S3_BUCKET_NAME",
+			EnvVar: "AWS_S3_BUCKET_NAME",
+			Value:  "test",
+			Usage:  "S3 bucket name",
+		},
+		cli.StringFlag{
+			Name:   "AWS_S3_ACCOUNT_FOLDER",
+			EnvVar: "AWS_S3_ACCOUNT_FOLDER",
+			Value:  "test",
+			Usage:  "S3 folder",
+		},
 	}
 	app.Action = func(ctx *cli.Context) error {
 
@@ -122,7 +155,18 @@ func main() {
 
 		// User
 		userRepoRunner := user_repository.NewUserRepositoryRunner(db)
-		userUc := user_usecase.NewUserUsecase(userRepoRunner, timeoutContext)
+
+		creds := credentials.NewStaticCredentials(ctx.String("AWS_S3_ACCESS_TOKEN"), ctx.String("AWS_S3_SECRET_TOKEN"), ctx.String(""))
+
+		s, _ := session.NewSession(&aws.Config{
+			Credentials: creds,
+			Region:      aws.String(ctx.String("S3_REGION")),
+		})
+		// User Image
+		// func NewUserImageRepository(s *session.Session, bucketName, fileDir string) UserS3Image {
+		userImage := user_repository.NewUserImageRepository(s, ctx.String("AWS_S3_BUCKET_NAME"), ctx.String("AWS_S3_ACCOUNT_FOLDER"))
+
+		userUc := user_usecase.NewUserUsecase(userRepoRunner, userImage, timeoutContext)
 		userResolver := user_resolver.NewUserResolver(userUc)
 
 		router := chi.NewRouter()

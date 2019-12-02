@@ -3,6 +3,7 @@ package user_uc
 import (
 	"bara/model"
 	"bara/user"
+	"bara/user/domain"
 	"bara/user/repository"
 	"bara/utils"
 	"context"
@@ -117,12 +118,23 @@ func (u *userUsecase) GetUserByUserName(ctx context.Context, userName string) (*
 	return user, nil
 }
 
-func (u *userUsecase) UpdateUser(ctx context.Context, imageStr string) (string, error) {
-	data, err := base64.StdEncoding.DecodeString(imageStr)
+// UpdateUser...
+func (u *userUsecase) UpdateUser(ctx context.Context, user domain.UserForUpdate) (*model.Users, error) {
+	if user.Image != nil {
+		data, err := base64.StdEncoding.DecodeString(*user.Image)
 
-	if err != nil {
-		return "", err
+		if err != nil {
+			return nil, err
+		}
+
+		url, err := u.userImage.PutImageFile(ctx, data)
+
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Println(url)
 	}
 
-	u.userImage.PutImageFile(ctx, data)
+	return nil, nil
 }

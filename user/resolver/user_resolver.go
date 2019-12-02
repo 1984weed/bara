@@ -80,3 +80,21 @@ func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_m
 		Bio:      user.Bio,
 	}, nil
 }
+
+func (u *userResolver) UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
+	userForUpdate := domain.UserForUpdate{
+		UserName: input.UserName,
+		RealName: input.RealName,
+		Email:    input.Email,
+		Bio:      input.Bio,
+		Image:    input.Image,
+	}
+
+	_, err := u.uc.UpdateUser(ctx, userForUpdate)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
