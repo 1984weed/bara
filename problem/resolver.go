@@ -13,5 +13,6 @@ type Resolver interface {
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int64, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
+	TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	GetUsersSubmissionByProblemID(ctx context.Context, problemSlug string, limit, offset int) ([]*graphql_model.Submission, error)
 }

@@ -253,6 +253,30 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 	}, nil
 }
 
+func (pr *problemResolver) TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
+	domainCode := &domain.SubmitCode{
+		LanguageSlug: graphQlToCodeSlug[graphql_model.CodeLanguage(input.Lang)],
+		TypedCode:    input.TypedCode,
+		ProblemSlug:  input.Slug,
+	}
+	result, err := pr.uc.RunProblem(ctx, domainCode, inputStr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &graphql_model.CodeResult{
+		Result: &graphql_model.CodeResultDetail{
+			Expected: result.Expected,
+			Result:   result.Result,
+			Status:   result.Status,
+			Time:     result.Time,
+			Input:    &result.Input,
+		},
+		Stdout: result.Output,
+	}, nil
+}
+
 func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, problemSlug string, limit, offset int) ([]*graphql_model.Submission, error) {
 	var user *model.Users
 	if user = auth.ForContext(ctx); user == nil {

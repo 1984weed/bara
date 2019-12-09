@@ -100,6 +100,21 @@ func (r *problemRepository) GetTestcaseByProblemID(ctx context.Context, problemI
 	return *qts, err
 }
 
+func (r *problemRepository) GetTestcaseByInput(ctx context.Context, problemID int64, input string) (*model.ProblemTestcases, error) {
+	qts := new(model.ProblemTestcases)
+
+	err := r.Conn.Model(qts).
+		Where("problem_testcases.problem_id = ?", problemID).
+		Where("problem_testcases.input_text = ?", input).
+		Select()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return qts, err
+}
+
 func (r *problemRepository) SaveProblem(ctx context.Context, problem *model.Problems) error {
 	_, err := r.Conn.Model(problem).
 		OnConflict("(id) DO UPDATE").

@@ -270,6 +270,32 @@ func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitC
 	return codeResult, nil
 }
 
+func (p *problemUsecase) RunProblem(ctx context.Context, code *domain.SubmitCode, inputStr string) (*domain.CodeResult, error) {
+	repo := p.runner.GetRepository()
+	problemWithArgs, err := repo.GetBySlug(ctx, code.ProblemSlug)
+
+	testcase, err := repo.GetTestcaseByInput(ctx, problemWithArgs.ID, inputStr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	testcaseStr := domain.CreateTestcase([]domain.Testcase{
+		{
+			Input:  testcase.InputText,
+			Output: testcase.OutputText,
+		},
+	})
+
+	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, testcaseStr, problemWithArgs.FunctionName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return codeResult, nil
+}
+
 func (p *problemUsecase) GetUsersSubmissionByProblemID(ctx context.Context, userID int64, problemSlug string, limit, offset int) ([]domain.CodeSubmission, error) {
 	repo := p.runner.GetRepository()
 	results, err := repo.GetProblemUserResult(ctx, problemSlug, userID, limit, offset)

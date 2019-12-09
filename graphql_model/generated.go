@@ -63,6 +63,12 @@ type ProblemDetailInfo struct {
 	TestCases    []*TestCaseType `json:"testCases"`
 }
 
+type RunCode struct {
+	TypedCode string `json:"typedCode"`
+	Lang      string `json:"lang"`
+	Slug      string `json:"slug"`
+}
+
 type Submission struct {
 	ID         string       `json:"id"`
 	LangSlug   CodeLanguage `json:"langSlug"`

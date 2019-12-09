@@ -69,6 +69,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateProblem func(childComplexity int, input graphql_model.NewProblem) int
 		SubmitCode    func(childComplexity int, input graphql_model.SubmitCode) int
+		TestRunCode   func(childComplexity int, inputStr string, input graphql_model.SubmitCode) int
 		UpdateProblem func(childComplexity int, problemID int, input graphql_model.NewProblem) int
 		UpdateUser    func(childComplexity int, input graphql_model.UserInput) int
 	}
@@ -126,6 +127,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	SubmitCode(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
+	TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error)
@@ -254,6 +256,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SubmitCode(childComplexity, args["input"].(graphql_model.SubmitCode)), true
+
+	case "Mutation.testRunCode":
+		if e.complexity.Mutation.TestRunCode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_testRunCode_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.TestRunCode(childComplexity, args["inputStr"].(string), args["input"].(graphql_model.SubmitCode)), true
 
 	case "Mutation.updateProblem":
 		if e.complexity.Mutation.UpdateProblem == nil {
@@ -663,6 +677,12 @@ input SubmitCode {
   slug: String!
 }
 
+input RunCode {
+  typedCode: String!
+  lang: String!
+  slug: String!
+}
+
 input TestCase {
   input: [String]
   output: String!
@@ -708,6 +728,7 @@ input UserInput {
 
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
+  testRunCode(inputStr: String!, input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!
   updateUser(input: UserInput!): User
@@ -743,6 +764,28 @@ func (ec *executionContext) field_Mutation_submitCode_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_testRunCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["inputStr"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["inputStr"] = arg0
+	var arg1 graphql_model.SubmitCode
+	if tmp, ok := rawArgs["input"]; ok {
+		arg1, err = ec.unmarshalNSubmitCode2baraᚋgraphql_modelᚐSubmitCode(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -1357,6 +1400,50 @@ func (ec *executionContext) _Mutation_submitCode(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().SubmitCode(rctx, args["input"].(graphql_model.SubmitCode))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.CodeResult)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNCodeResult2ᚖbaraᚋgraphql_modelᚐCodeResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_testRunCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_testRunCode_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().TestRunCode(rctx, args["inputStr"].(string), args["input"].(graphql_model.SubmitCode))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4011,6 +4098,36 @@ func (ec *executionContext) unmarshalInputNewProblem(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRunCode(ctx context.Context, obj interface{}) (graphql_model.RunCode, error) {
+	var it graphql_model.RunCode
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "typedCode":
+			var err error
+			it.TypedCode, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lang":
+			var err error
+			it.Lang, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "slug":
+			var err error
+			it.Slug, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSubmitCode(ctx context.Context, obj interface{}) (graphql_model.SubmitCode, error) {
 	var it graphql_model.SubmitCode
 	var asMap = obj.(map[string]interface{})
@@ -4272,6 +4389,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "submitCode":
 			out.Values[i] = ec._Mutation_submitCode(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "testRunCode":
+			out.Values[i] = ec._Mutation_testRunCode(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
