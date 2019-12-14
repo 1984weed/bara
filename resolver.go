@@ -70,7 +70,7 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.S
 }
 
 func (r *mutationResolver) TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
-	return r.ProblemResolver.TestRunCode(ctx, input)
+	return r.ProblemResolver.TestRunCode(ctx, inputStr, input)
 }
 
 func (r *mutationResolver) CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {

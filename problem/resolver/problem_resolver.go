@@ -259,6 +259,7 @@ func (pr *problemResolver) TestRunCode(ctx context.Context, inputStr string, inp
 		TypedCode:    input.TypedCode,
 		ProblemSlug:  input.Slug,
 	}
+
 	result, err := pr.uc.RunProblem(ctx, domainCode, inputStr)
 
 	if err != nil {
