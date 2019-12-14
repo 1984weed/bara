@@ -30,8 +30,18 @@ async function main() {
     } else if (lineCount === 1) {
       inputNum = parseInt(line);
     } else if ((inputNum + 1) * countTestCase + 1 === lineCount) {
-      const expected = JSON.stringify(JSON.parse(line));
-      const resultStr = JSON.stringify(result);
+      let expected = ""
+      try {
+        expected = JSON.stringify(JSON.parse(line));
+      } catch {
+        expected = line
+      }
+      let resultStr = ""
+      try {
+        resultStr = JSON.stringify(JSON.parse(result));
+      } catch {
+        resultStr = result
+      }
       if (resultStr !== expected) {
         successFlag = false;
         console.log(
@@ -50,7 +60,11 @@ async function main() {
       inputs = [];
       countTestCase++;
     } else {
-      inputs.push(JSON.parse(line));
+      try{
+        inputs.push(JSON.parse(line));
+      } catch {
+        inputs.push(line);
+      }
 
       if (inputs.length === inputNum) {
         result = %s(...inputs);

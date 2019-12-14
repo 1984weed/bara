@@ -47,6 +47,7 @@ func (e *executor) Exec(codeLanguage model.CodeLanguageSlug, typedCode string, t
 	execStr := fmt.Sprintf(codeCompile.PrepareCode, typedCode, functionName)
 	log.Println(machineType)
 
+	fmt.Println(execStr)
 	sandbox := NewSandBoxRunner(dir, fmt.Sprintf(`folder-%s`, utils.RandomString(10)), codeCompile.Command, codeCompile.FileName, testcase, machineType, execStr, e.timeoutSecond)
 	out, err := sandbox.Exec()
 

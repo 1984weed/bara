@@ -72,6 +72,7 @@ func (s *SandBoxRunner) run() ([]byte, error) {
 
 	if _, err := os.Stat(s.SandboxFile); os.IsNotExist(err) {
 		sandboxCommand = ""
+		fmt.Println(fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File))
 		return exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File)).Output()
 	}
 
