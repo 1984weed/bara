@@ -23,6 +23,7 @@ type Problem {
   description: String!
   codeSnippets: [CodeSnippet!]!
   problemDetailInfo: ProblemDetailInfo 
+  sampleTestCase: String
 }
 
 type ProblemDetailInfo {

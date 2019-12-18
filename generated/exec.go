@@ -79,6 +79,7 @@ type ComplexityRoot struct {
 		Description       func(childComplexity int) int
 		ID                func(childComplexity int) int
 		ProblemDetailInfo func(childComplexity int) int
+		SampleTestCase    func(childComplexity int) int
 		Slug              func(childComplexity int) int
 		Title             func(childComplexity int) int
 	}
@@ -320,6 +321,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Problem.ProblemDetailInfo(childComplexity), true
+
+	case "Problem.sampleTestCase":
+		if e.complexity.Problem.SampleTestCase == nil {
+			break
+		}
+
+		return e.complexity.Problem.SampleTestCase(childComplexity), true
 
 	case "Problem.slug":
 		if e.complexity.Problem.Slug == nil {
@@ -629,6 +637,7 @@ type Problem {
   description: String!
   codeSnippets: [CodeSnippet!]!
   problemDetailInfo: ProblemDetailInfo 
+  sampleTestCase: String
 }
 
 type ProblemDetailInfo {
@@ -1807,6 +1816,40 @@ func (ec *executionContext) _Problem_problemDetailInfo(ctx context.Context, fiel
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOProblemDetailInfo2ᚖbaraᚋgraphql_modelᚐProblemDetailInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Problem_sampleTestCase(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Problem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Problem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SampleTestCase, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProblemDetailInfo_functionName(ctx context.Context, field graphql.CollectedField, obj *graphql_model.ProblemDetailInfo) (ret graphql.Marshaler) {
@@ -4458,6 +4501,8 @@ func (ec *executionContext) _Problem(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "problemDetailInfo":
 			out.Values[i] = ec._Problem_problemDetailInfo(ctx, field, obj)
+		case "sampleTestCase":
+			out.Values[i] = ec._Problem_sampleTestCase(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

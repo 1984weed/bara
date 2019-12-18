@@ -78,6 +78,7 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 	}
 
 	testcases := make([]*graphql_model.TestCaseType, len(p.ProblemTestcases))
+	sampleTestCase := p.ProblemTestcases[0].Input
 
 	for i, p := range p.ProblemTestcases {
 		inputArray := p.ConvertInputArray()
@@ -106,6 +107,7 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 			Args:         codeArg,
 			TestCases:    testcases,
 		},
+		SampleTestCase: &sampleTestCase,
 	}, nil
 }
 
@@ -181,6 +183,8 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 		Title: p.Title,
 	}, nil
 }
+
+// UpdateProblem ...
 func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
 	// if user := auth.ForContext(ctx); user == nil {
 	// 	return nil, errors.New("Forbidden")

@@ -53,6 +53,7 @@ type Problem struct {
 	Description       string             `json:"description"`
 	CodeSnippets      []*CodeSnippet     `json:"codeSnippets"`
 	ProblemDetailInfo *ProblemDetailInfo `json:"problemDetailInfo"`
+	SampleTestCase    *string            `json:"sampleTestCase"`
 }
 
 type ProblemDetailInfo struct {
