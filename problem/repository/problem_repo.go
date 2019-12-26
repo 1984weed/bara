@@ -162,7 +162,9 @@ func (r *problemRepository) GetProblemUserResult(ctx context.Context, problemSlu
 }
 
 func (r *problemRepository) SaveProblemArgs(ctx context.Context, args *model.ProblemArgs) error {
-	return r.Conn.Insert(args)
+	_, err := r.Conn.Model(args).Insert()
+
+	return err
 }
 
 func (r *problemRepository) DeleteProblemArgs(ctx context.Context, args *model.ProblemArgs) error {

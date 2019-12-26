@@ -116,7 +116,7 @@ func (t *Testcase) GetInput() string {
 	inputString := ""
 
 	for i, input := range t.InputArray {
-		if i == 0 {
+		if i == len(t.InputArray)-1 {
 			inputString += fmt.Sprintf("%s", input)
 		} else {
 			inputString += fmt.Sprintf("%s\n", input)

@@ -154,13 +154,13 @@ func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inp
 		if err != nil {
 			return err
 		}
+		err = repo.DeleteProblemArgs(ctx, &model.ProblemArgs{
+			ProblemID: problemID,
+		})
+		if err != nil {
+			return err
+		}
 		for i, arg := range inputProblem.ProblemArgs {
-			err = repo.DeleteProblemArgs(ctx, &model.ProblemArgs{
-				ProblemID: problemID,
-			})
-			if err != nil {
-				return err
-			}
 			err = repo.SaveProblemArgs(ctx, &model.ProblemArgs{
 				ProblemID: newProblem.ID,
 				OrderNo:   i + 1,
@@ -170,6 +170,10 @@ func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inp
 			if err != nil {
 				return err
 			}
+		}
+
+		if err != nil {
+			return err
 		}
 		for _, testcase := range inputProblem.Testcases {
 			err = repo.DeleteProblemTestcase(ctx, &model.ProblemTestcases{

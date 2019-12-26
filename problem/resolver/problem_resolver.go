@@ -248,7 +248,7 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 	return &graphql_model.CodeResult{
 		Result: &graphql_model.CodeResultDetail{
 			Expected: result.Expected,
-			Result:   result.Result,
+			Result:   string(result.Result),
 			Status:   result.Status,
 			Time:     result.Time,
 			Input:    &result.Input,
@@ -273,7 +273,7 @@ func (pr *problemResolver) TestRunCode(ctx context.Context, inputStr string, inp
 	return &graphql_model.CodeResult{
 		Result: &graphql_model.CodeResultDetail{
 			Expected: result.Expected,
-			Result:   result.Result,
+			Result:   string(result.Result),
 			Status:   result.Status,
 			Time:     result.Time,
 			Input:    &result.Input,

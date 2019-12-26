@@ -71,6 +71,7 @@ func (e *executor) Exec(codeLanguage model.CodeLanguageSlug, typedCode string, t
 			break
 		}
 
+		fmt.Println(string(line))
 		err = json.Unmarshal([]byte(line), &result)
 	}
 

@@ -40,7 +40,11 @@ async function main() {
       try {
         resultStr = JSON.stringify(JSON.parse(result));
       } catch {
-        resultStr = result
+        if(Array.isArray(result)) {
+          resultStr = "[" + result + "]"
+        } else {
+          resultStr = result
+        }
       }
       if (resultStr !== expected) {
         successFlag = false;
