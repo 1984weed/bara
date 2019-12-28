@@ -6,6 +6,7 @@ import (
 	"bara/model"
 	"bara/problem"
 	"bara/problem/domain"
+	"bara/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -302,7 +303,7 @@ func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, pr
 			RuntimeMs:  s.ExecTime,
 			StatusSlug: s.StatusSlug,
 			URL:        "undefined",
-			Timestamp:  s.Timestamp.String(),
+			Timestamp:  utils.GetISO8061(s.Timestamp),
 		}
 	}
 
