@@ -175,11 +175,10 @@ func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inp
 		if err != nil {
 			return err
 		}
+		err = repo.DeleteProblemTestcase(ctx, &model.ProblemTestcases{
+			ProblemID: problemID,
+		})
 		for _, testcase := range inputProblem.Testcases {
-			err = repo.DeleteProblemTestcase(ctx, &model.ProblemTestcases{
-				ProblemID: problemID,
-			})
-
 			if err != nil {
 				return err
 			}
