@@ -5,6 +5,31 @@ var readline = require("readline");
 
 %s
 
+function getResultStr(result) {
+  let resultStr = ""
+  try {
+    resultStr = JSON.stringify(JSON.parse(result));
+  } catch {
+    if(Array.isArray(result)) {
+      resultStr = "[" + result + "]"
+    } else {
+      resultStr = result
+    }
+  }
+
+  return resultStr
+}
+
+function getExpected(line) {
+  let expected = ""
+  try {
+    expected = JSON.stringify(JSON.parse(line));
+  } catch {
+    expected = line
+  }
+  return expected
+}
+
 async function main() {
   var rl = readline.createInterface({
     input: process.stdin,
@@ -16,6 +41,7 @@ async function main() {
   let lineCount = 0;
   let inputs = [];
   let result = null;
+  let expected = ""
 
   var start = new Date();
   var successFlag = false;
@@ -30,22 +56,8 @@ async function main() {
     } else if (lineCount === 1) {
       inputNum = parseInt(line);
     } else if ((inputNum + 1) * countTestCase + 1 === lineCount) {
-      let expected = ""
-      try {
-        expected = JSON.stringify(JSON.parse(line));
-      } catch {
-        expected = line
-      }
-      let resultStr = ""
-      try {
-        resultStr = JSON.stringify(JSON.parse(result));
-      } catch {
-        if(Array.isArray(result)) {
-          resultStr = "[" + result + "]"
-        } else {
-          resultStr = result
-        }
-      }
+      const resultStr = getResultStr(result)
+      expected = getExpected(line)
       if (resultStr !== expected) {
         successFlag = false;
         console.log(
@@ -79,10 +91,10 @@ async function main() {
   if (successFlag) {
     console.log(
       JSON.stringify({
-		status: "success",
-    result: "",
-    input: "", 
-		expected: "",
+        status: "success",
+        result: getResultStr(result),
+        input: inputs.join("\n"), 
+        expected,
         time: new Date() - start
       })
     );
