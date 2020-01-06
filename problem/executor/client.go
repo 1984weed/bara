@@ -61,6 +61,8 @@ func (e *executor) Exec(codeLanguage model.CodeLanguageSlug, typedCode string, t
 	reader := bufio.NewReader(bytesReader)
 	var result domain.CodeResult
 	stdoutArray := []string{}
+	outputFlag := false
+	outputs := []byte{}
 
 	for {
 		line, _, err := reader.ReadLine()
@@ -71,9 +73,14 @@ func (e *executor) Exec(codeLanguage model.CodeLanguageSlug, typedCode string, t
 			break
 		}
 
-		fmt.Println(string(line))
-		err = json.Unmarshal([]byte(line), &result)
+		if string(line) == "output" {
+			outputFlag = true
+		}
+		if outputFlag {
+			outputs = append(outputs, line...)
+		}
 	}
+	err = json.Unmarshal(outputs, &result)
 
 	stdout := ""
 

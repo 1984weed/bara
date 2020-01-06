@@ -42,6 +42,7 @@ async function main() {
   let inputs = [];
   let result = null;
   let expected = ""
+  let lastInputs = []
 
   var start = new Date();
   var successFlag = false;
@@ -73,6 +74,7 @@ async function main() {
       }
 
       successFlag = true;
+      lastInputs = inputs
       inputs = [];
       countTestCase++;
     } else {
@@ -93,7 +95,7 @@ async function main() {
       JSON.stringify({
         status: "success",
         result: getResultStr(result),
-        input: inputs.join("\n"), 
+        input: lastInputs.join("\n"), 
         expected,
         time: new Date() - start
       })
