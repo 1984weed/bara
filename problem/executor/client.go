@@ -61,34 +61,27 @@ func (e *executor) Exec(codeLanguage model.CodeLanguageSlug, typedCode string, t
 	reader := bufio.NewReader(bytesReader)
 	var result domain.CodeResult
 	stdoutArray := []string{}
-	outputFlag := false
-	outputs := []byte{}
 
 	for {
-		line, _, err := reader.ReadLine()
-
-		stdoutArray = append(stdoutArray, fmt.Sprintf("%s", line))
+		line, err := reader.ReadString('\n')
 
 		if err == io.EOF {
 			break
 		}
 
-		if string(line) == "output" {
-			outputFlag = true
-		}
-		if outputFlag {
-			outputs = append(outputs, line...)
-		}
+		stdoutArray = append(stdoutArray, fmt.Sprintf("%s", line))
+
 	}
-	err = json.Unmarshal(outputs, &result)
 
 	stdout := ""
 
 	for i, s := range stdoutArray {
-		if i < len(stdoutArray)-2 {
+		if i < len(stdoutArray)-1 {
 			stdout += s
 		}
 	}
+
+	err = json.Unmarshal([]byte(stdoutArray[len(stdoutArray)-1]), &result)
 
 	result.Output = stdout
 
