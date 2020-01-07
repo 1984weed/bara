@@ -9,8 +9,11 @@ SERVER_FILE=server/server.go
 SANDBOX_MAIN_FILE=sandbox/main.go
 BINARY_UNIX=$(BINARY_NAME)_unix
 
-all: build
-build: 
+build: install build-server build-sandbox
+install: 
+	go get 
+
+build-server: 
 	$(GOBUILD) -o $(BINARY_NAME) -v $(SERVER_FILE) 
 
 build-sandbox: 
