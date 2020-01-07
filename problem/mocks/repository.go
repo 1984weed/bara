@@ -233,3 +233,8 @@ func (p *ProblemRepository) GetProblemUserResult(ctx context.Context, problemSlu
 
 	return r0, r1
 }
+
+// GettestcaseByInput
+func (p *ProblemRepository) GetTestcaseByInput(ctx context.Context, problemID int64, input string) (*model.ProblemTestcases, error) {
+	return nil, nil
+}

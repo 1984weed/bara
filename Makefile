@@ -11,7 +11,7 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 
 build: install build-server build-sandbox
 install: 
-	go get 
+	go get ./...
 
 build-server: 
 	$(GOBUILD) -o $(BINARY_NAME) -v $(SERVER_FILE) 

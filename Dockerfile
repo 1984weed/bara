@@ -5,7 +5,6 @@ RUN apk add make \
     g++
 ADD . /src
 RUN cd /src && make build
-RUN cd /src && make build-sandbox
 
 # final stage
 FROM node:12.12.0-alpine
