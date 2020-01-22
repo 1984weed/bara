@@ -1,12 +1,18 @@
 package executor
 
 import (
+	"bara/problem/domain"
 	"bara/utils"
+	"bufio"
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -18,12 +24,13 @@ type SandBoxRunner struct {
 	SubmittedCode string
 	File          string
 	TestcaseFile  string
-	Testcase      string
+	Testcase      []string
 	ExeCommand    string
 	Timeout       time.Duration
 }
 
-func NewSandBoxRunner(path, folder, command, file, testcase, exeCommand, submittedCode string, timeout time.Duration) *SandBoxRunner {
+// NewSandBoxRunner
+func NewSandBoxRunner(path string, folder string, command string, file string, testcase []string, exeCommand string, submittedCode string, timeout time.Duration) *SandBoxRunner {
 	return &SandBoxRunner{
 		Folder:        fmt.Sprintf("%s/%s", path, folder),
 		SandboxFile:   fmt.Sprintf("%s/sandbox-cli", path),
@@ -37,10 +44,11 @@ func NewSandBoxRunner(path, folder, command, file, testcase, exeCommand, submitt
 	}
 }
 
-func (s *SandBoxRunner) Exec() ([]byte, error) {
+// Exec returns...
+func (s *SandBoxRunner) Exec() (*domain.CodeResult, error) {
 	err := s.prepare()
 	if err != nil {
-		return []byte{}, err
+		return nil, err
 	}
 	return s.run()
 }
@@ -51,12 +59,14 @@ func (s *SandBoxRunner) prepare() error {
 	if err != nil {
 		return err
 	}
-	testcaseFile := utils.NewFileUtils(s.TestcaseFile)
-	err = testcaseFile.WriteCreateFile(s.Testcase)
+	// for i, t := range s.Testcase {
+	// 	testcaseFile := utils.NewFileUtils(fmt.Sprintf("%s-%d", s.TestcaseFile, i))
+	// 	err = testcaseFile.WriteCreateFile(t)
+	// }
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
 	execFile := utils.NewFileUtils(s.File)
 	execFile.WriteCreateFile(s.SubmittedCode)
@@ -64,7 +74,7 @@ func (s *SandBoxRunner) prepare() error {
 	return nil
 }
 
-func (s *SandBoxRunner) run() ([]byte, error) {
+func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 	sandboxCommand := s.SandboxFile
 	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
 
@@ -72,8 +82,59 @@ func (s *SandBoxRunner) run() ([]byte, error) {
 
 	if _, err := os.Stat(s.SandboxFile); os.IsNotExist(err) {
 		sandboxCommand = ""
-		fmt.Println(fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File))
-		return exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File)).Output()
+		before := time.Now()
+
+		for _, t := range s.Testcase {
+			fmt.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
+			// cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", t, sandboxCommand, s.Command, s.File))
+			cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
+			cmd.Stdin = strings.NewReader(t)
+			var out bytes.Buffer
+			cmd.Stdout = &out
+
+			err := cmd.Run()
+			fmt.Println(string(out.Bytes()))
+
+			if err != nil {
+				return nil, err
+			}
+			bytesReader := bytes.NewReader(out.Bytes())
+			reader := bufio.NewReader(bytesReader)
+			var result domain.CodeResult
+			stdoutArray := []string{}
+			for {
+				line, err := reader.ReadString('\n')
+
+				if err == io.EOF {
+					break
+				}
+
+				stdoutArray = append(stdoutArray, fmt.Sprintf("%s", line))
+			}
+			stdout := ""
+
+			for i, s := range stdoutArray {
+				if i < len(stdoutArray)-1 {
+					stdout += s
+				}
+			}
+
+			err = json.Unmarshal([]byte(stdoutArray[len(stdoutArray)-1]), &result)
+			if result.Status == "Fail" {
+				after := time.Now()
+				return &domain.CodeResult{
+					Status: "Fail",
+					Time:   int(after.Unix() - before.Unix()),
+				}, nil
+			}
+		}
+
+		after := time.Now()
+		return &domain.CodeResult{
+			Status: "Success",
+			Time:   int(after.Unix() - before.Unix()),
+		}, nil
+		// return exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File)).Output()
 	}
 
 	log.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
@@ -86,5 +147,5 @@ func (s *SandBoxRunner) run() ([]byte, error) {
 	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 
-	return cmd.Output()
+	return &domain.CodeResult{}, nil
 }

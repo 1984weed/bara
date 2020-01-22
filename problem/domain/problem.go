@@ -132,21 +132,22 @@ func (t *Testcase) ConvertInputArray() []string {
 	return inputCases
 }
 
-func CreateTestcase(testcases []Testcase) string {
-	testcase := ""
+func CreateTestcases(testcases []Testcase) []string {
+	testcaseStrs := make([]string, len(testcases))
 	inputCount := strings.Count(testcases[0].Input, "\n") + 1
 
-	testcase += fmt.Sprintln(len(testcases))
-	testcase += fmt.Sprintln(inputCount)
-	for _, qt := range testcases {
+	// testcase += fmt.Sprintln(len(testcases))
+	for i, qt := range testcases {
+		testcase := fmt.Sprintln(inputCount)
 		inputCases := strings.Split(qt.Input, "\n")
 		for _, in := range inputCases {
 			testcase += fmt.Sprintln(in)
 		}
 		testcase += fmt.Sprintln(qt.Output)
+		testcaseStrs[i] = testcase
 	}
 
-	return testcase
+	return testcaseStrs
 }
 
 type SubmitCode struct {
@@ -154,6 +155,13 @@ type SubmitCode struct {
 	TypedCode    string
 	ProblemSlug  string
 }
+
+type CodeResultStatus string
+
+const (
+	StatusSuccess CodeResultStatus = "Success"
+	StatusFail    CodeResultStatus = "Fail"
+)
 
 type CodeResult struct {
 	Status   string

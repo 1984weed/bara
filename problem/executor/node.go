@@ -95,7 +95,7 @@ async function main() {
       JSON.stringify({
         status: "success",
         result: getResultStr(result),
-        input: lastInputs.join("\n"), 
+        input: lastInputs.join("\n"),
         expected,
         time: new Date() - start
       })
