@@ -144,7 +144,7 @@ func main() {
 		}
 
 		port := ctx.String("PORT")
-		timeoutContext := time.Duration(40) * time.Second
+		timeoutContext := time.Duration(5) * time.Second
 
 		codeExecutor := executor.NewExecutorClient(ctx.Bool("WITHOUT_CONTAINER"), 10)
 
