@@ -31,53 +31,26 @@ function getExpected(line) {
 }
 
 async function main() {
-  var rl = readline.createInterface({
+  const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     terminal: false
   });
-  let testCaseNum = 0;
   let inputNum = 0;
   let lineCount = 0;
   let inputs = [];
   let result = null;
   let expected = ""
-  let lastInputs = []
 
-  var start = new Date();
-  var successFlag = false;
-  var countTestCase = 1;
+  let successFlag = false;
 
   for await (const line of rl) {
     if(line === "") {
       break;
     }
     if (lineCount === 0) {
-      testCaseNum = parseInt(line);
-    } else if (lineCount === 1) {
       inputNum = parseInt(line);
-    } else if ((inputNum + 1) * countTestCase + 1 === lineCount) {
-      const resultStr = getResultStr(result)
-      expected = getExpected(line)
-      if (resultStr !== expected) {
-        successFlag = false;
-        console.log(
-          JSON.stringify({
-            status: "fail",
-            result: resultStr,
-            input: inputs.join("\n"),
-            expected,
-            time: 0
-          })
-        );
-        break;
-      }
-
-      successFlag = true;
-      lastInputs = inputs
-      inputs = [];
-      countTestCase++;
-    } else {
+    } else if (lineCount - 1 < inputNum) {
       try{
         inputs.push(JSON.parse(line));
       } catch {
@@ -87,6 +60,21 @@ async function main() {
       if (inputs.length === inputNum) {
         result = %s(...inputs);
       }
+    } else if(result != null) {
+      const resultStr = getResultStr(result)
+      expected = getExpected(line)
+      if (resultStr !== expected) {
+        successFlag = false;
+        console.log(
+          JSON.stringify({
+            status: "fail",
+            result: resultStr,
+            expected,
+          })
+        );
+        break;
+      } 
+      successFlag = true;
     }
     lineCount++;
   }
@@ -95,9 +83,7 @@ async function main() {
       JSON.stringify({
         status: "success",
         result: getResultStr(result),
-        input: lastInputs.join("\n"),
         expected,
-        time: new Date() - start
       })
     );
   }

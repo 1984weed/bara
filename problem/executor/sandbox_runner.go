@@ -86,7 +86,6 @@ func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 
 		for _, t := range s.Testcase {
 			fmt.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
-			// cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", t, sandboxCommand, s.Command, s.File))
 			cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
 			cmd.Stdin = strings.NewReader(t)
 			var out bytes.Buffer
