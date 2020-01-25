@@ -76,7 +76,6 @@ func (s *SandBoxRunner) prepare() error {
 
 func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 	sandboxCommand := s.SandboxFile
-	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
 
 	defer os.RemoveAll(s.Folder)
 
@@ -84,15 +83,17 @@ func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 		sandboxCommand = ""
 		before := time.Now()
 
-		for _, t := range s.Testcase {
-			fmt.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
+		for _, t := range s.Testcase[1:] {
+			ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
+			defer cancel()
+
 			cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
+
 			cmd.Stdin = strings.NewReader(t)
 			var out bytes.Buffer
 			cmd.Stdout = &out
 
 			err := cmd.Run()
-			fmt.Println(string(out.Bytes()))
 
 			if err != nil {
 				return nil, err
@@ -133,13 +134,13 @@ func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 			Status: "Success",
 			Time:   int(after.Unix() - before.Unix()),
 		}, nil
-		// return exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File)).Output()
 	}
 
 	log.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
-	defer cancel()
 	defer os.RemoveAll(s.Folder)
 
+	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
+	defer cancel()
 	cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File))
 	cmd.Env = []string{
 		"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
