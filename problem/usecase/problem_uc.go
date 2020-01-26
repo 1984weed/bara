@@ -236,8 +236,8 @@ func (p *problemUsecase) SubmitProblem(ctx context.Context, code *domain.SubmitC
 			Output: t.OutputText,
 		}
 	}
-	testcaseStr := domain.CreateTestcases(domainTestcases)
-	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, testcaseStr, problemWithArgs.FunctionName)
+
+	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, domainTestcases, problemWithArgs.FunctionName)
 
 	if err != nil {
 		return nil, err
@@ -283,14 +283,12 @@ func (p *problemUsecase) RunProblem(ctx context.Context, code *domain.SubmitCode
 		return nil, err
 	}
 
-	testcaseStr := domain.CreateTestcases([]domain.Testcase{
+	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, []domain.Testcase{
 		{
 			Input:  testcase.InputText,
 			Output: testcase.OutputText,
 		},
-	})
-
-	codeResult, err := p.codeExecutor.Exec(code.LanguageSlug, code.TypedCode, testcaseStr, problemWithArgs.FunctionName)
+	}, problemWithArgs.FunctionName)
 
 	if err != nil {
 		return nil, err

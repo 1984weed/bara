@@ -11,7 +11,7 @@ import (
 )
 
 type Client interface {
-	Exec(codeLanguage model.CodeLanguageSlug, typedCode string, testcase []string, functionName string) (*domain.CodeResult, error)
+	Exec(codeLanguage model.CodeLanguageSlug, typedCode string, testcase []domain.Testcase, functionName string) (*domain.CodeResult, error)
 }
 
 type executor struct {
@@ -26,7 +26,7 @@ func NewExecutorClient(withoutContainer bool, timeoutSecond time.Duration) Clien
 	}
 }
 
-func (e *executor) Exec(codeLanguage model.CodeLanguageSlug, typedCode string, testcase []string, functionName string) (*domain.CodeResult, error) {
+func (e *executor) Exec(codeLanguage model.CodeLanguageSlug, typedCode string, testcase []domain.Testcase, functionName string) (*domain.CodeResult, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return nil, nil

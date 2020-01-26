@@ -136,7 +136,6 @@ func CreateTestcases(testcases []Testcase) []string {
 	testcaseStrs := make([]string, len(testcases))
 	inputCount := strings.Count(testcases[0].Input, "\n") + 1
 
-	// testcase += fmt.Sprintln(len(testcases))
 	for i, qt := range testcases {
 		testcase := fmt.Sprintln(inputCount)
 		inputCases := strings.Split(qt.Input, "\n")
@@ -148,6 +147,19 @@ func CreateTestcases(testcases []Testcase) []string {
 	}
 
 	return testcaseStrs
+}
+
+func CreateTestcase(testcase Testcase) string {
+	inputCount := strings.Count(testcase.Input, "\n") + 1
+
+	testcaseStr := fmt.Sprintln(inputCount)
+	inputCases := strings.Split(testcase.Input, "\n")
+	for _, in := range inputCases {
+		testcaseStr += fmt.Sprintln(in)
+	}
+	testcaseStr += fmt.Sprintln(testcase.Output)
+
+	return testcaseStr
 }
 
 type SubmitCode struct {
@@ -169,6 +181,7 @@ type CodeResult struct {
 	Input    string
 	Expected string
 	Time     int
+	StdOut   string
 	Output   string
 }
 

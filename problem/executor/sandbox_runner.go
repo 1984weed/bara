@@ -9,12 +9,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
 	"time"
+
+	seccomp "github.com/elastic/go-seccomp-bpf"
+)
+
+var (
+	policyFile string
+	noNewPrivs bool
 )
 
 type SandBoxRunner struct {
@@ -24,13 +29,13 @@ type SandBoxRunner struct {
 	SubmittedCode string
 	File          string
 	TestcaseFile  string
-	Testcase      []string
+	Testcase      []domain.Testcase
 	ExeCommand    string
 	Timeout       time.Duration
 }
 
 // NewSandBoxRunner
-func NewSandBoxRunner(path string, folder string, command string, file string, testcase []string, exeCommand string, submittedCode string, timeout time.Duration) *SandBoxRunner {
+func NewSandBoxRunner(path string, folder string, command string, file string, testcase []domain.Testcase, exeCommand string, submittedCode string, timeout time.Duration) *SandBoxRunner {
 	return &SandBoxRunner{
 		Folder:        fmt.Sprintf("%s/%s", path, folder),
 		SandboxFile:   fmt.Sprintf("%s/sandbox-cli", path),
@@ -59,14 +64,6 @@ func (s *SandBoxRunner) prepare() error {
 	if err != nil {
 		return err
 	}
-	// for i, t := range s.Testcase {
-	// 	testcaseFile := utils.NewFileUtils(fmt.Sprintf("%s-%d", s.TestcaseFile, i))
-	// 	err = testcaseFile.WriteCreateFile(t)
-	// }
-
-	// if err != nil {
-	// 	return err
-	// }
 
 	execFile := utils.NewFileUtils(s.File)
 	execFile.WriteCreateFile(s.SubmittedCode)
@@ -75,77 +72,121 @@ func (s *SandBoxRunner) prepare() error {
 }
 
 func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
-	sandboxCommand := s.SandboxFile
-
 	defer os.RemoveAll(s.Folder)
 
-	if _, err := os.Stat(s.SandboxFile); os.IsNotExist(err) {
-		sandboxCommand = ""
-		before := time.Now()
+	stdout := ""
 
-		for _, t := range s.Testcase[1:] {
-			ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
-			defer cancel()
+	before := time.Now()
+	for _, t := range s.Testcase {
+		output, err := secCom(s.ExeCommand, fmt.Sprintf("%s %s", s.Command, s.File), strings.NewReader(domain.CreateTestcase(t)), s.Timeout)
 
-			cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
+		if err != nil {
+			return nil, err
+		}
 
-			cmd.Stdin = strings.NewReader(t)
-			var out bytes.Buffer
-			cmd.Stdout = &out
+		bytesReader := bytes.NewReader(output)
+		reader := bufio.NewReader(bytesReader)
+		var result domain.CodeResult
+		stdoutArray := []string{}
+		for {
+			line, err := reader.ReadString('\n')
 
-			err := cmd.Run()
-
-			if err != nil {
-				return nil, err
-			}
-			bytesReader := bytes.NewReader(out.Bytes())
-			reader := bufio.NewReader(bytesReader)
-			var result domain.CodeResult
-			stdoutArray := []string{}
-			for {
-				line, err := reader.ReadString('\n')
-
-				if err == io.EOF {
-					break
-				}
-
-				stdoutArray = append(stdoutArray, fmt.Sprintf("%s", line))
-			}
-			stdout := ""
-
-			for i, s := range stdoutArray {
-				if i < len(stdoutArray)-1 {
-					stdout += s
-				}
+			if err == io.EOF {
+				break
 			}
 
-			err = json.Unmarshal([]byte(stdoutArray[len(stdoutArray)-1]), &result)
-			if result.Status == "Fail" {
-				after := time.Now()
-				return &domain.CodeResult{
-					Status: "Fail",
-					Time:   int(after.Unix() - before.Unix()),
-				}, nil
+			stdoutArray = append(stdoutArray, fmt.Sprintf("%s", line))
+		}
+
+		for i, s := range stdoutArray {
+			if i < len(stdoutArray)-1 {
+				stdout += s
 			}
 		}
 
-		after := time.Now()
-		return &domain.CodeResult{
-			Status: "Success",
-			Time:   int(after.Unix() - before.Unix()),
-		}, nil
+		err = json.Unmarshal([]byte(stdoutArray[len(stdoutArray)-1]), &result)
+		if result.Status == "fail" {
+			after := time.Now()
+			return &domain.CodeResult{
+				Status:   "fail",
+				Input:    t.Input,
+				Expected: t.Output,
+				Output:   stdout,
+				Result:   result.Output,
+				Time:     int(after.Unix() - before.Unix()),
+			}, nil
+		}
 	}
 
-	log.Println(fmt.Sprintf("%s %s %s", sandboxCommand, s.Command, s.File))
-	defer os.RemoveAll(s.Folder)
+	after := time.Now()
+	if len(s.Testcase) == 1 {
+		test := s.Testcase[0]
+		return &domain.CodeResult{
+			Status:   "success",
+			Input:    test.Input,
+			Expected: test.Output,
+			Output:   stdout,
+			Time:     int(after.Unix() - before.Unix()),
+		}, nil
 
-	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout*time.Second)
+	}
+	return &domain.CodeResult{
+		Status: "success",
+		Time:   int(after.Unix() - before.Unix()),
+	}, nil
+}
+
+func secCom(execCommand, command string, input *strings.Reader, timeout time.Duration) ([]byte, error) {
+	var policy = &seccomp.Policy{
+		DefaultAction: seccomp.ActionAllow,
+		Syscalls: []seccomp.SyscallGroup{
+			{
+				Action: seccomp.ActionErrno,
+				Names: []string{
+					"connect",
+					"accept",
+					"sendto",
+					"recvfrom",
+					"sendmsg",
+					"recvmsg",
+					"bind",
+					"listen",
+					"getpid",
+					"kill",
+					"fork",
+				},
+			},
+		},
+	}
+
+	// Create a filter based on config.
+	filter := seccomp.Filter{
+		NoNewPrivs: noNewPrivs,
+		Flag:       seccomp.FilterFlagTSync,
+		Policy:     *policy,
+	}
+
+	// Load the BPF filter using the seccomp system call.
+	if err := seccomp.LoadFilter(filter); err != nil {
+		fmt.Fprintf(os.Stderr, "error loading filter: %v\n", err)
+		os.Exit(1)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, s.ExeCommand, "-c", fmt.Sprintf("cat %s | %s %s %s", s.TestcaseFile, sandboxCommand, s.Command, s.File))
+
+	cmd := exec.CommandContext(ctx, execCommand, "-c", command)
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = input
 	cmd.Env = []string{
 		"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 	}
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	if err := cmd.Run(); err != nil {
+		return []byte{}, err
+	}
 
-	return &domain.CodeResult{}, nil
+	return out.Bytes(), nil
 }
