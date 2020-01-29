@@ -76,8 +76,10 @@ func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 
 	stdout := ""
 
+	var result domain.CodeResult
 	before := time.Now()
 	for _, t := range s.Testcase {
+		stdout = ""
 		output, err := secCom(s.ExeCommand, fmt.Sprintf("%s %s", s.Command, s.File), strings.NewReader(domain.CreateTestcase(t)), s.Timeout)
 
 		if err != nil {
@@ -86,7 +88,6 @@ func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 
 		bytesReader := bytes.NewReader(output)
 		reader := bufio.NewReader(bytesReader)
-		var result domain.CodeResult
 		stdoutArray := []string{}
 		for {
 			line, err := reader.ReadString('\n')
@@ -112,7 +113,7 @@ func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 				Input:    t.Input,
 				Expected: t.Output,
 				Output:   stdout,
-				Result:   result.Output,
+				Result:   result.Result,
 				Time:     int(after.Unix() - before.Unix()),
 			}, nil
 		}
@@ -126,6 +127,7 @@ func (s *SandBoxRunner) run() (*domain.CodeResult, error) {
 			Input:    test.Input,
 			Expected: test.Output,
 			Output:   stdout,
+			Result:   result.Result,
 			Time:     int(after.Unix() - before.Unix()),
 		}, nil
 
