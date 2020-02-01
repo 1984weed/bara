@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+type Node interface {
+	IsNode()
+}
+
 type CodeArg struct {
 	Type string `json:"type"`
 	Name string `json:"name"`
@@ -34,6 +38,15 @@ type CodeResultDetail struct {
 type CodeSnippet struct {
 	Code string       `json:"code"`
 	Lang CodeLanguage `json:"lang"`
+}
+
+type Contest struct {
+	ID             string     `json:"id"`
+	ContestSlug    string     `json:"contestSlug"`
+	Title          string     `json:"title"`
+	StartTimestamp string     `json:"startTimestamp"`
+	Duration       *string    `json:"duration"`
+	Problems       []*Problem `json:"problems"`
 }
 
 type NewProblem struct {

@@ -15,6 +15,26 @@ CREATE TABLE users (
   CONSTRAINT user_username_unique UNIQUE (user_name)
 );
 
+DROP TABLE IF EXISTS contests cascade;
+
+CREATE TABLE contests (
+  id SERIAL PRIMARY KEY,
+  slug VARCHAR(255) NOT NULL,
+  start_time  TIMESTAMP NOT NULL,
+  CONSTRAINT contest_slug_unique UNIQUE (slug)
+);
+
+DROP TABLE IF EXISTS contest_problems cascade;
+
+CREATE TABLE contest_problems (
+  id SERIAL PRIMARY KEY,
+  contest_id INTEGER NOT NULL,
+  problem_id INTEGER NOT NULL
+);
+
+ALTER TABLE contest_problems ADD CONSTRAINT fk_contest_problems_problem_id FOREIGN KEY (problem_id) REFERENCES problems (id);
+ALTER TABLE contest_problems ADD CONSTRAINT fk_contest_problems_contest_id FOREIGN KEY (contest_id) REFERENCES contests (id);
+
 DROP TABLE IF EXISTS code_languages cascade;
 
 CREATE TABLE code_languages (

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -66,6 +67,15 @@ type ComplexityRoot struct {
 		Lang func(childComplexity int) int
 	}
 
+	Contest struct {
+		ContestSlug    func(childComplexity int) int
+		Duration       func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Problems       func(childComplexity int) int
+		StartTimestamp func(childComplexity int) int
+		Title          func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateProblem func(childComplexity int, input graphql_model.NewProblem) int
 		SubmitCode    func(childComplexity int, input graphql_model.SubmitCode) int
@@ -93,6 +103,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Contests       func(childComplexity int, limit *int, offset *int) int
 		Me             func(childComplexity int) int
 		Problem        func(childComplexity int, slug *string) int
 		Problems       func(childComplexity int, limit *int, offset *int) int
@@ -140,6 +151,7 @@ type QueryResolver interface {
 	User(ctx context.Context, userName *string) (*graphql_model.User, error)
 	TestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	SubmissionList(ctx context.Context, problemSlug string, limit *int, offset *int) ([]*graphql_model.Submission, error)
+	Contests(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Contest, error)
 }
 
 type executableSchema struct {
@@ -233,6 +245,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CodeSnippet.Lang(childComplexity), true
+
+	case "Contest.contestSlug":
+		if e.complexity.Contest.ContestSlug == nil {
+			break
+		}
+
+		return e.complexity.Contest.ContestSlug(childComplexity), true
+
+	case "Contest.duration":
+		if e.complexity.Contest.Duration == nil {
+			break
+		}
+
+		return e.complexity.Contest.Duration(childComplexity), true
+
+	case "Contest.id":
+		if e.complexity.Contest.ID == nil {
+			break
+		}
+
+		return e.complexity.Contest.ID(childComplexity), true
+
+	case "Contest.problems":
+		if e.complexity.Contest.Problems == nil {
+			break
+		}
+
+		return e.complexity.Contest.Problems(childComplexity), true
+
+	case "Contest.startTimestamp":
+		if e.complexity.Contest.StartTimestamp == nil {
+			break
+		}
+
+		return e.complexity.Contest.StartTimestamp(childComplexity), true
+
+	case "Contest.title":
+		if e.complexity.Contest.Title == nil {
+			break
+		}
+
+		return e.complexity.Contest.Title(childComplexity), true
 
 	case "Mutation.createProblem":
 		if e.complexity.Mutation.CreateProblem == nil {
@@ -377,6 +431,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProblemDetailInfo.TestCases(childComplexity), true
+
+	case "Query.contests":
+		if e.complexity.Query.Contests == nil {
+			break
+		}
+
+		args, err := ec.field_Query_contests_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Contests(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -612,7 +678,29 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type CodeResult {
+	&ast.Source{Name: "schemas/contest.graphql", Input: `extend type Query {
+    contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+}
+
+type Contest {
+  id: ID!
+  contestSlug: String!
+  title: String!
+  startTimestamp: String!
+  duration: String
+  problems: [Problem!]
+}
+`},
+	&ast.Source{Name: "schemas/schema.graphql", Input: `interface Node {
+  id: ID!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type CodeResult {
   result: CodeResultDetail!
   stdout: String!
 }
@@ -845,6 +933,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_contests_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg1
 	return args, nil
 }
 
@@ -1380,6 +1490,222 @@ func (ec *executionContext) _CodeSnippet_lang(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNCodeLanguage2baraᚋgraphql_modelᚐCodeLanguage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Contest_id(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Contest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Contest_contestSlug(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Contest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContestSlug, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Contest_title(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Contest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Contest_startTimestamp(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Contest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartTimestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Contest_duration(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Contest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Duration, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Contest_problems(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Contest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Problems, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*graphql_model.Problem)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOProblem2ᚕᚖbaraᚋgraphql_modelᚐProblem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_submitCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2286,6 +2612,50 @@ func (ec *executionContext) _Query_submissionList(ctx context.Context, field gra
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNSubmission2ᚕᚖbaraᚋgraphql_modelᚐSubmission(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_contests(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_contests_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Contests(rctx, args["limit"].(*int), args["offset"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*graphql_model.Contest)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNContest2ᚕᚖbaraᚋgraphql_modelᚐContest(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4271,6 +4641,15 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj *graphql_model.Node) graphql.Marshaler {
+	switch obj := (*obj).(type) {
+	case nil:
+		return graphql.Null
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -4404,6 +4783,52 @@ func (ec *executionContext) _CodeSnippet(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var contestImplementors = []string{"Contest"}
+
+func (ec *executionContext) _Contest(ctx context.Context, sel ast.SelectionSet, obj *graphql_model.Contest) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, contestImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Contest")
+		case "id":
+			out.Values[i] = ec._Contest_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "contestSlug":
+			out.Values[i] = ec._Contest_contestSlug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._Contest_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "startTimestamp":
+			out.Values[i] = ec._Contest_startTimestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "duration":
+			out.Values[i] = ec._Contest_duration(ctx, field, obj)
+		case "problems":
+			out.Values[i] = ec._Contest_problems(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4649,6 +5074,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_submissionList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "contests":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_contests(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -5234,6 +5673,57 @@ func (ec *executionContext) marshalNCodeSnippet2ᚖbaraᚋgraphql_modelᚐCodeSn
 	return ec._CodeSnippet(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNContest2baraᚋgraphql_modelᚐContest(ctx context.Context, sel ast.SelectionSet, v graphql_model.Contest) graphql.Marshaler {
+	return ec._Contest(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNContest2ᚕᚖbaraᚋgraphql_modelᚐContest(ctx context.Context, sel ast.SelectionSet, v []*graphql_model.Contest) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNContest2ᚖbaraᚋgraphql_modelᚐContest(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNContest2ᚖbaraᚋgraphql_modelᚐContest(ctx context.Context, sel ast.SelectionSet, v *graphql_model.Contest) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Contest(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
@@ -5743,6 +6233,46 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return ec.marshalOInt2int(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOProblem2ᚕᚖbaraᚋgraphql_modelᚐProblem(ctx context.Context, sel ast.SelectionSet, v []*graphql_model.Problem) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProblem2ᚖbaraᚋgraphql_modelᚐProblem(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOProblemDetailInfo2baraᚋgraphql_modelᚐProblemDetailInfo(ctx context.Context, sel ast.SelectionSet, v graphql_model.ProblemDetailInfo) graphql.Marshaler {

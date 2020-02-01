@@ -1,6 +1,7 @@
 package bara
 
 import (
+	contest "bara/contest/resolver"
 	"bara/generated"
 	"bara/graphql_model"
 	"bara/problem"
@@ -14,6 +15,7 @@ type Resolver struct {
 	DB              *pg.DB
 	ProblemResolver problem.Resolver
 	UserResolver    user.Resolver
+	ContestResolver contest.Resolver
 }
 
 func (r *Resolver) Query() generated.QueryResolver {
@@ -56,6 +58,21 @@ func (r *queryResolver) SubmissionList(ctx context.Context, problemSlug string, 
 		offsetNum = *offset
 	}
 	return r.ProblemResolver.GetUsersSubmissionByProblemID(ctx, problemSlug, limitNum, offsetNum)
+}
+func (r *queryResolver) Contests(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Contest, error) {
+	var limitNum int
+	if limit == nil {
+		limitNum = 25
+	} else {
+		limitNum = *limit
+	}
+	var offsetNum int
+	if offset == nil {
+		offsetNum = 25
+	} else {
+		offsetNum = *offset
+	}
+	return r.ContestResolver.GetContests(ctx, limitNum, offsetNum)
 }
 
 // Mutation ...

@@ -1,0 +1,12 @@
+extend type Query {
+    contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+}
+
+type Contest {
+  id: ID!
+  contestSlug: String!
+  title: String!
+  startTimestamp: String!
+  duration: String
+  problems: [Problem!]
+}
