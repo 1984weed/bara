@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS contests cascade;
 CREATE TABLE contests (
   id SERIAL PRIMARY KEY,
   slug VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
   start_time  TIMESTAMP NOT NULL,
   CONSTRAINT contest_slug_unique UNIQUE (slug)
 );

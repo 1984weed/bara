@@ -2,7 +2,6 @@ package contest
 
 import (
 	"bara/model"
-	"context"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
@@ -10,7 +9,7 @@ import (
 
 // Repository represent the problem's store
 type Repository interface {
-	GetContests(ctx context.Context, limit, offset int) ([]model.Contests, error)
+	GetContests(limit, offset int) ([]model.Contests, error)
 }
 
 type contestRepositoryRunner struct {
@@ -46,10 +45,13 @@ type contestRepository struct {
 func newContestRepository(Conn orm.DB) Repository {
 	return &contestRepository{Conn}
 }
-func (r *contestRepository) GetContests(ctx context.Context, limit, offset int) ([]model.Contests, error) {
+
+func (r *contestRepository) GetContests(limit, offset int) ([]model.Contests, error) {
 	contests := new([]model.Contests)
 
 	err := r.Conn.Model(contests).
+		Limit(limit).
+		Offset(offset).
 		Select()
 
 	return *contests, err
