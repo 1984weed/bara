@@ -1,7 +1,7 @@
 package bara
 
 import (
-	contest "bara/contest/resolver"
+	"bara/contest"
 	"bara/generated"
 	"bara/graphql_model"
 	"bara/problem"

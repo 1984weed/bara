@@ -1,7 +1,6 @@
 package contest
 
 import (
-	contest "bara/contest/repository"
 	"bara/model"
 )
 
@@ -11,11 +10,11 @@ type Usecase interface {
 }
 
 type contestUsecase struct {
-	runner contest.RepositoryRunner
+	runner RepositoryRunner
 }
 
 // NewContestUsecase creates new a contestUsecase object of contest.Usecase interface
-func NewContestUsecase(runner contest.RepositoryRunner) Usecase {
+func NewContestUsecase(runner RepositoryRunner) Usecase {
 	return &contestUsecase{runner}
 }
 

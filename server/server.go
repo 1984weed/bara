@@ -3,6 +3,7 @@ package main
 import (
 	"bara"
 	"bara/auth"
+	"bara/contest"
 	"bara/generated"
 	"bara/problem/executor"
 	problem_repository "bara/problem/repository"
@@ -153,6 +154,11 @@ func main() {
 		problemUc := problem_usecase.NewProblemUsecase(problemRepo, codeExecutor, timeoutContext)
 		problemResolver := problem_resolver.NewProblemResolver(problemUc)
 
+		// Contest
+		contestRepo := contest.NewContestRepositoryRunner(db)
+		contestUc := contest.NewContestUsecase(contestRepo)
+		contestResolver := contest.NewContestResolver(contestUc)
+
 		// User
 		userRepoRunner := user_repository.NewUserRepositoryRunner(db)
 
@@ -163,7 +169,6 @@ func main() {
 			Region:      aws.String(ctx.String("S3_REGION")),
 		})
 		// User Image
-		// func NewUserImageRepository(s *session.Session, bucketName, fileDir string) UserS3Image {
 		userImage := user_repository.NewUserImageRepository(s, ctx.String("AWS_S3_BUCKET_NAME"), ctx.String("AWS_S3_ACCOUNT_FOLDER"))
 
 		userUc := user_usecase.NewUserUsecase(userRepoRunner, userImage, timeoutContext)
@@ -188,6 +193,7 @@ func main() {
 					DB:              db,
 					ProblemResolver: problemResolver,
 					UserResolver:    userResolver,
+					ContestResolver: contestResolver,
 				},
 			}),
 			handler.RecoverFunc(func(ctx context.Context, err interface{}) error {

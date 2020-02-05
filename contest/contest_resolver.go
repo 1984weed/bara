@@ -1,7 +1,6 @@
 package contest
 
 import (
-	contest "bara/contest/usecase"
 	"bara/graphql_model"
 	"bara/utils"
 	"context"
@@ -14,11 +13,11 @@ type Resolver interface {
 }
 
 type contestResolver struct {
-	uc contest.Usecase
+	uc Usecase
 }
 
 // NewContestResolver initializes the contest/ resources graphql resolver
-func NewContestResolver(uc contest.Usecase) Resolver {
+func NewContestResolver(uc Usecase) Resolver {
 	return &contestResolver{uc}
 }
 
