@@ -40,5 +40,5 @@ func (cr *contestResolver) GetContests(ctx context.Context, limit int, offset in
 			Problems:       []*graphql_model.Problem{},
 		}
 	}
-	return []*graphql_model.Contest{}, nil
+	return resConttests, nil
 }

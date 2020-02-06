@@ -36,13 +36,13 @@ func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler)
 			cookie, err := url.QueryUnescape(c)
 
 			if err != nil {
-				log.Print("auth-token cookie is broken")
+				log.Print("auth-token is broken")
 				next.ServeHTTP(w, r)
 				return
 			}
 
 			if cookie[0:2] != "s:" {
-				log.Print("auth-token cookie is broken")
+				log.Print("auth-token is broken")
 				next.ServeHTTP(w, r)
 				return
 			}
