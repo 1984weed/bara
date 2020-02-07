@@ -2,6 +2,10 @@ extend type Query {
     contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
 }
 
+extend type Problem {
+  score: Int!
+}
+
 type Contest {
   id: ID!
   contestSlug: String!
