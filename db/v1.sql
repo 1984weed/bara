@@ -30,7 +30,8 @@ DROP TABLE IF EXISTS contest_problems cascade;
 CREATE TABLE contest_problems (
   id SERIAL PRIMARY KEY,
   contest_id INTEGER NOT NULL,
-  problem_id INTEGER NOT NULL
+  problem_id INTEGER NOT NULL,
+  order_id INTERGER 
 );
 
 ALTER TABLE contest_problems ADD CONSTRAINT fk_contest_problems_problem_id FOREIGN KEY (problem_id) REFERENCES problems (id);
