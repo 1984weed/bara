@@ -90,6 +90,7 @@ type ComplexityRoot struct {
 		ID                func(childComplexity int) int
 		ProblemDetailInfo func(childComplexity int) int
 		SampleTestCase    func(childComplexity int) int
+		Score             func(childComplexity int) int
 		Slug              func(childComplexity int) int
 		Title             func(childComplexity int) int
 	}
@@ -382,6 +383,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Problem.SampleTestCase(childComplexity), true
+
+	case "Problem.score":
+		if e.complexity.Problem.Score == nil {
+			break
+		}
+
+		return e.complexity.Problem.Score(childComplexity), true
 
 	case "Problem.slug":
 		if e.complexity.Problem.Slug == nil {
@@ -682,6 +690,10 @@ var parsedSchema = gqlparser.MustLoadSchema(
     contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
 }
 
+extend type Problem {
+  score: Int!
+}
+
 type Contest {
   id: ID!
   contestSlug: String!
@@ -690,7 +702,14 @@ type Contest {
   duration: String
   problems: [Problem!]
 }
-`},
+
+input NewContest {
+  contestSlug: String!
+  title: String!
+  startTimestamp: String!
+  duration: String
+  problemIDs: [ID!]
+}`},
 	&ast.Source{Name: "schemas/schema.graphql", Input: `interface Node {
   id: ID!
 }
@@ -2176,6 +2195,43 @@ func (ec *executionContext) _Problem_sampleTestCase(ctx context.Context, field g
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Problem_score(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Problem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Problem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Score, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProblemDetailInfo_functionName(ctx context.Context, field graphql.CollectedField, obj *graphql_model.ProblemDetailInfo) (ret graphql.Marshaler) {
@@ -4457,6 +4513,48 @@ func (ec *executionContext) unmarshalInputCodeArg(ctx context.Context, obj inter
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewContest(ctx context.Context, obj interface{}) (graphql_model.NewContest, error) {
+	var it graphql_model.NewContest
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "contestSlug":
+			var err error
+			it.ContestSlug, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startTimestamp":
+			var err error
+			it.StartTimestamp, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "duration":
+			var err error
+			it.Duration, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "problemIDs":
+			var err error
+			it.ProblemIDs, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewProblem(ctx context.Context, obj interface{}) (graphql_model.NewProblem, error) {
 	var it graphql_model.NewProblem
 	var asMap = obj.(map[string]interface{})
@@ -4928,6 +5026,11 @@ func (ec *executionContext) _Problem(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Problem_problemDetailInfo(ctx, field, obj)
 		case "sampleTestCase":
 			out.Values[i] = ec._Problem_sampleTestCase(ctx, field, obj)
+		case "score":
+			out.Values[i] = ec._Problem_score(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6210,6 +6313,38 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOID2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOID2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {

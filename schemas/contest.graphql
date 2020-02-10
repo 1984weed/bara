@@ -14,3 +14,11 @@ type Contest {
   duration: String
   problems: [Problem!]
 }
+
+input NewContest {
+  contestSlug: String!
+  title: String!
+  startTimestamp: String!
+  duration: String
+  problemIDs: [ID!]
+}

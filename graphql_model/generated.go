@@ -49,6 +49,14 @@ type Contest struct {
 	Problems       []*Problem `json:"problems"`
 }
 
+type NewContest struct {
+	ContestSlug    string   `json:"contestSlug"`
+	Title          string   `json:"title"`
+	StartTimestamp string   `json:"startTimestamp"`
+	Duration       *string  `json:"duration"`
+	ProblemIDs     []string `json:"problemIDs"`
+}
+
 type NewProblem struct {
 	Title        string      `json:"title"`
 	Description  string      `json:"description"`
@@ -67,6 +75,7 @@ type Problem struct {
 	CodeSnippets      []*CodeSnippet     `json:"codeSnippets"`
 	ProblemDetailInfo *ProblemDetailInfo `json:"problemDetailInfo"`
 	SampleTestCase    *string            `json:"sampleTestCase"`
+	Score             int                `json:"score"`
 }
 
 type ProblemDetailInfo struct {
