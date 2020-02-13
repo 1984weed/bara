@@ -12,6 +12,9 @@ type Repository interface {
 	GetContests(limit, offset int) ([]model.Contests, error)
 	GetContest(slug string) (*model.Contests, error)
 	GetContestProblems(slug string) ([]model.Problems, error)
+	CreateContest(newContest NewContest) (*model.Contests, error)
+	UpdateContest(contestID model.ContestID, contest NewContest) (*model.Contests, error)
+	DeleteContest(slug string) error
 }
 
 // RepositoryRunner can run repo
@@ -91,7 +94,53 @@ func (r *contestRepository) GetContestProblems(slug string) ([]model.Problems, e
 		return []model.Problems{}, err
 	}
 
-
 	return problems, err
 
+}
+
+// CreateContest
+func (r *contestRepository) CreateContest(newContest NewContest) (*model.Contests, error) {
+	contest := &model.Contests{
+		Slug:      newContest.Slug,
+		Title:     newContest.Title,
+		StartTime: newContest.StartTime,
+	}
+	err := r.Conn.Insert(contest)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return contest, err
+}
+
+// UpdateContest
+func (r *contestRepository) UpdateContest(contestID model.ContestID, contest NewContest) (*model.Contests, error) {
+	updateContest := &model.Contests{
+		ID:        contestID,
+		Slug:      contest.Slug,
+		Title:     contest.Title,
+		StartTime: contest.StartTime,
+	}
+	err := r.Conn.Update(updateContest)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return updateContest, err
+}
+
+// DeleteContest
+func (r *contestRepository) DeleteContest(slug string) error {
+	deleteContest := &model.Contests{
+		Slug: slug,
+	}
+	err := r.Conn.Delete(deleteContest)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

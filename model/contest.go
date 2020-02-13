@@ -2,9 +2,11 @@ package model
 
 import "time"
 
+type ContestID int64
+
 // Contests table data
 type Contests struct {
-	ID        int64
+	ID        ContestID
 	Slug      string
 	Title     string
 	StartTime time.Time
