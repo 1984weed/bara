@@ -2,9 +2,11 @@ package contest
 
 import (
 	"bara/graphql_model"
+	"bara/model"
 	"bara/utils"
 	"context"
 	"fmt"
+	"strconv"
 )
 
 // Resolver represent the contest's resolver interface
@@ -12,8 +14,8 @@ type Resolver interface {
 	GetContests(ctx context.Context, limit int, offset int) ([]*graphql_model.Contest, error)
 	GetContest(ctx context.Context, slug string) (*graphql_model.Contest, error)
 	CreateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error)
-	UpdateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error)
-	RemoveContest(ctx context.Context, slug string) error
+	UpdateContest(ctx context.Context, contestID string, contest graphql_model.NewContest) (*graphql_model.Contest, error)
+	DeleteContest(ctx context.Context, slug string) error
 }
 
 type contestResolver struct {
@@ -55,6 +57,40 @@ func (cr *contestResolver) GetContest(ctx context.Context, slug string) (*graphq
 		return nil, err
 	}
 
+	return contestToGraphqlContest(contest), nil
+}
+
+func (cr *contestResolver) CreateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error) {
+	return nil, nil
+}
+
+func (cr *contestResolver) UpdateContest(ctx context.Context, contestID string, contest graphql_model.NewContest) (*graphql_model.Contest, error) {
+	num, err := strconv.Atoi(contestID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := cr.uc.UpdateContest(model.ContestID(num), graphqlContestToNewContest(contest))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return contestToGraphqlContest(c), nil
+}
+
+func (cr *contestResolver) DeleteContest(ctx context.Context, slug string) error {
+	err := cr.uc.DeleteContest(slug)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func contestToGraphqlContest(contest *ContestWithProblem) *graphql_model.Contest {
 	problems := make([]*graphql_model.Problem, len(contest.Problems))
 
 	for i, p := range contest.Problems {
@@ -65,7 +101,6 @@ func (cr *contestResolver) GetContest(ctx context.Context, slug string) (*graphq
 			Description: p.Description,
 		}
 	}
-
 	return &graphql_model.Contest{
 		ID:             fmt.Sprintln("%s", contest.ID),
 		ContestSlug:    contest.Slug,
@@ -73,17 +108,31 @@ func (cr *contestResolver) GetContest(ctx context.Context, slug string) (*graphq
 		StartTimestamp: utils.GetISO8061(contest.StartTime),
 		Duration:       nil,
 		Problems:       problems,
-	}, nil
+	}
 }
 
-func (cr *contestResolver) CreateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error) {
-	return nil, nil
-}
+func graphqlContestToNewContest(contest graphql_model.NewContest) *NewContest {
+	startTime, err := utils.GetTimeFromString(contest.StartTimestamp)
 
-func (cr *contestResolver) UpdateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error) {
-	return nil, nil
-}
+	if err != nil {
+		return nil
+	}
+	problemIDs := make([]int64, len(contest.ProblemIDs))
 
-func (cr *contestResolver) RemoveContest(ctx context.Context, slug string) error {
-	return nil
+	for i, p := range contest.ProblemIDs {
+		num, err := strconv.Atoi(p)
+
+		if err != nil {
+			continue
+		}
+
+		problemIDs[i] = int64(num)
+	}
+
+	return &NewContest{
+		Title:      contest.Title,
+		Slug:       contest.ContestSlug,
+		StartTime:  startTime,
+		ProblemIDs: problemIDs,
+	}
 }

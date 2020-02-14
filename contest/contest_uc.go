@@ -8,9 +8,10 @@ import (
 type Usecase interface {
 	GetContests(limit, offset int) ([]model.Contests, error)
 	GetContest(contestSlug string) (*ContestWithProblem, error)
-	CreateContest(newcontest NewContest) (*ContestWithProblem, error)
-	UpdateContest(id model.ContestID, contest NewContest) (*ContestWithProblem, error)
+	CreateContest(newcontest *NewContest) (*ContestWithProblem, error)
+	UpdateContest(id model.ContestID, contest *NewContest) (*ContestWithProblem, error)
 	DeleteContest(slug string) error
+	RegisterProblemResult(result interface{}, contestSlug string, problemSlug string) error
 }
 
 type contestUsecase struct {
@@ -51,7 +52,7 @@ func (c *contestUsecase) GetContest(contestSlug string) (*ContestWithProblem, er
 }
 
 // CreateContest
-func (c *contestUsecase) CreateContest(newcontest NewContest) (*ContestWithProblem, error) {
+func (c *contestUsecase) CreateContest(newcontest *NewContest) (*ContestWithProblem, error) {
 	var createdContest *model.Contests
 	err := c.runner.RunInTransaction(func(r Repository) error {
 		cc, err := r.CreateContest(newcontest)
@@ -71,7 +72,7 @@ func (c *contestUsecase) CreateContest(newcontest NewContest) (*ContestWithProbl
 }
 
 // UpdateContest
-func (c *contestUsecase) UpdateContest(id model.ContestID, contest NewContest) (*ContestWithProblem, error) {
+func (c *contestUsecase) UpdateContest(id model.ContestID, contest *NewContest) (*ContestWithProblem, error) {
 	var createdContest *model.Contests
 	err := c.runner.RunInTransaction(func(r Repository) error {
 		cc, err := r.UpdateContest(id, contest)
@@ -98,6 +99,19 @@ func (c *contestUsecase) DeleteContest(slug string) error {
 		if err != nil {
 			return err
 		}
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RegisterResult the result on a contest
+func (c *contestUsecase) RegisterProblemResult(result interface{}, contestSlug string, problemSlug string) error {
+	err := c.runner.RunInTransaction(func(r Repository) error {
 		return nil
 	})
 

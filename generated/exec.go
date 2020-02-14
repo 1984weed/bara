@@ -77,9 +77,12 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateContest func(childComplexity int, newContest graphql_model.NewContest) int
 		CreateProblem func(childComplexity int, input graphql_model.NewProblem) int
+		DeleteContest func(childComplexity int, contestSlug string) int
 		SubmitCode    func(childComplexity int, input graphql_model.SubmitCode) int
 		TestRunCode   func(childComplexity int, inputStr string, input graphql_model.SubmitCode) int
+		UpdateContest func(childComplexity int, contestID string, newContest graphql_model.NewContest) int
 		UpdateProblem func(childComplexity int, problemID int, input graphql_model.NewProblem) int
 		UpdateUser    func(childComplexity int, input graphql_model.UserInput) int
 	}
@@ -144,6 +147,9 @@ type MutationResolver interface {
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error)
+	CreateContest(ctx context.Context, newContest graphql_model.NewContest) (*graphql_model.Contest, error)
+	UpdateContest(ctx context.Context, contestID string, newContest graphql_model.NewContest) (*graphql_model.Contest, error)
+	DeleteContest(ctx context.Context, contestSlug string) (*bool, error)
 }
 type QueryResolver interface {
 	Problems(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Problem, error)
@@ -289,6 +295,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Contest.Title(childComplexity), true
 
+	case "Mutation.createContest":
+		if e.complexity.Mutation.CreateContest == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createContest_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateContest(childComplexity, args["newContest"].(graphql_model.NewContest)), true
+
 	case "Mutation.createProblem":
 		if e.complexity.Mutation.CreateProblem == nil {
 			break
@@ -300,6 +318,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateProblem(childComplexity, args["input"].(graphql_model.NewProblem)), true
+
+	case "Mutation.deleteContest":
+		if e.complexity.Mutation.DeleteContest == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteContest_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteContest(childComplexity, args["contestSlug"].(string)), true
 
 	case "Mutation.submitCode":
 		if e.complexity.Mutation.SubmitCode == nil {
@@ -324,6 +354,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.TestRunCode(childComplexity, args["inputStr"].(string), args["input"].(graphql_model.SubmitCode)), true
+
+	case "Mutation.updateContest":
+		if e.complexity.Mutation.UpdateContest == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateContest_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateContest(childComplexity, args["contestID"].(string), args["newContest"].(graphql_model.NewContest)), true
 
 	case "Mutation.updateProblem":
 		if e.complexity.Mutation.UpdateProblem == nil {
@@ -687,7 +729,13 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schemas/contest.graphql", Input: `extend type Query {
-    contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+  contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+}
+
+extend type Mutation {
+  createContest(newContest: NewContest!): Contest!
+  updateContest(contestID: ID!, newContest: NewContest!): Contest!
+  deleteContest(contestSlug: String!): Boolean
 }
 
 extend type Problem {
@@ -855,6 +903,20 @@ type Mutation {
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createContest_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 graphql_model.NewContest
+	if tmp, ok := rawArgs["newContest"]; ok {
+		arg0, err = ec.unmarshalNNewContest2baraᚋgraphql_modelᚐNewContest(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newContest"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createProblem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -866,6 +928,20 @@ func (ec *executionContext) field_Mutation_createProblem_args(ctx context.Contex
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteContest_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["contestSlug"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["contestSlug"] = arg0
 	return args, nil
 }
 
@@ -902,6 +978,28 @@ func (ec *executionContext) field_Mutation_testRunCode_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateContest_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["contestID"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["contestID"] = arg0
+	var arg1 graphql_model.NewContest
+	if tmp, ok := rawArgs["newContest"]; ok {
+		arg1, err = ec.unmarshalNNewContest2baraᚋgraphql_modelᚐNewContest(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newContest"] = arg1
 	return args, nil
 }
 
@@ -1942,6 +2040,135 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOUser2ᚖbaraᚋgraphql_modelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createContest(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createContest_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateContest(rctx, args["newContest"].(graphql_model.NewContest))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.Contest)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNContest2ᚖbaraᚋgraphql_modelᚐContest(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateContest(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateContest_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateContest(rctx, args["contestID"].(string), args["newContest"].(graphql_model.NewContest))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.Contest)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNContest2ᚖbaraᚋgraphql_modelᚐContest(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteContest(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteContest_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteContest(rctx, args["contestSlug"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Problem_id(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Problem) (ret graphql.Marshaler) {
@@ -4975,6 +5202,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "updateUser":
 			out.Values[i] = ec._Mutation_updateUser(ctx, field)
+		case "createContest":
+			out.Values[i] = ec._Mutation_createContest(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateContest":
+			out.Values[i] = ec._Mutation_updateContest(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteContest":
+			out.Values[i] = ec._Mutation_deleteContest(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5853,6 +6092,10 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNNewContest2baraᚋgraphql_modelᚐNewContest(ctx context.Context, v interface{}) (graphql_model.NewContest, error) {
+	return ec.unmarshalInputNewContest(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNNewProblem2baraᚋgraphql_modelᚐNewProblem(ctx context.Context, v interface{}) (graphql_model.NewProblem, error) {

@@ -101,3 +101,22 @@ func (r *mutationResolver) UpdateProblem(ctx context.Context, problemID int, inp
 func (r *mutationResolver) UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
 	return r.UserResolver.UpdateUser(ctx, input)
 }
+
+func (r *mutationResolver) CreateContest(ctx context.Context, newContest graphql_model.NewContest) (*graphql_model.Contest, error) {
+	return r.ContestResolver.CreateContest(ctx, newContest)
+}
+
+func (r *mutationResolver) UpdateContest(ctx context.Context, contestID string, newContest graphql_model.NewContest) (*graphql_model.Contest, error) {
+	return r.ContestResolver.UpdateContest(ctx, contestID, newContest)
+}
+
+func (r *mutationResolver) DeleteContest(ctx context.Context, contestSlug string) (*bool, error) {
+	err := r.ContestResolver.DeleteContest(ctx, contestSlug)
+	if err != nil {
+		b := false
+		return &b, err
+	}
+
+	b := true
+	return &b, nil
+}

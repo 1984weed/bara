@@ -1,5 +1,11 @@
 extend type Query {
-    contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+  contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+}
+
+extend type Mutation {
+  createContest(newContest: NewContest!): Contest!
+  updateContest(contestID: ID!, newContest: NewContest!): Contest!
+  deleteContest(contestSlug: String!): Boolean
 }
 
 extend type Problem {

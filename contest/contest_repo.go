@@ -12,8 +12,8 @@ type Repository interface {
 	GetContests(limit, offset int) ([]model.Contests, error)
 	GetContest(slug string) (*model.Contests, error)
 	GetContestProblems(slug string) ([]model.Problems, error)
-	CreateContest(newContest NewContest) (*model.Contests, error)
-	UpdateContest(contestID model.ContestID, contest NewContest) (*model.Contests, error)
+	CreateContest(newContest *NewContest) (*model.Contests, error)
+	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
 	DeleteContest(slug string) error
 }
 
@@ -99,7 +99,7 @@ func (r *contestRepository) GetContestProblems(slug string) ([]model.Problems, e
 }
 
 // CreateContest
-func (r *contestRepository) CreateContest(newContest NewContest) (*model.Contests, error) {
+func (r *contestRepository) CreateContest(newContest *NewContest) (*model.Contests, error) {
 	contest := &model.Contests{
 		Slug:      newContest.Slug,
 		Title:     newContest.Title,
@@ -115,7 +115,7 @@ func (r *contestRepository) CreateContest(newContest NewContest) (*model.Contest
 }
 
 // UpdateContest
-func (r *contestRepository) UpdateContest(contestID model.ContestID, contest NewContest) (*model.Contests, error) {
+func (r *contestRepository) UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error) {
 	updateContest := &model.Contests{
 		ID:        contestID,
 		Slug:      contest.Slug,
