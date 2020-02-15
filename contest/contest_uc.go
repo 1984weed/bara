@@ -2,6 +2,7 @@ package contest
 
 import (
 	"bara/model"
+	"bara/problem/domain"
 )
 
 // Usecase represent the problem's usecases
@@ -11,7 +12,7 @@ type Usecase interface {
 	CreateContest(newcontest *NewContest) (*ContestWithProblem, error)
 	UpdateContest(id model.ContestID, contest *NewContest) (*ContestWithProblem, error)
 	DeleteContest(slug string) error
-	RegisterProblemResult(result interface{}, contestSlug string, problemSlug string) error
+	RegisterProblemResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
 }
 
 type contestUsecase struct {
@@ -110,8 +111,13 @@ func (c *contestUsecase) DeleteContest(slug string) error {
 }
 
 // RegisterResult the result on a contest
-func (c *contestUsecase) RegisterProblemResult(result interface{}, contestSlug string, problemSlug string) error {
+func (c *contestUsecase) RegisterProblemResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error {
 	err := c.runner.RunInTransaction(func(r Repository) error {
+		err := r.CreateSubmitResult(result, contestSlug, problemSlug, userID)
+
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 

@@ -75,6 +75,10 @@ func (r *queryResolver) Contests(ctx context.Context, limit *int, offset *int) (
 	return r.ContestResolver.GetContests(ctx, limitNum, offsetNum)
 }
 
+func (r *queryResolver) Contest(ctx context.Context, contestSlug string) (*graphql_model.Contest, error) {
+	return nil, nil
+}
+
 // Mutation ...
 func (r *Resolver) Mutation() generated.MutationResolver {
 	return &mutationResolver{r}
@@ -84,6 +88,10 @@ type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
 	return r.ProblemResolver.SubmitProblem(ctx, input)
+}
+
+func (r *mutationResolver) SubmitContestCode(ctx context.Context, contestSlug string, problemSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
+	return r.ProblemResolver.SubmitContestCode(ctx, contestSlug, input)
 }
 
 func (r *mutationResolver) TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {

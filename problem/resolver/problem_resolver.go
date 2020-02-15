@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"bara/auth"
+	"bara/contest"
 	"bara/graphql_model"
 	"bara/model"
 	"bara/problem"
@@ -16,11 +17,12 @@ import (
 
 type problemResolver struct {
 	uc problem.Usecase
+	cc contest.Usecase
 }
 
 // NewProblemResolver initializes the problem/ resources graphql resolver
-func NewProblemResolver(uc problem.Usecase) problem.Resolver {
-	return &problemResolver{uc}
+func NewProblemResolver(uc problem.Usecase, cc contest.Usecase) problem.Resolver {
+	return &problemResolver{uc, cc}
 }
 
 var codeSlugToGraphQL = map[model.CodeLanguageSlug]graphql_model.CodeLanguage{
@@ -241,6 +243,41 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 		ProblemSlug:  input.Slug,
 	}
 	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &graphql_model.CodeResult{
+		Result: &graphql_model.CodeResultDetail{
+			Expected: result.Expected,
+			Result:   string(result.Result),
+			Status:   result.Status,
+			Time:     result.Time,
+			Input:    &result.Input,
+		},
+		Stdout: result.Output,
+	}, nil
+}
+
+func (pr *problemResolver) SubmitContestCode(ctx context.Context, contestSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
+	var user *model.Users
+	if user = auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
+
+	domainCode := &domain.SubmitCode{
+		LanguageSlug: graphQlToCodeSlug[graphql_model.CodeLanguage(input.Lang)],
+		TypedCode:    input.TypedCode,
+		ProblemSlug:  input.Slug,
+	}
+	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = pr.cc.RegisterProblemResult(result, contestSlug, input.Slug, user.ID)
 
 	if err != nil {
 		return nil, err

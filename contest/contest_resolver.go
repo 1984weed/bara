@@ -61,7 +61,13 @@ func (cr *contestResolver) GetContest(ctx context.Context, slug string) (*graphq
 }
 
 func (cr *contestResolver) CreateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error) {
-	return nil, nil
+	c, err := cr.uc.CreateContest(graphqlContestToNewContest(contest))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return contestToGraphqlContest(c), nil
 }
 
 func (cr *contestResolver) UpdateContest(ctx context.Context, contestID string, contest graphql_model.NewContest) (*graphql_model.Contest, error) {

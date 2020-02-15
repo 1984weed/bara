@@ -2,6 +2,7 @@ package contest
 
 import (
 	"bara/model"
+	"bara/problem/domain"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
@@ -15,6 +16,7 @@ type Repository interface {
 	CreateContest(newContest *NewContest) (*model.Contests, error)
 	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
 	DeleteContest(slug string) error
+	CreateSubmitResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
 }
 
 // RepositoryRunner can run repo
@@ -81,14 +83,14 @@ func (r *contestRepository) GetContestProblems(slug string) ([]model.Problems, e
 
 	_, err := r.Conn.Query(
 		&problems, `
-			SELECT 
-				p.*
-			FROM problems p, contest c, contest_problems cp
-			WHERE c.slug = ?
-			AND cp.problem_id = p.id 
-			AND c.id = cp.contest_id
-			ORDER BY cp.order_id DESC
-		`, slug)
+				SELECT 
+					p.*
+				FROM problems p, contest c, contest_problems cp
+				WHERE c.slug = ?
+				AND cp.problem_id = p.id 
+				AND c.id = cp.contest_id
+				ORDER BY cp.order_id DESC
+			`, slug)
 
 	if err != nil {
 		return []model.Problems{}, err
@@ -131,12 +133,51 @@ func (r *contestRepository) UpdateContest(contestID model.ContestID, contest *Ne
 	return updateContest, err
 }
 
-// DeleteContest
+// DeleteContest is ...
 func (r *contestRepository) DeleteContest(slug string) error {
 	deleteContest := &model.Contests{
 		Slug: slug,
 	}
 	err := r.Conn.Delete(deleteContest)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateSubmitResult is ...
+func (r *contestRepository) CreateSubmitResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error {
+	contest := new(model.Contests)
+
+	err := r.Conn.Model(contest).
+		Where("contests.slug = ?", contestSlug).
+		Select()
+
+	if err != nil {
+		return err
+	}
+
+	problem := new(model.Problems)
+
+	err = r.Conn.Model(contest).
+		Where("problems.slug = ?", problemSlug).
+		Select()
+
+	if err != nil {
+		return err
+	}
+
+	problemResult := &model.ContestProblemUserResults{
+		ContestID: contest.ID,
+		ProblemID: problem.ID,
+		UserID:    userID,
+		Status:    result.Status,
+		ExecTime:  result.Time,
+	}
+
+	err = r.Conn.Insert(problemResult)
 
 	if err != nil {
 		return err

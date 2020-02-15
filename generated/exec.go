@@ -77,14 +77,15 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateContest func(childComplexity int, newContest graphql_model.NewContest) int
-		CreateProblem func(childComplexity int, input graphql_model.NewProblem) int
-		DeleteContest func(childComplexity int, contestSlug string) int
-		SubmitCode    func(childComplexity int, input graphql_model.SubmitCode) int
-		TestRunCode   func(childComplexity int, inputStr string, input graphql_model.SubmitCode) int
-		UpdateContest func(childComplexity int, contestID string, newContest graphql_model.NewContest) int
-		UpdateProblem func(childComplexity int, problemID int, input graphql_model.NewProblem) int
-		UpdateUser    func(childComplexity int, input graphql_model.UserInput) int
+		CreateContest     func(childComplexity int, newContest graphql_model.NewContest) int
+		CreateProblem     func(childComplexity int, input graphql_model.NewProblem) int
+		DeleteContest     func(childComplexity int, contestSlug string) int
+		SubmitCode        func(childComplexity int, input graphql_model.SubmitCode) int
+		SubmitContestCode func(childComplexity int, contestSlug string, problemSlug string, input graphql_model.SubmitCode) int
+		TestRunCode       func(childComplexity int, inputStr string, input graphql_model.SubmitCode) int
+		UpdateContest     func(childComplexity int, contestID string, newContest graphql_model.NewContest) int
+		UpdateProblem     func(childComplexity int, problemID int, input graphql_model.NewProblem) int
+		UpdateUser        func(childComplexity int, input graphql_model.UserInput) int
 	}
 
 	Problem struct {
@@ -107,6 +108,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Contest        func(childComplexity int, contestSlug string) int
 		Contests       func(childComplexity int, limit *int, offset *int) int
 		Me             func(childComplexity int) int
 		Problem        func(childComplexity int, slug *string) int
@@ -143,6 +145,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	SubmitCode(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
+	SubmitContestCode(ctx context.Context, contestSlug string, problemSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error)
@@ -159,6 +162,7 @@ type QueryResolver interface {
 	TestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	SubmissionList(ctx context.Context, problemSlug string, limit *int, offset *int) ([]*graphql_model.Submission, error)
 	Contests(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Contest, error)
+	Contest(ctx context.Context, contestSlug string) (*graphql_model.Contest, error)
 }
 
 type executableSchema struct {
@@ -343,6 +347,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SubmitCode(childComplexity, args["input"].(graphql_model.SubmitCode)), true
 
+	case "Mutation.submitContestCode":
+		if e.complexity.Mutation.SubmitContestCode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_submitContestCode_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SubmitContestCode(childComplexity, args["contestSlug"].(string), args["problemSlug"].(string), args["input"].(graphql_model.SubmitCode)), true
+
 	case "Mutation.testRunCode":
 		if e.complexity.Mutation.TestRunCode == nil {
 			break
@@ -481,6 +497,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProblemDetailInfo.TestCases(childComplexity), true
+
+	case "Query.contest":
+		if e.complexity.Query.Contest == nil {
+			break
+		}
+
+		args, err := ec.field_Query_contest_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Contest(childComplexity, args["contestSlug"].(string)), true
 
 	case "Query.contests":
 		if e.complexity.Query.Contests == nil {
@@ -730,6 +758,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schemas/contest.graphql", Input: `extend type Query {
   contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+  contest(contestSlug: String!): Contest!
 }
 
 extend type Mutation {
@@ -892,6 +921,7 @@ input UserInput {
 
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
+  submitContestCode(contestSlug: String!, problemSlug: String!, input: SubmitCode!): CodeResult!
   testRunCode(inputStr: String!, input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!
@@ -956,6 +986,36 @@ func (ec *executionContext) field_Mutation_submitCode_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_submitContestCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["contestSlug"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["contestSlug"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["problemSlug"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["problemSlug"] = arg1
+	var arg2 graphql_model.SubmitCode
+	if tmp, ok := rawArgs["input"]; ok {
+		arg2, err = ec.unmarshalNSubmitCode2baraᚋgraphql_modelᚐSubmitCode(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg2
 	return args, nil
 }
 
@@ -1050,6 +1110,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_contest_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["contestSlug"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["contestSlug"] = arg0
 	return args, nil
 }
 
@@ -1852,6 +1926,50 @@ func (ec *executionContext) _Mutation_submitCode(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().SubmitCode(rctx, args["input"].(graphql_model.SubmitCode))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.CodeResult)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNCodeResult2ᚖbaraᚋgraphql_modelᚐCodeResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_submitContestCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_submitContestCode_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SubmitContestCode(rctx, args["contestSlug"].(string), args["problemSlug"].(string), args["input"].(graphql_model.SubmitCode))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2939,6 +3057,50 @@ func (ec *executionContext) _Query_contests(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNContest2ᚕᚖbaraᚋgraphql_modelᚐContest(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_contest(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_contest_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Contest(rctx, args["contestSlug"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.Contest)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNContest2ᚖbaraᚋgraphql_modelᚐContest(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5185,6 +5347,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "submitContestCode":
+			out.Values[i] = ec._Mutation_submitContestCode(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "testRunCode":
 			out.Values[i] = ec._Mutation_testRunCode(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -5430,6 +5597,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_contests(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "contest":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_contest(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

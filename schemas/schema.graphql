@@ -132,6 +132,7 @@ input UserInput {
 
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
+  submitContestCode(contestSlug: String!, problemSlug: String!, input: SubmitCode!): CodeResult!
   testRunCode(inputStr: String!, input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!

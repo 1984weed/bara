@@ -149,15 +149,15 @@ func main() {
 
 		codeExecutor := executor.NewExecutorClient(ctx.Bool("WITHOUT_CONTAINER"), 10)
 
-		// Problem
-		problemRepo := problem_repository.NewProblemRepositoryRunner(db)
-		problemUc := problem_usecase.NewProblemUsecase(problemRepo, codeExecutor, timeoutContext)
-		problemResolver := problem_resolver.NewProblemResolver(problemUc)
-
 		// Contest
 		contestRepo := contest.NewContestRepositoryRunner(db)
 		contestUc := contest.NewContestUsecase(contestRepo)
 		contestResolver := contest.NewContestResolver(contestUc)
+
+		// Problem
+		problemRepo := problem_repository.NewProblemRepositoryRunner(db)
+		problemUc := problem_usecase.NewProblemUsecase(problemRepo, codeExecutor, timeoutContext)
+		problemResolver := problem_resolver.NewProblemResolver(problemUc, contestUc)
 
 		// User
 		userRepoRunner := user_repository.NewUserRepositoryRunner(db)

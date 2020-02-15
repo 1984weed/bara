@@ -1,5 +1,6 @@
 extend type Query {
   contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
+  contest(contestSlug: String!): Contest!
 }
 
 extend type Mutation {
