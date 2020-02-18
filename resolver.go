@@ -75,8 +75,14 @@ func (r *queryResolver) Contests(ctx context.Context, limit *int, offset *int) (
 	return r.ContestResolver.GetContests(ctx, limitNum, offsetNum)
 }
 
-func (r *queryResolver) Contest(ctx context.Context, contestSlug string) (*graphql_model.Contest, error) {
-	return nil, nil
+func (r *queryResolver) Contest(ctx context.Context, slug string) (*graphql_model.Contest, error) {
+	contest, err := r.ContestResolver.GetContest(ctx, slug)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return contest, nil
 }
 
 // Mutation ...

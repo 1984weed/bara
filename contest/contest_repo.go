@@ -85,7 +85,7 @@ func (r *contestRepository) GetContestProblems(slug string) ([]model.Problems, e
 		&problems, `
 				SELECT 
 					p.*
-				FROM problems p, contest c, contest_problems cp
+				FROM problems p, contests c, contest_problems cp
 				WHERE c.slug = ?
 				AND cp.problem_id = p.id 
 				AND c.id = cp.contest_id

@@ -1,12 +1,12 @@
 extend type Query {
   contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
-  contest(contestSlug: String!): Contest!
+  contest(slug: String!): Contest!
 }
 
 extend type Mutation {
   createContest(newContest: NewContest!): Contest!
   updateContest(contestID: ID!, newContest: NewContest!): Contest!
-  deleteContest(contestSlug: String!): Boolean
+  deleteContest(slug: String!): Boolean
 }
 
 extend type Problem {
@@ -15,7 +15,7 @@ extend type Problem {
 
 type Contest {
   id: ID!
-  contestSlug: String!
+  slug: String!
   title: String!
   startTimestamp: String!
   duration: String
@@ -23,7 +23,7 @@ type Contest {
 }
 
 input NewContest {
-  contestSlug: String!
+  slug: String!
   title: String!
   startTimestamp: String!
   duration: String

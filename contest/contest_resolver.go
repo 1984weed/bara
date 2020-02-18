@@ -39,7 +39,7 @@ func (cr *contestResolver) GetContests(ctx context.Context, limit int, offset in
 	for i, c := range contests {
 		resConttests[i] = &graphql_model.Contest{
 			ID:             fmt.Sprintln("%s", c.ID),
-			ContestSlug:    c.Slug,
+			Slug:           c.Slug,
 			Title:          c.Title,
 			StartTimestamp: utils.GetISO8061(c.StartTime),
 			Duration:       nil,
@@ -109,7 +109,7 @@ func contestToGraphqlContest(contest *ContestWithProblem) *graphql_model.Contest
 	}
 	return &graphql_model.Contest{
 		ID:             fmt.Sprintln("%s", contest.ID),
-		ContestSlug:    contest.Slug,
+		Slug:           contest.Slug,
 		Title:          contest.Title,
 		StartTimestamp: utils.GetISO8061(contest.StartTime),
 		Duration:       nil,
@@ -137,7 +137,7 @@ func graphqlContestToNewContest(contest graphql_model.NewContest) *NewContest {
 
 	return &NewContest{
 		Title:      contest.Title,
-		Slug:       contest.ContestSlug,
+		Slug:       contest.Slug,
 		StartTime:  startTime,
 		ProblemIDs: problemIDs,
 	}

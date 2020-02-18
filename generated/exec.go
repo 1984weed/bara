@@ -68,10 +68,10 @@ type ComplexityRoot struct {
 	}
 
 	Contest struct {
-		ContestSlug    func(childComplexity int) int
 		Duration       func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Problems       func(childComplexity int) int
+		Slug           func(childComplexity int) int
 		StartTimestamp func(childComplexity int) int
 		Title          func(childComplexity int) int
 	}
@@ -79,7 +79,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateContest     func(childComplexity int, newContest graphql_model.NewContest) int
 		CreateProblem     func(childComplexity int, input graphql_model.NewProblem) int
-		DeleteContest     func(childComplexity int, contestSlug string) int
+		DeleteContest     func(childComplexity int, slug string) int
 		SubmitCode        func(childComplexity int, input graphql_model.SubmitCode) int
 		SubmitContestCode func(childComplexity int, contestSlug string, problemSlug string, input graphql_model.SubmitCode) int
 		TestRunCode       func(childComplexity int, inputStr string, input graphql_model.SubmitCode) int
@@ -108,7 +108,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Contest        func(childComplexity int, contestSlug string) int
+		Contest        func(childComplexity int, slug string) int
 		Contests       func(childComplexity int, limit *int, offset *int) int
 		Me             func(childComplexity int) int
 		Problem        func(childComplexity int, slug *string) int
@@ -152,7 +152,7 @@ type MutationResolver interface {
 	UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error)
 	CreateContest(ctx context.Context, newContest graphql_model.NewContest) (*graphql_model.Contest, error)
 	UpdateContest(ctx context.Context, contestID string, newContest graphql_model.NewContest) (*graphql_model.Contest, error)
-	DeleteContest(ctx context.Context, contestSlug string) (*bool, error)
+	DeleteContest(ctx context.Context, slug string) (*bool, error)
 }
 type QueryResolver interface {
 	Problems(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Problem, error)
@@ -162,7 +162,7 @@ type QueryResolver interface {
 	TestNewProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	SubmissionList(ctx context.Context, problemSlug string, limit *int, offset *int) ([]*graphql_model.Submission, error)
 	Contests(ctx context.Context, limit *int, offset *int) ([]*graphql_model.Contest, error)
-	Contest(ctx context.Context, contestSlug string) (*graphql_model.Contest, error)
+	Contest(ctx context.Context, slug string) (*graphql_model.Contest, error)
 }
 
 type executableSchema struct {
@@ -257,13 +257,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CodeSnippet.Lang(childComplexity), true
 
-	case "Contest.contestSlug":
-		if e.complexity.Contest.ContestSlug == nil {
-			break
-		}
-
-		return e.complexity.Contest.ContestSlug(childComplexity), true
-
 	case "Contest.duration":
 		if e.complexity.Contest.Duration == nil {
 			break
@@ -284,6 +277,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Contest.Problems(childComplexity), true
+
+	case "Contest.slug":
+		if e.complexity.Contest.Slug == nil {
+			break
+		}
+
+		return e.complexity.Contest.Slug(childComplexity), true
 
 	case "Contest.startTimestamp":
 		if e.complexity.Contest.StartTimestamp == nil {
@@ -333,7 +333,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteContest(childComplexity, args["contestSlug"].(string)), true
+		return e.complexity.Mutation.DeleteContest(childComplexity, args["slug"].(string)), true
 
 	case "Mutation.submitCode":
 		if e.complexity.Mutation.SubmitCode == nil {
@@ -508,7 +508,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Contest(childComplexity, args["contestSlug"].(string)), true
+		return e.complexity.Query.Contest(childComplexity, args["slug"].(string)), true
 
 	case "Query.contests":
 		if e.complexity.Query.Contests == nil {
@@ -758,13 +758,13 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schemas/contest.graphql", Input: `extend type Query {
   contests(limit: Int = 25, offset: Int  = 0): [Contest!]!
-  contest(contestSlug: String!): Contest!
+  contest(slug: String!): Contest!
 }
 
 extend type Mutation {
   createContest(newContest: NewContest!): Contest!
   updateContest(contestID: ID!, newContest: NewContest!): Contest!
-  deleteContest(contestSlug: String!): Boolean
+  deleteContest(slug: String!): Boolean
 }
 
 extend type Problem {
@@ -773,7 +773,7 @@ extend type Problem {
 
 type Contest {
   id: ID!
-  contestSlug: String!
+  slug: String!
   title: String!
   startTimestamp: String!
   duration: String
@@ -781,7 +781,7 @@ type Contest {
 }
 
 input NewContest {
-  contestSlug: String!
+  slug: String!
   title: String!
   startTimestamp: String!
   duration: String
@@ -965,13 +965,13 @@ func (ec *executionContext) field_Mutation_deleteContest_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["contestSlug"]; ok {
+	if tmp, ok := rawArgs["slug"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["contestSlug"] = arg0
+	args["slug"] = arg0
 	return args, nil
 }
 
@@ -1117,13 +1117,13 @@ func (ec *executionContext) field_Query_contest_args(ctx context.Context, rawArg
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["contestSlug"]; ok {
+	if tmp, ok := rawArgs["slug"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["contestSlug"] = arg0
+	args["slug"] = arg0
 	return args, nil
 }
 
@@ -1720,7 +1720,7 @@ func (ec *executionContext) _Contest_id(ctx context.Context, field graphql.Colle
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Contest_contestSlug(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
+func (ec *executionContext) _Contest_slug(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Contest) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1739,7 +1739,7 @@ func (ec *executionContext) _Contest_contestSlug(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ContestSlug, nil
+		return obj.Slug, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2274,7 +2274,7 @@ func (ec *executionContext) _Mutation_deleteContest(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteContest(rctx, args["contestSlug"].(string))
+		return ec.resolvers.Mutation().DeleteContest(rctx, args["slug"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3085,7 +3085,7 @@ func (ec *executionContext) _Query_contest(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Contest(rctx, args["contestSlug"].(string))
+		return ec.resolvers.Query().Contest(rctx, args["slug"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4908,9 +4908,9 @@ func (ec *executionContext) unmarshalInputNewContest(ctx context.Context, obj in
 
 	for k, v := range asMap {
 		switch k {
-		case "contestSlug":
+		case "slug":
 			var err error
-			it.ContestSlug, err = ec.unmarshalNString2string(ctx, v)
+			it.Slug, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5297,8 +5297,8 @@ func (ec *executionContext) _Contest(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "contestSlug":
-			out.Values[i] = ec._Contest_contestSlug(ctx, field, obj)
+		case "slug":
+			out.Values[i] = ec._Contest_slug(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

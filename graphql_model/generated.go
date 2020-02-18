@@ -42,7 +42,7 @@ type CodeSnippet struct {
 
 type Contest struct {
 	ID             string     `json:"id"`
-	ContestSlug    string     `json:"contestSlug"`
+	Slug           string     `json:"slug"`
 	Title          string     `json:"title"`
 	StartTimestamp string     `json:"startTimestamp"`
 	Duration       *string    `json:"duration"`
@@ -50,7 +50,7 @@ type Contest struct {
 }
 
 type NewContest struct {
-	ContestSlug    string   `json:"contestSlug"`
+	Slug           string   `json:"slug"`
 	Title          string   `json:"title"`
 	StartTimestamp string   `json:"startTimestamp"`
 	Duration       *string  `json:"duration"`
