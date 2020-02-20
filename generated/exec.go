@@ -81,7 +81,7 @@ type ComplexityRoot struct {
 		CreateProblem     func(childComplexity int, input graphql_model.NewProblem) int
 		DeleteContest     func(childComplexity int, slug string) int
 		SubmitCode        func(childComplexity int, input graphql_model.SubmitCode) int
-		SubmitContestCode func(childComplexity int, contestSlug string, problemSlug string, input graphql_model.SubmitCode) int
+		SubmitContestCode func(childComplexity int, contestSlug string, input graphql_model.SubmitCode) int
 		TestRunCode       func(childComplexity int, inputStr string, input graphql_model.SubmitCode) int
 		UpdateContest     func(childComplexity int, contestID string, newContest graphql_model.NewContest) int
 		UpdateProblem     func(childComplexity int, problemID int, input graphql_model.NewProblem) int
@@ -145,7 +145,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	SubmitCode(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
-	SubmitContestCode(ctx context.Context, contestSlug string, problemSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
+	SubmitContestCode(ctx context.Context, contestSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error)
@@ -357,7 +357,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SubmitContestCode(childComplexity, args["contestSlug"].(string), args["problemSlug"].(string), args["input"].(graphql_model.SubmitCode)), true
+		return e.complexity.Mutation.SubmitContestCode(childComplexity, args["contestSlug"].(string), args["input"].(graphql_model.SubmitCode)), true
 
 	case "Mutation.testRunCode":
 		if e.complexity.Mutation.TestRunCode == nil {
@@ -921,7 +921,7 @@ input UserInput {
 
 type Mutation {
   submitCode(input: SubmitCode!): CodeResult!
-  submitContestCode(contestSlug: String!, problemSlug: String!, input: SubmitCode!): CodeResult!
+  submitContestCode(contestSlug: String!, input: SubmitCode!): CodeResult!
   testRunCode(inputStr: String!, input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!
@@ -1000,22 +1000,14 @@ func (ec *executionContext) field_Mutation_submitContestCode_args(ctx context.Co
 		}
 	}
 	args["contestSlug"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["problemSlug"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["problemSlug"] = arg1
-	var arg2 graphql_model.SubmitCode
+	var arg1 graphql_model.SubmitCode
 	if tmp, ok := rawArgs["input"]; ok {
-		arg2, err = ec.unmarshalNSubmitCode2baraᚋgraphql_modelᚐSubmitCode(ctx, tmp)
+		arg1, err = ec.unmarshalNSubmitCode2baraᚋgraphql_modelᚐSubmitCode(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg2
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -1969,7 +1961,7 @@ func (ec *executionContext) _Mutation_submitContestCode(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SubmitContestCode(rctx, args["contestSlug"].(string), args["problemSlug"].(string), args["input"].(graphql_model.SubmitCode))
+		return ec.resolvers.Mutation().SubmitContestCode(rctx, args["contestSlug"].(string), args["input"].(graphql_model.SubmitCode))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

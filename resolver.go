@@ -96,7 +96,7 @@ func (r *mutationResolver) SubmitCode(ctx context.Context, input graphql_model.S
 	return r.ProblemResolver.SubmitProblem(ctx, input)
 }
 
-func (r *mutationResolver) SubmitContestCode(ctx context.Context, contestSlug string, problemSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
+func (r *mutationResolver) SubmitContestCode(ctx context.Context, contestSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
 	return r.ProblemResolver.SubmitContestCode(ctx, contestSlug, input)
 }
 

@@ -34,3 +34,5 @@ docker-up-for-test:
 docker-local:
 	@docker-compose up -d bara.db bara.redis
 
+init-db-data:
+	./scripts/init-data.sh

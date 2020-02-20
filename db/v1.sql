@@ -15,6 +15,33 @@ CREATE TABLE users (
   CONSTRAINT user_username_unique UNIQUE (user_name)
 );
 
+DROP TYPE IF EXISTS args_t cascade;
+CREATE TYPE args_t AS enum(
+  'string[][]',
+  'string[]', 
+  'string',
+  'int[][]',
+  'int[]',
+  'int',
+  'double[][]',
+  'double[]',
+  'double');
+
+DROP TABLE IF EXISTS problems cascade;
+
+CREATE TABLE problems (
+  id SERIAL PRIMARY KEY,
+  slug VARCHAR(255) NOT NULL,
+  title VARCHAR(300) NOT NULL,
+  description TEXT NOT NULL,
+  function_name VARCHAR(255),
+  author_id INTEGER,
+  output_type args_t NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  CONSTRAINT problems_slug_unique UNIQUE(slug)
+);
+
 DROP TABLE IF EXISTS contests cascade;
 
 CREATE TABLE contests (
@@ -31,7 +58,7 @@ CREATE TABLE contest_problems (
   id SERIAL PRIMARY KEY,
   contest_id INTEGER NOT NULL,
   problem_id INTEGER NOT NULL,
-  order_id INTERGER 
+  order_id INTEGER 
 );
 
 ALTER TABLE contest_problems ADD CONSTRAINT fk_contest_problems_problem_id FOREIGN KEY (problem_id) REFERENCES problems (id);
@@ -66,33 +93,6 @@ CREATE TABLE code_languages (
   id INTEGER PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   slug VARCHAR(255) NOT NULL
-);
-
-DROP TYPE IF EXISTS args_t cascade;
-CREATE TYPE args_t AS enum(
-  'string[][]',
-  'string[]', 
-  'string',
-  'int[][]',
-  'int[]',
-  'int',
-  'double[][]',
-  'double[]',
-  'double');
-
-DROP TABLE IF EXISTS problems cascade;
-
-CREATE TABLE problems (
-  id SERIAL PRIMARY KEY,
-  slug VARCHAR(255) NOT NULL,
-  title VARCHAR(300) NOT NULL,
-  description TEXT NOT NULL,
-  function_name VARCHAR(255),
-  author_id INTEGER,
-  output_type args_t NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  CONSTRAINT problems_slug_unique UNIQUE(slug)
 );
 
 DROP TABLE IF EXISTS problem_args cascade;
