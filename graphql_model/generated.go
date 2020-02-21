@@ -86,6 +86,18 @@ type ProblemDetailInfo struct {
 	TestCases    []*TestCaseType `json:"testCases"`
 }
 
+type ProblemSubmitResult struct {
+	Problem       *Problem `json:"problem"`
+	Status        string   `json:"status"`
+	CompletedTime string   `json:"completedTime"`
+}
+
+type Ranking struct {
+	Rank                int                  `json:"rank"`
+	User                *User                `json:"user"`
+	ProblemSubmitResult *ProblemSubmitResult `json:"problemSubmitResult"`
+}
+
 type RunCode struct {
 	TypedCode string `json:"typedCode"`
 	Lang      string `json:"lang"`

@@ -161,7 +161,7 @@ func (r *contestRepository) CreateSubmitResult(result *domain.CodeResult, contes
 
 	problem := new(model.Problems)
 
-	err = r.Conn.Model(contest).
+	err = r.Conn.Model(problem).
 		Where("problems.slug = ?", problemSlug).
 		Select()
 

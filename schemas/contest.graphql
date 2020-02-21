@@ -7,6 +7,19 @@ extend type Mutation {
   createContest(newContest: NewContest!): Contest!
   updateContest(contestID: ID!, newContest: NewContest!): Contest!
   deleteContest(slug: String!): Boolean
+  startCalculateRanking(slug: String!): Ranking
+}
+
+type Ranking {
+  rank: Int!
+  user: User!
+  problemSubmitResult: ProblemSubmitResult!
+}
+
+type ProblemSubmitResult {
+  problem: Problem!
+  status: String!
+  completedTime: String!
 }
 
 extend type Problem {
