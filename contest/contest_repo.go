@@ -13,6 +13,8 @@ type Repository interface {
 	GetContests(limit, offset int) ([]model.Contests, error)
 	GetContest(slug string) (*model.Contests, error)
 	GetContestProblems(slug string) ([]model.Problems, error)
+	GetContestResult(slug string) ([]model.ContestProblemUserResults, error)
+	UpdateContestRanking(slug string) ([]model.ContestProblemUserResults, error)
 	CreateContest(newContest *NewContest) (*model.Contests, error)
 	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
 	DeleteContest(slug string) error

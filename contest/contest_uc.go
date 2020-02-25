@@ -11,6 +11,7 @@ type Usecase interface {
 	GetContest(contestSlug string) (*ContestWithProblem, error)
 	CreateContest(newcontest *NewContest) (*ContestWithProblem, error)
 	UpdateContest(id model.ContestID, contest *NewContest) (*ContestWithProblem, error)
+	UpdateRankingContest(contestSlug string) error
 	DeleteContest(slug string) error
 	RegisterProblemResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
 }
@@ -114,6 +115,35 @@ func (c *contestUsecase) DeleteContest(slug string) error {
 func (c *contestUsecase) RegisterProblemResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error {
 	err := c.runner.RunInTransaction(func(r Repository) error {
 		err := r.CreateSubmitResult(result, contestSlug, problemSlug, userID)
+
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
+	contestResult, err := c.runner.GetRepository().GetContestResult(contestSlug)
+
+	var userResultTimeMap map[int64]int
+	for _, c := range contestResult {
+		_, ok := userResultTimeMap[c.UserID]
+
+		if ok {
+			userResultTimeMap[c.UserID] += c.ExecTime
+		} else {
+			userResultTimeMap[c.UserID] = c.ExecTime
+		}
+	}
+
+	err = c.runner.RunInTransaction(func(r Repository) error {
 
 		if err != nil {
 			return err
