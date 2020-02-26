@@ -143,6 +143,8 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 		}
 	}
 
+	ranking := make([]ContestRanking, len(userResultTimeMap))
+
 	err = c.runner.RunInTransaction(func(r Repository) error {
 
 		if err != nil {

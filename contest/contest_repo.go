@@ -13,8 +13,8 @@ type Repository interface {
 	GetContests(limit, offset int) ([]model.Contests, error)
 	GetContest(slug string) (*model.Contests, error)
 	GetContestProblems(slug string) ([]model.Problems, error)
-	GetContestResult(slug string) ([]model.ContestProblemUserResults, error)
-	UpdateContestRanking() ([]model.ContestProblemUserResults, error)
+	GetContestResult(slug string) ([]model.ContestUserResults, error)
+	UpdateContestRanking(ranking []ContestRanking) ([]model.ContestProblemUserResults, error)
 	CreateContest(newContest *NewContest) (*model.Contests, error)
 	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
 	DeleteContest(slug string) error
@@ -24,6 +24,7 @@ type Repository interface {
 // RepositoryRunner can run repo
 type RepositoryRunner interface {
 	RunInTransaction(fn func(r Repository) error) error
+
 	GetRepository() Repository
 }
 
@@ -100,6 +101,29 @@ func (r *contestRepository) GetContestProblems(slug string) ([]model.Problems, e
 
 	return problems, err
 
+}
+func (r *contestRepository) UpdateContestRanking(rankings []ContestRanking) ([]model.ContestProblemUserResults, error) {
+	res := make([]model.ContestProblemUserResults, len(rankings))
+
+	return res, nil
+}
+
+func (r *contestRepository) GetContestResult(slug string) ([]model.ContestUserResults, error) {
+	var res []model.ContestUserResults
+	_, err := r.Conn.Query(
+		&res, `
+			SELECT cpur.id, cpur.user_id, c.start_time, c.id, cpur.created_at
+			FROM contests c , contest_problem_user_results cpur
+			INNER JOIN (
+			SELECT min(created_at) AS min_date FROM contest_problem_user_results WHERE status = 'success' GROUP BY user_id ) cm ON cm.min_date = created_at
+			WHERE 
+			c.id = cpur.contest_id AND c.slug = ? AND cpur.status = 'success'
+			`, slug)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 // CreateContest

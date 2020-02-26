@@ -72,7 +72,8 @@ CREATE TABLE contest_problem_user_results (
   problem_id INTEGER NOT NULL,
   user_id INTEGER NOT NULL,
   status VARCHAR(10) NOT NULL,
-  exec_time INTEGER
+  exec_time INTEGER,
+  created_at TIMESTAMP NOT NULL
 );
 
 ALTER TABLE contest_problem_user_results ADD CONSTRAINT fk_contest_problems_problem_id FOREIGN KEY (problem_id) REFERENCES problems (id);
@@ -84,7 +85,7 @@ CREATE TABLE contest_user_results (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
   contest_id INTEGER NOT NULL,
-  ranking INTEGER NOT NULL
+  ranking INTEGER NOT NULL,
 );
 
 DROP TABLE IF EXISTS code_languages cascade;
