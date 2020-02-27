@@ -13,7 +13,7 @@ type Repository interface {
 	GetContests(limit, offset int) ([]model.Contests, error)
 	GetContest(slug string) (*model.Contests, error)
 	GetContestProblems(slug string) ([]model.Problems, error)
-	GetContestResult(slug string) ([]model.ContestUserResults, error)
+	GetContestProblemResult(contestSlug string, problemSlug string) ([]model.ContestUserProblemSuccess, error)
 	UpdateContestRanking(ranking []ContestRanking) ([]model.ContestProblemUserResults, error)
 	CreateContest(newContest *NewContest) (*model.Contests, error)
 	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
@@ -108,17 +108,24 @@ func (r *contestRepository) UpdateContestRanking(rankings []ContestRanking) ([]m
 	return res, nil
 }
 
-func (r *contestRepository) GetContestResult(slug string) ([]model.ContestUserResults, error) {
-	var res []model.ContestUserResults
+func (r *contestRepository) GetContestProblemResult(contestSlug string, problemSlug string) ([]model.ContestUserProblemSuccess, error) {
+	var res []model.ContestUserProblemSuccess
+
 	_, err := r.Conn.Query(
 		&res, `
-			SELECT cpur.id, cpur.user_id, c.start_time, c.id, cpur.created_at
-			FROM contests c , contest_problem_user_results cpur
+			SELECT cpur.user_id, cpur.created_at, cpur.exec_time
+			FROM problems p, contests c , contest_problem_user_results cpur
 			INNER JOIN (
 			SELECT min(created_at) AS min_date FROM contest_problem_user_results WHERE status = 'success' GROUP BY user_id ) cm ON cm.min_date = created_at
 			WHERE 
-			c.id = cpur.contest_id AND c.slug = ? AND cpur.status = 'success'
-			`, slug)
+			p.id = cpur.problem_id
+			AND c.id = cpur.contest_id
+			AND c.slug = ?
+			AND p.slug = ?
+			AND cpur.status = 'success' 
+			GROUP BY cpur.user_id HAVING cpur.created_at = MIN(cpur.created_at)
+			ORDER BY cpur.created_at
+			`, contestSlug, problemSlug)
 	if err != nil {
 		return nil, err
 	}

@@ -98,8 +98,14 @@ func (cr *contestResolver) DeleteContest(ctx context.Context, slug string) error
 }
 
 func (cr *contestResolver) StartCalculateRanking(ctx context.Context, slug string) (*graphql_model.Ranking, error) {
-	err := cr.uc.UpdateRanking(slug)
+	err := cr.uc.UpdateRankingContest(slug)
 	// UpdateRankingContest(contestSlug string) error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func contestToGraphqlContest(contest *ContestWithProblem) *graphql_model.Contest {

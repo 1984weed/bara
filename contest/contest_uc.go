@@ -130,22 +130,28 @@ func (c *contestUsecase) RegisterProblemResult(result *domain.CodeResult, contes
 }
 
 func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
-	contestResult, err := c.runner.GetRepository().GetContestResult(contestSlug)
-
-	var userResultTimeMap map[int64]int
-	for _, c := range contestResult {
-		_, ok := userResultTimeMap[c.UserID]
-
-		if ok {
-			userResultTimeMap[c.UserID] += c.ExecTime
-		} else {
-			userResultTimeMap[c.UserID] = c.ExecTime
-		}
-	}
-
-	ranking := make([]ContestRanking, len(userResultTimeMap))
+	contest, err := c.runner.GetRepository().GetContest(contestSlug)
+	problems, err := c.runner.GetRepository().GetContestProblems(contestSlug)
 
 	err = c.runner.RunInTransaction(func(r Repository) error {
+		var userResultTimeMap map[int64]int64
+		for _, p := range problems {
+			contestResults, err := r.GetContestProblemResult(contestSlug, p.Slug)
+
+			if err != nil {
+				return err
+			}
+			for _, c := range contestResults {
+				_, ok := userResultTimeMap[c.UserID]
+
+				timeSpend := c.CreatedAt.Unix() - contest.StartTime.Unix()
+				if ok {
+					userResultTimeMap[c.UserID] += timeSpend
+				} else {
+					userResultTimeMap[c.UserID] = timeSpend
+				}
+			}
+		}
 
 		if err != nil {
 			return err

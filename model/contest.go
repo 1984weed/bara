@@ -29,3 +29,10 @@ type ContestUserResults struct {
 	ContestID int64
 	Ranking   int
 }
+
+// ContestProblemUserTime
+type ContestUserProblemSuccess struct {
+	UserID    int64
+	ExecTime  int
+	CreatedAt time.Time
+}
