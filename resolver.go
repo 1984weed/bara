@@ -136,7 +136,7 @@ func (r *mutationResolver) DeleteContest(ctx context.Context, contestSlug string
 }
 
 func (r *mutationResolver) StartCalculateRanking(ctx context.Context, slug string) (*graphql_model.Ranking, error) {
-	err := r.ContestResolver.StartCalculateRanking(ctx, contestSlug)
+	_, err := r.ContestResolver.UpdateRankingContest(ctx, slug)
 
 	if err != nil {
 		return nil, err

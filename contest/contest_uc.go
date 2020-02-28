@@ -3,6 +3,7 @@ package contest
 import (
 	"bara/model"
 	"bara/problem/domain"
+	"sort"
 )
 
 // Usecase represent the problem's usecases
@@ -134,7 +135,7 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 	problems, err := c.runner.GetRepository().GetContestProblems(contestSlug)
 
 	err = c.runner.RunInTransaction(func(r Repository) error {
-		var userResultTimeMap map[int64]int64
+		var userResultTimeMap map[int64]int
 		for _, p := range problems {
 			contestResults, err := r.GetContestProblemResult(contestSlug, p.Slug)
 
@@ -144,7 +145,7 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 			for _, c := range contestResults {
 				_, ok := userResultTimeMap[c.UserID]
 
-				timeSpend := c.CreatedAt.Unix() - contest.StartTime.Unix()
+				timeSpend := int(c.CreatedAt.Unix() - contest.StartTime.Unix())
 				if ok {
 					userResultTimeMap[c.UserID] += timeSpend
 				} else {
@@ -152,6 +153,15 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 				}
 			}
 		}
+
+		values := make([]int, len(userResultTimeMap))
+		i := 0
+		for _, value := range userResultTimeMap {
+			values[i] = value
+			i++
+		}
+
+		sort.Ints(values)
 
 		if err != nil {
 			return err
