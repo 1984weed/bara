@@ -26,7 +26,7 @@ type ContestProblemUserResults struct {
 type ContestUserResults struct {
 	ID        int64
 	UserID    int64
-	ContestID int64
+	ContestID ContestID
 	Ranking   int
 }
 

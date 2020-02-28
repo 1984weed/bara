@@ -153,16 +153,32 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 				}
 			}
 		}
-
-		values := make([]int, len(userResultTimeMap))
-		i := 0
-		for _, value := range userResultTimeMap {
-			values[i] = value
-			i++
+		type kv struct {
+			Key   int64
+			Value int
 		}
 
-		sort.Ints(values)
+		pl := make([]kv, len(userResultTimeMap))
+		i := 0
+		for k, v := range userResultTimeMap {
+			pl[i] = kv{k, v}
+			i++
+		}
+		sort.Slice(pl, func(i, j int) bool {
+			return pl[i].Value > pl[j].Value
+		})
 
+		rankings := make([]ContestRanking, len(pl))
+
+		for i, v := range pl {
+			rankings[i] = ContestRanking{
+				UserID:    v.Key,
+				ContestID: contest.ID,
+				Ranking:   i,
+			}
+		}
+
+		err := r.UpdateContestRanking(rankings)
 		if err != nil {
 			return err
 		}

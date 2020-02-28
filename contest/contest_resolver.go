@@ -99,7 +99,6 @@ func (cr *contestResolver) DeleteContest(ctx context.Context, slug string) error
 
 func (cr *contestResolver) UpdateRankingContest(ctx context.Context, slug string) (*graphql_model.Ranking, error) {
 	err := cr.uc.UpdateRankingContest(slug)
-	// UpdateRankingContest(contestSlug string) error
 
 	if err != nil {
 		return nil, err

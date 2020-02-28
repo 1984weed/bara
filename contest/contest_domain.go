@@ -24,8 +24,7 @@ type NewContest struct {
 
 // ContestRanking ...
 type ContestRanking struct {
-	ID        int64
 	UserID    int64
-	ContestID int64
+	ContestID model.ContestID
 	Ranking   int
 }

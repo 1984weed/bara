@@ -14,7 +14,7 @@ type Repository interface {
 	GetContest(slug string) (*model.Contests, error)
 	GetContestProblems(slug string) ([]model.Problems, error)
 	GetContestProblemResult(contestSlug string, problemSlug string) ([]model.ContestUserProblemSuccess, error)
-	UpdateContestRanking(ranking []ContestRanking) ([]model.ContestProblemUserResults, error)
+	UpdateContestRanking(ranking []ContestRanking) error
 	CreateContest(newContest *NewContest) (*model.Contests, error)
 	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
 	DeleteContest(slug string) error
@@ -102,10 +102,18 @@ func (r *contestRepository) GetContestProblems(slug string) ([]model.Problems, e
 	return problems, err
 
 }
-func (r *contestRepository) UpdateContestRanking(rankings []ContestRanking) ([]model.ContestProblemUserResults, error) {
-	res := make([]model.ContestProblemUserResults, len(rankings))
+func (r *contestRepository) UpdateContestRanking(rankings []ContestRanking) error {
+	res := make([]model.ContestUserResults, len(rankings))
 
-	return res, nil
+	for i, r := range rankings {
+		res[i] = model.ContestUserResults{
+			ContestID: r.ContestID,
+			UserID:    r.UserID,
+			Ranking:   r.Ranking,
+		}
+	}
+
+	return r.Conn.Insert(res)
 }
 
 func (r *contestRepository) GetContestProblemResult(contestSlug string, problemSlug string) ([]model.ContestUserProblemSuccess, error) {
