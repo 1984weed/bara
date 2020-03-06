@@ -61,6 +61,7 @@ func (c *contestUsecase) CreateContest(newcontest *NewContest) (*ContestWithProb
 		cc, err := r.CreateContest(newcontest)
 		createdContest = cc
 
+		cc, err := r.CreateContest(newcontest)
 		if err != nil {
 			return err
 		}

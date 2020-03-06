@@ -28,3 +28,9 @@ type ContestRanking struct {
 	ContestID model.ContestID
 	Ranking   int
 }
+
+// ContestProblemID ...
+type ContestProblemID struct {
+	ContestID model.ContestID
+	ProblemID int64
+}

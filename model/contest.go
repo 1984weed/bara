@@ -22,6 +22,14 @@ type ContestProblemUserResults struct {
 	ExecTime  int
 }
 
+// ContestProblems ...
+type ContestProblems struct {
+	ID        int64
+	ContestID ContestID
+	ProblemID int64
+	OrderID   int
+}
+
 // ContestUserResults table data
 type ContestUserResults struct {
 	ID        int64
