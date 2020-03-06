@@ -158,6 +158,7 @@ func (r *contestRepository) CreateContest(newContest *NewContest) (*model.Contes
 	return contest, err
 }
 
+// RegisterContestProblem
 func (r *contestRepository) RegisterContestProblem(contestProblems []ContestProblemID) error {
 	contestsPs := make([]model.ContestProblems, len(contestProblems))
 
