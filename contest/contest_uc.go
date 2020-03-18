@@ -61,10 +61,21 @@ func (c *contestUsecase) CreateContest(newcontest *NewContest) (*ContestWithProb
 		cc, err := r.CreateContest(newcontest)
 		createdContest = cc
 
-		cc, err := r.CreateContest(newcontest)
+		contestProblems := make([]ContestProblemID, len(newcontest.ProblemIDs))
+
+		for i, pID := range newcontest.ProblemIDs {
+			contestProblems[i] = ContestProblemID{
+				ContestID: cc.ID,
+				ProblemID: pID,
+			}
+		}
+
+		err = r.RegisterContestProblem(contestProblems)
+
 		if err != nil {
 			return err
 		}
+
 		return nil
 	})
 

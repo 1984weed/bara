@@ -16,7 +16,7 @@ type Repository interface {
 	GetContestProblemResult(contestSlug string, problemSlug string) ([]model.ContestUserProblemSuccess, error)
 	UpdateContestRanking(ranking []ContestRanking) error
 	CreateContest(newContest *NewContest) (*model.Contests, error)
-	RegisterContestProblem(problemID int64, contestID model.ContestID) error
+	RegisterContestProblem(contestProblems []ContestProblemID) error
 	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
 	DeleteContest(slug string) error
 	CreateSubmitResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
@@ -169,7 +169,7 @@ func (r *contestRepository) RegisterContestProblem(contestProblems []ContestProb
 			OrderID:   i,
 		}
 	}
-	err := r.Conn.Insert(contestsPs)
+	err := r.Conn.Insert(&contestsPs)
 
 	if err != nil {
 		return err
