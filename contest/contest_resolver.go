@@ -119,7 +119,7 @@ func contestToGraphqlContest(contest *ContestWithProblem) *graphql_model.Contest
 		}
 	}
 	return &graphql_model.Contest{
-		ID:             fmt.Sprintln("%s", contest.ID),
+		ID:             fmt.Sprintf("%d", contest.ID),
 		Slug:           contest.Slug,
 		Title:          contest.Title,
 		StartTimestamp: utils.GetISO8061(contest.StartTime),

@@ -17,6 +17,7 @@ type Repository interface {
 	UpdateContestRanking(ranking []ContestRanking) error
 	CreateContest(newContest *NewContest) (*model.Contests, error)
 	RegisterContestProblem(contestProblems []ContestProblemID) error
+	DeleteContestProblem(contestID model.ContestID) error
 	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
 	DeleteContest(slug string) error
 	CreateSubmitResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
@@ -158,7 +159,7 @@ func (r *contestRepository) CreateContest(newContest *NewContest) (*model.Contes
 	return contest, err
 }
 
-// RegisterContestProblem
+// RegisterContestProblem...
 func (r *contestRepository) RegisterContestProblem(contestProblems []ContestProblemID) error {
 	contestsPs := make([]model.ContestProblems, len(contestProblems))
 
@@ -178,6 +179,20 @@ func (r *contestRepository) RegisterContestProblem(contestProblems []ContestProb
 	return nil
 }
 
+// DeleteContestProblem...
+func (r *contestRepository) DeleteContestProblem(contestID model.ContestID) error {
+	deleteContestProblems := &model.ContestProblems{
+		ContestID: contestID,
+	}
+
+	_, err := r.Conn.Model(deleteContestProblems).Where("contest_id = ?contest_id").Delete()
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // UpdateContest
 func (r *contestRepository) UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error) {
 	updateContest := &model.Contests{
@@ -192,7 +207,7 @@ func (r *contestRepository) UpdateContest(contestID model.ContestID, contest *Ne
 		return nil, err
 	}
 
-	return updateContest, err
+	return updateContest, nil
 }
 
 // DeleteContest is ...

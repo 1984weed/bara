@@ -48,9 +48,11 @@ func (c *contestUsecase) GetContest(contestSlug string) (*ContestWithProblem, er
 	problems, err := c.runner.GetRepository().GetContestProblems(contestSlug)
 
 	return &ContestWithProblem{
-		ID:       int64(contest.ID),
-		Slug:     contest.Slug,
-		Problems: problems,
+		ID:        int64(contest.ID),
+		Title:     contest.Title,
+		Slug:      contest.Slug,
+		StartTime: contest.StartTime,
+		Problems:  problems,
 	}, err
 }
 
@@ -88,13 +90,32 @@ func (c *contestUsecase) CreateContest(newcontest *NewContest) (*ContestWithProb
 
 // UpdateContest
 func (c *contestUsecase) UpdateContest(id model.ContestID, contest *NewContest) (*ContestWithProblem, error) {
-	var createdContest *model.Contests
+	var updatedContest *model.Contests
 	err := c.runner.RunInTransaction(func(r Repository) error {
 		cc, err := r.UpdateContest(id, contest)
-		createdContest = cc
+		updatedContest = cc
+
+		err = r.DeleteContestProblem(id)
 
 		if err != nil {
 			return err
+		}
+
+		if len(contest.ProblemIDs) > 0 {
+			contestProblems := make([]ContestProblemID, len(contest.ProblemIDs))
+
+			for i, pID := range contest.ProblemIDs {
+				contestProblems[i] = ContestProblemID{
+					ContestID: cc.ID,
+					ProblemID: pID,
+				}
+			}
+
+			err = r.RegisterContestProblem(contestProblems)
+			if err != nil {
+				return err
+			}
+
 		}
 		return nil
 	})
@@ -103,7 +124,7 @@ func (c *contestUsecase) UpdateContest(id model.ContestID, contest *NewContest) 
 		return nil, err
 	}
 
-	return c.GetContest(createdContest.Slug)
+	return c.GetContest(updatedContest.Slug)
 }
 
 // CreateContest
