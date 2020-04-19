@@ -146,13 +146,13 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Bio      func(childComplexity int) int
-		Email    func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Image    func(childComplexity int) int
-		RealName func(childComplexity int) int
-		Role     func(childComplexity int) int
-		UserName func(childComplexity int) int
+		Bio         func(childComplexity int) int
+		DisplayName func(childComplexity int) int
+		Email       func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Image       func(childComplexity int) int
+		Role        func(childComplexity int) int
+		UserName    func(childComplexity int) int
 	}
 }
 
@@ -720,6 +720,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Bio(childComplexity), true
 
+	case "User.displayName":
+		if e.complexity.User.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.User.DisplayName(childComplexity), true
+
 	case "User.email":
 		if e.complexity.User.Email == nil {
 			break
@@ -740,13 +747,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Image(childComplexity), true
-
-	case "User.realName":
-		if e.complexity.User.RealName == nil {
-			break
-		}
-
-		return e.complexity.User.RealName(childComplexity), true
 
 	case "User.role":
 		if e.complexity.User.Role == nil {
@@ -984,7 +984,7 @@ enum UserRole {
 
 type User {
   id: ID!
-  realName: String!
+  displayName: String!
   userName: String!
   email: String!
   image: String!
@@ -993,7 +993,7 @@ type User {
 }
 
 input UserInput {
-  realName: String
+  displayName: String
   userName: String
   email: String
   image: String
@@ -3858,7 +3858,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_realName(ctx context.Context, field graphql.CollectedField, obj *graphql_model.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_displayName(ctx context.Context, field graphql.CollectedField, obj *graphql_model.User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -3877,7 +3877,7 @@ func (ec *executionContext) _User_realName(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.RealName, nil
+		return obj.DisplayName, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5438,9 +5438,9 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 
 	for k, v := range asMap {
 		switch k {
-		case "realName":
+		case "displayName":
 			var err error
-			it.RealName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.DisplayName, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6154,8 +6154,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "realName":
-			out.Values[i] = ec._User_realName(ctx, field, obj)
+		case "displayName":
+			out.Values[i] = ec._User_displayName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

@@ -43,24 +43,24 @@ func (u *userRepositoryTest) SetupTest() {
 func mockUserData() []model.Users {
 	return []model.Users{
 		{
-			UserName:  "user-1",
-			RealName:  "James Smith",
-			Password:  "user-1-password",
-			Email:     "user-1-email@testtest.com",
-			Bio:       "user-1-bio",
-			Image:     "user-1-image",
-			UpdatedAt: time.Now().UTC(),
-			CreatedAt: time.Now().UTC(),
+			UserName:    "user-1",
+			DisplayName: "James Smith",
+			Password:    "user-1-password",
+			Email:       "user-1-email@testtest.com",
+			Bio:         "user-1-bio",
+			Image:       "user-1-image",
+			UpdatedAt:   time.Now().UTC(),
+			CreatedAt:   time.Now().UTC(),
 		},
 		{
-			UserName:  "user-2",
-			RealName:  "Maria Garcia",
-			Password:  "user-2-password",
-			Email:     "user-2-email@testtest.com",
-			Bio:       "user-2-bio",
-			Image:     "user-2-image",
-			UpdatedAt: time.Now().UTC(),
-			CreatedAt: time.Now().UTC(),
+			UserName:    "user-2",
+			DisplayName: "Maria Garcia",
+			Password:    "user-2-password",
+			Email:       "user-2-email@testtest.com",
+			Bio:         "user-2-bio",
+			Image:       "user-2-image",
+			UpdatedAt:   time.Now().UTC(),
+			CreatedAt:   time.Now().UTC(),
 		},
 	}
 }
@@ -109,15 +109,15 @@ func (a *userRepositoryTest) TestGetUserByEmail() {
 
 		require.NoError(a.T(), err)
 		assert.Equal(a.T(), &model.Users{
-			ID:        res.ID,
-			UserName:  targetUser.UserName,
-			RealName:  targetUser.RealName,
-			Password:  targetUser.Password,
-			Email:     targetUser.Email,
-			Bio:       targetUser.Bio,
-			Image:     targetUser.Image,
-			UpdatedAt: res.UpdatedAt,
-			CreatedAt: res.CreatedAt,
+			ID:          res.ID,
+			UserName:    targetUser.UserName,
+			DisplayName: targetUser.DisplayName,
+			Password:    targetUser.Password,
+			Email:       targetUser.Email,
+			Bio:         targetUser.Bio,
+			Image:       targetUser.Image,
+			UpdatedAt:   res.UpdatedAt,
+			CreatedAt:   res.CreatedAt,
 		}, res)
 	})
 
@@ -141,15 +141,15 @@ func (a *userRepositoryTest) TestGetUserByUserName() {
 
 		require.NoError(a.T(), err)
 		assert.Equal(a.T(), &model.Users{
-			ID:        res.ID,
-			UserName:  targetUser.UserName,
-			RealName:  targetUser.RealName,
-			Password:  targetUser.Password,
-			Email:     targetUser.Email,
-			Bio:       targetUser.Bio,
-			Image:     targetUser.Image,
-			UpdatedAt: res.UpdatedAt,
-			CreatedAt: res.CreatedAt,
+			ID:          res.ID,
+			UserName:    targetUser.UserName,
+			DisplayName: targetUser.DisplayName,
+			Password:    targetUser.Password,
+			Email:       targetUser.Email,
+			Bio:         targetUser.Bio,
+			Image:       targetUser.Image,
+			UpdatedAt:   res.UpdatedAt,
+			CreatedAt:   res.CreatedAt,
 		}, res)
 	})
 

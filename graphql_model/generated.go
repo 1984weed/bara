@@ -130,21 +130,21 @@ type TestCaseType struct {
 }
 
 type User struct {
-	ID       string    `json:"id"`
-	RealName string    `json:"realName"`
-	UserName string    `json:"userName"`
-	Email    string    `json:"email"`
-	Image    string    `json:"image"`
-	Role     *UserRole `json:"role"`
-	Bio      string    `json:"bio"`
+	ID          string    `json:"id"`
+	DisplayName string    `json:"displayName"`
+	UserName    string    `json:"userName"`
+	Email       string    `json:"email"`
+	Image       string    `json:"image"`
+	Role        *UserRole `json:"role"`
+	Bio         string    `json:"bio"`
 }
 
 type UserInput struct {
-	RealName *string `json:"realName"`
-	UserName *string `json:"userName"`
-	Email    *string `json:"email"`
-	Image    *string `json:"image"`
-	Bio      *string `json:"bio"`
+	DisplayName *string `json:"displayName"`
+	UserName    *string `json:"userName"`
+	Email       *string `json:"email"`
+	Image       *string `json:"image"`
+	Bio         *string `json:"bio"`
 }
 
 type CodeLanguage string

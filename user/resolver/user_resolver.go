@@ -50,13 +50,13 @@ func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
 	}
 
 	return &graphql_model.User{
-		ID:       string(user.ID),
-		RealName: user.RealName,
-		UserName: user.UserName,
-		Email:    user.Email,
-		Image:    user.Image,
-		Role:     &role,
-		Bio:      user.Bio,
+		ID:          string(user.ID),
+		DisplayName: user.DisplayName,
+		UserName:    user.UserName,
+		Email:       user.Email,
+		Image:       user.Image,
+		Role:        &role,
+		Bio:         user.Bio,
 	}, nil
 }
 
@@ -72,22 +72,22 @@ func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_m
 	}
 
 	return &graphql_model.User{
-		ID:       string(user.ID),
-		RealName: user.RealName,
-		UserName: user.UserName,
-		Email:    user.Email,
-		Image:    user.Image,
-		Bio:      user.Bio,
+		ID:          string(user.ID),
+		DisplayName: user.DisplayName,
+		UserName:    user.UserName,
+		Email:       user.Email,
+		Image:       user.Image,
+		Bio:         user.Bio,
 	}, nil
 }
 
 func (u *userResolver) UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
 	userForUpdate := domain.UserForUpdate{
-		UserName: input.UserName,
-		RealName: input.RealName,
-		Email:    input.Email,
-		Bio:      input.Bio,
-		Image:    input.Image,
+		UserName:    input.UserName,
+		DisplayName: input.DisplayName,
+		Email:       input.Email,
+		Bio:         input.Bio,
+		Image:       input.Image,
 	}
 
 	_, err := u.uc.UpdateUser(ctx, userForUpdate)

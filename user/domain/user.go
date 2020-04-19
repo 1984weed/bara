@@ -7,9 +7,9 @@ func IsAdmin(username string) bool {
 
 // UserForUpdate ...
 type UserForUpdate struct {
-	UserName *string
-	RealName *string
-	Email    *string
-	Bio      *string
-	Image    *string
+	UserName    *string
+	DisplayName *string
+	Email       *string
+	Bio         *string
+	Image       *string
 }

@@ -4,8 +4,8 @@ DROP TABLE IF EXISTS users cascade;
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   user_name VARCHAR(255) NOT NULL,
-  real_name VARCHAR(255),
-  password VARCHAR(255) NOT NULL,
+  display_name VARCHAR(255),
+  password VARCHAR(255) NULL,
   email VARCHAR(255) NOT NULL,
   bio VARCHAR(1024),
   image VARCHAR(255),
@@ -14,6 +14,21 @@ CREATE TABLE users (
   CONSTRAINT user_email_unique UNIQUE (email),
   CONSTRAINT user_username_unique UNIQUE (user_name)
 );
+
+DROP TABLE IF EXISTS oauth_users cascade;
+
+CREATE TABLE oauth_users (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  access_token VARCHAR(255),
+  refresh_token VARCHAR(255),
+  provider VARCHAR(255) NOT NULL,
+  provider_id VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE oauth_users ADD CONSTRAINT fk_oauth_users_user_id FOREIGN KEY (user_id) REFERENCES users (id);
 
 DROP TYPE IF EXISTS args_t cascade;
 CREATE TYPE args_t AS enum(

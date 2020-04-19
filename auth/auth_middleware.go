@@ -5,6 +5,7 @@ import (
 	"bara/user"
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"net/url"
@@ -35,13 +36,7 @@ func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler)
 			}
 			cookie, err := url.QueryUnescape(c)
 
-			if err != nil {
-				log.Print("auth-token is broken")
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			if cookie[0:2] != "s:" {
+			if err != nil || cookie[0:2] != "s:" {
 				log.Print("auth-token is broken")
 				next.ServeHTTP(w, r)
 				return
@@ -52,7 +47,7 @@ func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler)
 			userID, err := getSession("sess:", redisKey, pool)
 
 			if err != nil {
-				http.Error(w, "Invalid cookie", http.StatusForbidden)
+				next.ServeHTTP(w, r)
 				return
 			}
 
@@ -87,23 +82,32 @@ func getSession(prefix string, key string, pool *redis.Pool) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return getUserID(b), nil
+	userID, err := getUserID(b)
+
+	if err != nil {
+		return 0, err
+	}
+	return userID, nil
 }
 
-func getUserID(d []byte) int64 {
+func getUserID(d []byte) (int64, error) {
 	var f interface{}
 	err := json.Unmarshal(d, &f)
 
 	if err != nil {
-		return 0
+		return 0, err
 	}
 	m := f.(map[string]interface{})
 
-	user := m["passport"]
+	user, ok := m["passport"]
+
+	if !ok {
+		return 0, errors.New("There is no sessions")
+	}
 
 	v := user.(map[string]interface{})
 
-	return int64(v["user"].(float64))
+	return int64(v["user"].(float64)), nil
 }
 
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
