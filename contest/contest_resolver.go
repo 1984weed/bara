@@ -1,6 +1,7 @@
 package contest
 
 import (
+	"bara/auth"
 	"bara/graphql_model"
 	"bara/model"
 	"bara/utils"
@@ -58,7 +59,25 @@ func (cr *contestResolver) GetContest(ctx context.Context, slug string) (*graphq
 		return nil, err
 	}
 
-	return contestToGraphqlContest(contest), nil
+	resContest := contestToGraphqlContest(contest)
+
+	var user *model.Users
+	user = auth.ForContext(ctx)
+	if user != nil {
+		contestProblemsStatus, err := cr.uc.GetContestProblemResult(model.ContestID(contest.ID), user.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		for i, p := range contest.Problems {
+			_, ok := contestProblemsStatus[p.ID]
+			resContest.Problems[i].UserResult = &graphql_model.ContestProblemsUserResult{
+				Done: ok,
+			}
+		}
+	}
+
+	return resContest, nil
 }
 
 func (cr *contestResolver) CreateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error) {

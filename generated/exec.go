@@ -76,6 +76,10 @@ type ComplexityRoot struct {
 		Title          func(childComplexity int) int
 	}
 
+	ContestProblemsUserResult struct {
+		Done func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateContest         func(childComplexity int, newContest graphql_model.NewContest) int
 		CreateProblem         func(childComplexity int, input graphql_model.NewProblem) int
@@ -98,6 +102,7 @@ type ComplexityRoot struct {
 		Score             func(childComplexity int) int
 		Slug              func(childComplexity int) int
 		Title             func(childComplexity int) int
+		UserResult        func(childComplexity int) int
 	}
 
 	ProblemDetailInfo struct {
@@ -313,6 +318,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Contest.Title(childComplexity), true
 
+	case "ContestProblemsUserResult.done":
+		if e.complexity.ContestProblemsUserResult.Done == nil {
+			break
+		}
+
+		return e.complexity.ContestProblemsUserResult.Done(childComplexity), true
+
 	case "Mutation.createContest":
 		if e.complexity.Mutation.CreateContest == nil {
 			break
@@ -488,6 +500,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Problem.Title(childComplexity), true
+
+	case "Problem.userResult":
+		if e.complexity.Problem.UserResult == nil {
+			break
+		}
+
+		return e.complexity.Problem.UserResult(childComplexity), true
 
 	case "ProblemDetailInfo.args":
 		if e.complexity.ProblemDetailInfo.Args == nil {
@@ -850,6 +869,7 @@ type ProblemSubmitResult {
 
 extend type Problem {
   score: Int!
+  userResult: ContestProblemsUserResult
 }
 
 type Contest {
@@ -859,6 +879,10 @@ type Contest {
   startTimestamp: String!
   duration: String
   problems: [Problem!]
+}
+
+type ContestProblemsUserResult {
+  done: Boolean!
 }
 
 input NewContest {
@@ -975,6 +999,7 @@ input NewProblem {
   argsNum: Int!
   args: [CodeArg!]!
   testCases: [TestCase!]!
+  testCaseNum: Int!
 }
 
 enum UserRole {
@@ -1986,6 +2011,43 @@ func (ec *executionContext) _Contest_problems(ctx context.Context, field graphql
 	return ec.marshalOProblem2ᚕᚖbaraᚋgraphql_modelᚐProblem(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ContestProblemsUserResult_done(ctx context.Context, field graphql.CollectedField, obj *graphql_model.ContestProblemsUserResult) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ContestProblemsUserResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Done, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_submitCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2705,6 +2767,40 @@ func (ec *executionContext) _Problem_score(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Problem_userResult(ctx context.Context, field graphql.CollectedField, obj *graphql_model.Problem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Problem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserResult, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*graphql_model.ContestProblemsUserResult)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOContestProblemsUserResult2ᚖbaraᚋgraphql_modelᚐContestProblemsUserResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProblemDetailInfo_functionName(ctx context.Context, field graphql.CollectedField, obj *graphql_model.ProblemDetailInfo) (ret graphql.Marshaler) {
@@ -5342,6 +5438,12 @@ func (ec *executionContext) unmarshalInputNewProblem(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
+		case "testCaseNum":
+			var err error
+			it.TestCaseNum, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -5677,6 +5779,33 @@ func (ec *executionContext) _Contest(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var contestProblemsUserResultImplementors = []string{"ContestProblemsUserResult"}
+
+func (ec *executionContext) _ContestProblemsUserResult(ctx context.Context, sel ast.SelectionSet, obj *graphql_model.ContestProblemsUserResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, contestProblemsUserResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContestProblemsUserResult")
+		case "done":
+			out.Values[i] = ec._ContestProblemsUserResult_done(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -5789,6 +5918,8 @@ func (ec *executionContext) _Problem(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "userResult":
+			out.Values[i] = ec._Problem_userResult(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7191,6 +7322,17 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOContestProblemsUserResult2baraᚋgraphql_modelᚐContestProblemsUserResult(ctx context.Context, sel ast.SelectionSet, v graphql_model.ContestProblemsUserResult) graphql.Marshaler {
+	return ec._ContestProblemsUserResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOContestProblemsUserResult2ᚖbaraᚋgraphql_modelᚐContestProblemsUserResult(ctx context.Context, sel ast.SelectionSet, v *graphql_model.ContestProblemsUserResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ContestProblemsUserResult(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOID2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {

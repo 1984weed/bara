@@ -15,6 +15,7 @@ type Usecase interface {
 	UpdateRankingContest(contestSlug string) error
 	DeleteContest(slug string) error
 	RegisterProblemResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
+	GetContestProblemResult(contestID model.ContestID, userID int64) (map[int64]UserContestProblemResult, error)
 }
 
 type contestUsecase struct {
@@ -223,4 +224,33 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 	}
 
 	return nil
+}
+
+// GetContestProblemResult ...
+func (c *contestUsecase) GetContestProblemResult(contestID model.ContestID, userID int64) (map[int64]UserContestProblemResult, error) {
+	result, err := c.runner.GetRepository().GetContestProblemsUserResults(contestID, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	res := map[int64]UserContestProblemResult{}
+
+	for _, r := range result {
+		rp, ok := res[r.ProblemID]
+
+		if ok {
+			if rp.Done {
+				continue
+			}
+		}
+
+		res[r.ProblemID] = UserContestProblemResult{
+			ContestID: contestID,
+			ProblemID: r.ProblemID,
+			Done:      r.Status == "success",
+		}
+	}
+
+	return res, nil
 }

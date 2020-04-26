@@ -105,6 +105,7 @@ input NewProblem {
   argsNum: Int!
   args: [CodeArg!]!
   testCases: [TestCase!]!
+  testCaseNum: Int!
 }
 
 enum UserRole {

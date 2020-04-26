@@ -49,6 +49,10 @@ type Contest struct {
 	Problems       []*Problem `json:"problems"`
 }
 
+type ContestProblemsUserResult struct {
+	Done bool `json:"done"`
+}
+
 type NewContest struct {
 	Slug           string   `json:"slug"`
 	Title          string   `json:"title"`
@@ -65,17 +69,19 @@ type NewProblem struct {
 	ArgsNum      int         `json:"argsNum"`
 	Args         []*CodeArg  `json:"args"`
 	TestCases    []*TestCase `json:"testCases"`
+	TestCaseNum  int         `json:"testCaseNum"`
 }
 
 type Problem struct {
-	ID                int                `json:"id"`
-	Slug              string             `json:"slug"`
-	Title             string             `json:"title"`
-	Description       string             `json:"description"`
-	CodeSnippets      []*CodeSnippet     `json:"codeSnippets"`
-	ProblemDetailInfo *ProblemDetailInfo `json:"problemDetailInfo"`
-	SampleTestCase    *string            `json:"sampleTestCase"`
-	Score             int                `json:"score"`
+	ID                int                        `json:"id"`
+	Slug              string                     `json:"slug"`
+	Title             string                     `json:"title"`
+	Description       string                     `json:"description"`
+	CodeSnippets      []*CodeSnippet             `json:"codeSnippets"`
+	ProblemDetailInfo *ProblemDetailInfo         `json:"problemDetailInfo"`
+	SampleTestCase    *string                    `json:"sampleTestCase"`
+	Score             int                        `json:"score"`
+	UserResult        *ContestProblemsUserResult `json:"userResult"`
 }
 
 type ProblemDetailInfo struct {

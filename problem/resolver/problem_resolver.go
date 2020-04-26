@@ -200,8 +200,9 @@ func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, i
 			VarType: a.Type,
 		}
 	}
-	testcases := make([]domain.Testcase, len(input.TestCases))
-	for i, t := range input.TestCases {
+	testcases := make([]domain.Testcase, input.TestCaseNum)
+	for i := 0; i < input.TestCaseNum; i++ {
+		t := input.TestCases[i]
 		input := make([]string, len(t.Input))
 		for i, in := range t.Input {
 			input[i] = *in

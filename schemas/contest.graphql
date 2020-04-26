@@ -24,6 +24,7 @@ type ProblemSubmitResult {
 
 extend type Problem {
   score: Int!
+  userResult: ContestProblemsUserResult
 }
 
 type Contest {
@@ -33,6 +34,10 @@ type Contest {
   startTimestamp: String!
   duration: String
   problems: [Problem!]
+}
+
+type ContestProblemsUserResult {
+  done: Boolean!
 }
 
 input NewContest {

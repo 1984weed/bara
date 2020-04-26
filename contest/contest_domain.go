@@ -34,3 +34,9 @@ type ContestProblemID struct {
 	ContestID model.ContestID
 	ProblemID int64
 }
+
+type UserContestProblemResult struct {
+	ContestID model.ContestID
+	ProblemID int64
+	Done      bool
+}

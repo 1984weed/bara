@@ -42,5 +42,7 @@ type ContestUserResults struct {
 type ContestUserProblemSuccess struct {
 	UserID    int64
 	ExecTime  int
+	ProblemID int64
 	CreatedAt time.Time
+	Status    string
 }

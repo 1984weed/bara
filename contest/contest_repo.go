@@ -14,6 +14,7 @@ type Repository interface {
 	GetContest(slug string) (*model.Contests, error)
 	GetContestProblems(slug string) ([]model.Problems, error)
 	GetContestProblemResult(contestSlug string, problemSlug string) ([]model.ContestUserProblemSuccess, error)
+	GetContestProblemsUserResults(contestID model.ContestID, userID int64) ([]model.ContestUserProblemSuccess, error)
 	UpdateContestRanking(ranking []ContestRanking) error
 	CreateContest(newContest *NewContest) (*model.Contests, error)
 	RegisterContestProblem(contestProblems []ContestProblemID) error
@@ -143,7 +144,22 @@ func (r *contestRepository) GetContestProblemResult(contestSlug string, problemS
 	return res, nil
 }
 
-// CreateContest
+func (r *contestRepository) GetContestProblemsUserResults(contestID model.ContestID, userID int64) ([]model.ContestUserProblemSuccess, error) {
+	var res []model.ContestUserProblemSuccess
+
+	_, err := r.Conn.Query(
+		&res, `
+		SELECT user_id, status, problem_id, exec_time FROM contest_problem_user_results cpur WHERE contest_id = ? and user_id = ? 
+		`, contestID, userID)
+
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// CreateContest ...
 func (r *contestRepository) CreateContest(newContest *NewContest) (*model.Contests, error) {
 	contest := &model.Contests{
 		Slug:      newContest.Slug,
