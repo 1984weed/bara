@@ -169,6 +169,7 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 	}
 	problem := &domain.NewProblem{
 		Title:        input.Title,
+		Slug:         input.Slug,
 		Description:  input.Description,
 		OutputType:   input.OutputType,
 		FunctionName: input.FunctionName,

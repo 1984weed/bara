@@ -993,6 +993,7 @@ input CodeArg {
 
 input NewProblem {
   title: String!
+  slug: String
   description: String!
   functionName: String!
   outputType: String!
@@ -5399,6 +5400,12 @@ func (ec *executionContext) unmarshalInputNewProblem(ctx context.Context, obj in
 		case "title":
 			var err error
 			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "slug":
+			var err error
+			it.Slug, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

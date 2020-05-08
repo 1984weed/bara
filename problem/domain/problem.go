@@ -92,6 +92,7 @@ func convertJSTypeFromType(typeStr string) string {
 // NewProblem represents a new problem
 type NewProblem struct {
 	Title        string
+	Slug         *string
 	Description  string
 	OutputType   string
 	FunctionName string

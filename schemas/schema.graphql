@@ -99,6 +99,7 @@ input CodeArg {
 
 input NewProblem {
   title: String!
+  slug: String
   description: String!
   functionName: String!
   outputType: String!

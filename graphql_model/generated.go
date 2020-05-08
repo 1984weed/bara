@@ -63,6 +63,7 @@ type NewContest struct {
 
 type NewProblem struct {
 	Title        string      `json:"title"`
+	Slug         *string     `json:"slug"`
 	Description  string      `json:"description"`
 	FunctionName string      `json:"functionName"`
 	OutputType   string      `json:"outputType"`
