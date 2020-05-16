@@ -61,14 +61,21 @@ func newContestRepository(Conn orm.DB) Repository {
 }
 
 func (r *contestRepository) GetContests(limit, offset int) ([]model.Contests, error) {
-	contests := new([]model.Contests)
+	var contests []model.Contests
 
-	err := r.Conn.Model(contests).
-		Limit(limit).
-		Offset(offset).
-		Select()
+	_, err := r.Conn.Query(
+		&contests, `
+				SELECT 
+					c.id,
+					c.slug,
+					c.title,
+					c.start_time
+				FROM contests c
+				ORDER BY c.id
+				LIMIT ? OFFSET ?
+			`, limit, offset)
 
-	return *contests, err
+	return contests, err
 }
 
 func (r *contestRepository) GetContest(slug string) (*model.Contests, error) {

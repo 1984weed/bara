@@ -40,7 +40,7 @@ func (cr *contestResolver) GetContests(ctx context.Context, limit int, offset in
 	resConttests := make([]*graphql_model.Contest, len(contests))
 	for i, c := range contests {
 		resConttests[i] = &graphql_model.Contest{
-			ID:             fmt.Sprintln("%s", c.ID),
+			ID:             strconv.Itoa(int(c.ID)),
 			Slug:           c.Slug,
 			Title:          c.Title,
 			StartTimestamp: utils.GetISO8061(c.StartTime),

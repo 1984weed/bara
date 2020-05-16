@@ -38,12 +38,30 @@ func newProblemRepository(Conn orm.DB) problem.Repository {
 	return &problemRepository{Conn}
 }
 func (r *problemRepository) GetProblems(ctx context.Context, limit, offset int) ([]model.Problems, error) {
-	problems := new([]model.Problems)
+	var problems []model.Problems
 
-	err := r.Conn.Model(problems).
-		Select()
+	_, err := r.Conn.Query(
+		&problems, `
+			SELECT 
+				id,
+				slug,
+				title,
+				description,
+				function_name,
+				output_type,
+				author_id,
+				created_at,
+				updated_at
+			FROM problems p
+			ORDER BY p.id
+			LIMIT ? OFFSET ?
+		`, limit, offset)
 
-	return *problems, err
+	if err != nil {
+		return nil, err
+	}
+
+	return problems, err
 }
 
 func (r *problemRepository) GetBySlug(ctx context.Context, slug string) (*model.ProblemsWithArgs, error) {

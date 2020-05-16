@@ -24,6 +24,7 @@ type Problem struct {
 
 func ConvertProblemFromTableModel(p model.Problems) *Problem {
 	return &Problem{
+		ProblemID:    p.ID,
 		Slug:         p.Slug,
 		Title:        p.Title,
 		Description:  p.Description,

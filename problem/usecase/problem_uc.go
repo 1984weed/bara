@@ -142,10 +142,15 @@ func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain
 }
 
 func (p *problemUsecase) UpdateProblem(ctx context.Context, problemID int64, inputProblem *domain.NewProblem) (*domain.Problem, error) {
+	slug := inputProblem.GetSlug()
+
+	if inputProblem.Slug != nil {
+		slug = *inputProblem.Slug
+	}
 	newProblem := &model.Problems{
 		ID:           problemID,
 		Title:        inputProblem.Title,
-		Slug:         inputProblem.GetSlug(),
+		Slug:         slug,
 		Description:  inputProblem.Description,
 		FunctionName: inputProblem.FunctionName,
 		OutputType:   inputProblem.OutputType,

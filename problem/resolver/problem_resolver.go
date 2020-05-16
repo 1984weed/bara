@@ -45,6 +45,7 @@ func (pr *problemResolver) GetProblems(ctx context.Context, limit int, offset in
 
 	for i, p := range problems {
 		graphProblems[i] = &graphql_model.Problem{
+			ID:           int(p.ProblemID),
 			Slug:         p.Slug,
 			Title:        p.Title,
 			Description:  p.Description,
@@ -185,14 +186,15 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 	return &graphql_model.Problem{
 		ID:    int(p.ProblemID),
 		Title: p.Title,
+		Slug:  p.Slug,
 	}, nil
 }
 
 // UpdateProblem ...
 func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
-	// if user := auth.ForContext(ctx); user == nil {
-	// 	return nil, errors.New("Forbidden")
-	// }
+	if user := auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
 
 	args := make([]domain.ProblemArgs, input.ArgsNum)
 	for i, a := range input.Args {
@@ -215,6 +217,7 @@ func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, i
 	}
 	problem := &domain.NewProblem{
 		Title:        input.Title,
+		Slug:         input.Slug,
 		Description:  input.Description,
 		OutputType:   input.OutputType,
 		FunctionName: input.FunctionName,
@@ -230,6 +233,7 @@ func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, i
 	return &graphql_model.Problem{
 		ID:    int(p.ProblemID),
 		Title: p.Title,
+		Slug:  p.Slug,
 	}, nil
 }
 
