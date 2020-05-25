@@ -1,34 +1,20 @@
-package contest
+package repository
 
 import (
+	"bara/contest"
+	"bara/contest/domain"
 	"bara/model"
-	"bara/problem/domain"
+	problem_domain "bara/problem/domain"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 )
 
-// Repository represent the problem's store
-type Repository interface {
-	GetContests(limit, offset int) ([]model.Contests, error)
-	GetContest(slug string) (*model.Contests, error)
-	GetContestProblems(slug string) ([]model.Problems, error)
-	GetContestProblemResult(contestSlug string, problemSlug string) ([]model.ContestUserProblemSuccess, error)
-	GetContestProblemsUserResults(contestID model.ContestID, userID int64) ([]model.ContestUserProblemSuccess, error)
-	UpdateContestRanking(ranking []ContestRanking) error
-	CreateContest(newContest *NewContest) (*model.Contests, error)
-	RegisterContestProblem(contestProblems []ContestProblemID) error
-	DeleteContestProblem(contestID model.ContestID) error
-	UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error)
-	DeleteContest(slug string) error
-	CreateSubmitResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
-}
-
 // RepositoryRunner can run repo
 type RepositoryRunner interface {
-	RunInTransaction(fn func(r Repository) error) error
+	RunInTransaction(fn func(r contest.Repository) error) error
 
-	GetRepository() Repository
+	GetRepository() contest.Repository
 }
 
 // NewProblemRepositoryRunner will create an object that represent the problem.Repository Runner Interface
@@ -40,14 +26,14 @@ type contestRepositoryRunner struct {
 	Conn *pg.DB
 }
 
-func (p *contestRepositoryRunner) RunInTransaction(fn func(r Repository) error) error {
+func (p *contestRepositoryRunner) RunInTransaction(fn func(r contest.Repository) error) error {
 	return p.Conn.RunInTransaction(func(tx *pg.Tx) error {
 		pr := newContestRepository(interface{}(tx).(orm.DB))
 		return fn(pr)
 	})
 }
 
-func (p *contestRepositoryRunner) GetRepository() Repository {
+func (p *contestRepositoryRunner) GetRepository() contest.Repository {
 	return newContestRepository(interface{}(p.Conn).(orm.DB))
 }
 
@@ -56,7 +42,7 @@ type contestRepository struct {
 }
 
 // newContestRepository will create an object that represent the problem.Repository interface
-func newContestRepository(Conn orm.DB) Repository {
+func newContestRepository(Conn orm.DB) contest.Repository {
 	return &contestRepository{Conn}
 }
 
@@ -112,7 +98,7 @@ func (r *contestRepository) GetContestProblems(slug string) ([]model.Problems, e
 	return problems, err
 
 }
-func (r *contestRepository) UpdateContestRanking(rankings []ContestRanking) error {
+func (r *contestRepository) UpdateContestRanking(rankings []domain.ContestRanking) error {
 	res := make([]model.ContestUserResults, len(rankings))
 
 	for i, r := range rankings {
@@ -167,7 +153,7 @@ func (r *contestRepository) GetContestProblemsUserResults(contestID model.Contes
 }
 
 // CreateContest ...
-func (r *contestRepository) CreateContest(newContest *NewContest) (*model.Contests, error) {
+func (r *contestRepository) CreateContest(newContest *domain.NewContest) (*model.Contests, error) {
 	contest := &model.Contests{
 		Slug:      newContest.Slug,
 		Title:     newContest.Title,
@@ -183,7 +169,7 @@ func (r *contestRepository) CreateContest(newContest *NewContest) (*model.Contes
 }
 
 // RegisterContestProblem...
-func (r *contestRepository) RegisterContestProblem(contestProblems []ContestProblemID) error {
+func (r *contestRepository) RegisterContestProblem(contestProblems []domain.ContestProblemID) error {
 	contestsPs := make([]model.ContestProblems, len(contestProblems))
 
 	for i, cp := range contestProblems {
@@ -217,7 +203,7 @@ func (r *contestRepository) DeleteContestProblem(contestID model.ContestID) erro
 }
 
 // UpdateContest
-func (r *contestRepository) UpdateContest(contestID model.ContestID, contest *NewContest) (*model.Contests, error) {
+func (r *contestRepository) UpdateContest(contestID model.ContestID, contest *domain.NewContest) (*model.Contests, error) {
 	updateContest := &model.Contests{
 		ID:        contestID,
 		Slug:      contest.Slug,
@@ -248,7 +234,7 @@ func (r *contestRepository) DeleteContest(slug string) error {
 }
 
 // CreateSubmitResult is ...
-func (r *contestRepository) CreateSubmitResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error {
+func (r *contestRepository) CreateSubmitResult(result *problem_domain.CodeResult, contestSlug string, problemSlug string, userID int64) error {
 	contest := new(model.Contests)
 
 	err := r.Conn.Model(contest).

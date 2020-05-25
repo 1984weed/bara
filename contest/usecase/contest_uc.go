@@ -1,29 +1,20 @@
-package contest
+package usecase
 
 import (
+	"bara/contest"
+	"bara/contest/domain"
+	"bara/contest/repository"
 	"bara/model"
-	"bara/problem/domain"
+	problem_domain "bara/problem/domain"
 	"sort"
 )
 
-// Usecase represent the problem's usecases
-type Usecase interface {
-	GetContests(limit, offset int) ([]model.Contests, error)
-	GetContest(contestSlug string) (*ContestWithProblem, error)
-	CreateContest(newcontest *NewContest) (*ContestWithProblem, error)
-	UpdateContest(id model.ContestID, contest *NewContest) (*ContestWithProblem, error)
-	UpdateRankingContest(contestSlug string) error
-	DeleteContest(slug string) error
-	RegisterProblemResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error
-	GetContestProblemResult(contestID model.ContestID, userID int64) (map[int64]UserContestProblemResult, error)
-}
-
 type contestUsecase struct {
-	runner RepositoryRunner
+	runner repository.RepositoryRunner
 }
 
 // NewContestUsecase creates new a contestUsecase object of contest.Usecase interface
-func NewContestUsecase(runner RepositoryRunner) Usecase {
+func NewContestUsecase(runner repository.RepositoryRunner) contest.Usecase {
 	return &contestUsecase{runner}
 }
 
@@ -39,7 +30,7 @@ func (c *contestUsecase) GetContests(limit, offset int) ([]model.Contests, error
 }
 
 // GetContest ...
-func (c *contestUsecase) GetContest(contestSlug string) (*ContestWithProblem, error) {
+func (c *contestUsecase) GetContest(contestSlug string) (*domain.ContestWithProblem, error) {
 	contest, err := c.runner.GetRepository().GetContest(contestSlug)
 
 	if err != nil {
@@ -48,7 +39,7 @@ func (c *contestUsecase) GetContest(contestSlug string) (*ContestWithProblem, er
 
 	problems, err := c.runner.GetRepository().GetContestProblems(contestSlug)
 
-	return &ContestWithProblem{
+	return &domain.ContestWithProblem{
 		ID:        int64(contest.ID),
 		Title:     contest.Title,
 		Slug:      contest.Slug,
@@ -58,16 +49,16 @@ func (c *contestUsecase) GetContest(contestSlug string) (*ContestWithProblem, er
 }
 
 // CreateContest
-func (c *contestUsecase) CreateContest(newcontest *NewContest) (*ContestWithProblem, error) {
+func (c *contestUsecase) CreateContest(newcontest *domain.NewContest) (*domain.ContestWithProblem, error) {
 	var createdContest *model.Contests
-	err := c.runner.RunInTransaction(func(r Repository) error {
+	err := c.runner.RunInTransaction(func(r contest.Repository) error {
 		cc, err := r.CreateContest(newcontest)
 		createdContest = cc
 
-		contestProblems := make([]ContestProblemID, len(newcontest.ProblemIDs))
+		contestProblems := make([]domain.ContestProblemID, len(newcontest.ProblemIDs))
 
 		for i, pID := range newcontest.ProblemIDs {
-			contestProblems[i] = ContestProblemID{
+			contestProblems[i] = domain.ContestProblemID{
 				ContestID: cc.ID,
 				ProblemID: pID,
 			}
@@ -90,10 +81,10 @@ func (c *contestUsecase) CreateContest(newcontest *NewContest) (*ContestWithProb
 }
 
 // UpdateContest
-func (c *contestUsecase) UpdateContest(id model.ContestID, contest *NewContest) (*ContestWithProblem, error) {
+func (c *contestUsecase) UpdateContest(id model.ContestID, newContest *domain.NewContest) (*domain.ContestWithProblem, error) {
 	var updatedContest *model.Contests
-	err := c.runner.RunInTransaction(func(r Repository) error {
-		cc, err := r.UpdateContest(id, contest)
+	err := c.runner.RunInTransaction(func(r contest.Repository) error {
+		cc, err := r.UpdateContest(id, newContest)
 		updatedContest = cc
 
 		err = r.DeleteContestProblem(id)
@@ -102,11 +93,11 @@ func (c *contestUsecase) UpdateContest(id model.ContestID, contest *NewContest) 
 			return err
 		}
 
-		if len(contest.ProblemIDs) > 0 {
-			contestProblems := make([]ContestProblemID, len(contest.ProblemIDs))
+		if len(newContest.ProblemIDs) > 0 {
+			contestProblems := make([]domain.ContestProblemID, len(newContest.ProblemIDs))
 
-			for i, pID := range contest.ProblemIDs {
-				contestProblems[i] = ContestProblemID{
+			for i, pID := range newContest.ProblemIDs {
+				contestProblems[i] = domain.ContestProblemID{
 					ContestID: cc.ID,
 					ProblemID: pID,
 				}
@@ -130,7 +121,7 @@ func (c *contestUsecase) UpdateContest(id model.ContestID, contest *NewContest) 
 
 // CreateContest
 func (c *contestUsecase) DeleteContest(slug string) error {
-	err := c.runner.RunInTransaction(func(r Repository) error {
+	err := c.runner.RunInTransaction(func(r contest.Repository) error {
 		err := r.DeleteContest(slug)
 
 		if err != nil {
@@ -147,8 +138,8 @@ func (c *contestUsecase) DeleteContest(slug string) error {
 }
 
 // RegisterResult the result on a contest
-func (c *contestUsecase) RegisterProblemResult(result *domain.CodeResult, contestSlug string, problemSlug string, userID int64) error {
-	err := c.runner.RunInTransaction(func(r Repository) error {
+func (c *contestUsecase) RegisterProblemResult(result *problem_domain.CodeResult, contestSlug string, problemSlug string, userID int64) error {
+	err := c.runner.RunInTransaction(func(r contest.Repository) error {
 		err := r.CreateSubmitResult(result, contestSlug, problemSlug, userID)
 
 		if err != nil {
@@ -165,10 +156,10 @@ func (c *contestUsecase) RegisterProblemResult(result *domain.CodeResult, contes
 }
 
 func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
-	contest, err := c.runner.GetRepository().GetContest(contestSlug)
+	targetContest, err := c.runner.GetRepository().GetContest(contestSlug)
 	problems, err := c.runner.GetRepository().GetContestProblems(contestSlug)
 
-	err = c.runner.RunInTransaction(func(r Repository) error {
+	err = c.runner.RunInTransaction(func(r contest.Repository) error {
 		var userResultTimeMap map[int64]int
 		for _, p := range problems {
 			contestResults, err := r.GetContestProblemResult(contestSlug, p.Slug)
@@ -179,7 +170,7 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 			for _, c := range contestResults {
 				_, ok := userResultTimeMap[c.UserID]
 
-				timeSpend := int(c.CreatedAt.Unix() - contest.StartTime.Unix())
+				timeSpend := int(c.CreatedAt.Unix() - targetContest.StartTime.Unix())
 				if ok {
 					userResultTimeMap[c.UserID] += timeSpend
 				} else {
@@ -202,12 +193,12 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 			return pl[i].Value > pl[j].Value
 		})
 
-		rankings := make([]ContestRanking, len(pl))
+		rankings := make([]domain.ContestRanking, len(pl))
 
 		for i, v := range pl {
-			rankings[i] = ContestRanking{
+			rankings[i] = domain.ContestRanking{
 				UserID:    v.Key,
-				ContestID: contest.ID,
+				ContestID: targetContest.ID,
 				Ranking:   i,
 			}
 		}
@@ -227,14 +218,14 @@ func (c *contestUsecase) UpdateRankingContest(contestSlug string) error {
 }
 
 // GetContestProblemResult ...
-func (c *contestUsecase) GetContestProblemResult(contestID model.ContestID, userID int64) (map[int64]UserContestProblemResult, error) {
+func (c *contestUsecase) GetContestProblemResult(contestID model.ContestID, userID int64) (map[int64]domain.UserContestProblemResult, error) {
 	result, err := c.runner.GetRepository().GetContestProblemsUserResults(contestID, userID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	res := map[int64]UserContestProblemResult{}
+	res := map[int64]domain.UserContestProblemResult{}
 
 	for _, r := range result {
 		rp, ok := res[r.ProblemID]
@@ -245,7 +236,7 @@ func (c *contestUsecase) GetContestProblemResult(contestID model.ContestID, user
 			}
 		}
 
-		res[r.ProblemID] = UserContestProblemResult{
+		res[r.ProblemID] = domain.UserContestProblemResult{
 			ContestID: contestID,
 			ProblemID: r.ProblemID,
 			Done:      r.Status == "success",

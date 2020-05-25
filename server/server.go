@@ -3,7 +3,9 @@ package main
 import (
 	"bara"
 	"bara/auth"
-	"bara/contest"
+	contest_repository "bara/contest/repository"
+	contest_resolver "bara/contest/resolver"
+	contest_usecase "bara/contest/usecase"
 	"bara/generated"
 	"bara/problem/executor"
 	problem_repository "bara/problem/repository"
@@ -150,9 +152,9 @@ func main() {
 		codeExecutor := executor.NewExecutorClient(ctx.Bool("WITHOUT_CONTAINER"), 10)
 
 		// Contest
-		contestRepo := contest.NewContestRepositoryRunner(db)
-		contestUc := contest.NewContestUsecase(contestRepo)
-		contestResolver := contest.NewContestResolver(contestUc)
+		contestRepo := contest_repository.NewContestRepositoryRunner(db)
+		contestUc := contest_usecase.NewContestUsecase(contestRepo)
+		contestResolver := contest_resolver.NewContestResolver(contestUc)
 
 		// Problem
 		problemRepo := problem_repository.NewProblemRepositoryRunner(db)

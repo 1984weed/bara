@@ -1,7 +1,9 @@
-package contest
+package resolver
 
 import (
 	"bara/auth"
+	"bara/contest"
+	"bara/contest/domain"
 	"bara/graphql_model"
 	"bara/model"
 	"bara/utils"
@@ -10,22 +12,12 @@ import (
 	"strconv"
 )
 
-// Resolver represent the contest's resolver interface
-type Resolver interface {
-	GetContests(ctx context.Context, limit int, offset int) ([]*graphql_model.Contest, error)
-	GetContest(ctx context.Context, slug string) (*graphql_model.Contest, error)
-	UpdateRankingContest(ctx context.Context, slug string) (*graphql_model.Ranking, error)
-	CreateContest(ctx context.Context, contest graphql_model.NewContest) (*graphql_model.Contest, error)
-	UpdateContest(ctx context.Context, contestID string, contest graphql_model.NewContest) (*graphql_model.Contest, error)
-	DeleteContest(ctx context.Context, slug string) error
-}
-
 type contestResolver struct {
-	uc Usecase
+	uc contest.Usecase
 }
 
 // NewContestResolver initializes the contest/ resources graphql resolver
-func NewContestResolver(uc Usecase) Resolver {
+func NewContestResolver(uc contest.Usecase) contest.Resolver {
 	return &contestResolver{uc}
 }
 
@@ -126,7 +118,7 @@ func (cr *contestResolver) UpdateRankingContest(ctx context.Context, slug string
 	return nil, nil
 }
 
-func contestToGraphqlContest(contest *ContestWithProblem) *graphql_model.Contest {
+func contestToGraphqlContest(contest *domain.ContestWithProblem) *graphql_model.Contest {
 	problems := make([]*graphql_model.Problem, len(contest.Problems))
 
 	for i, p := range contest.Problems {
@@ -147,7 +139,7 @@ func contestToGraphqlContest(contest *ContestWithProblem) *graphql_model.Contest
 	}
 }
 
-func graphqlContestToNewContest(contest graphql_model.NewContest) *NewContest {
+func graphqlContestToNewContest(contest graphql_model.NewContest) *domain.NewContest {
 	startTime, err := utils.GetTimeFromString(contest.StartTimestamp)
 
 	if err != nil {
@@ -165,7 +157,7 @@ func graphqlContestToNewContest(contest graphql_model.NewContest) *NewContest {
 		problemIDs[i] = int64(num)
 	}
 
-	return &NewContest{
+	return &domain.NewContest{
 		Title:      contest.Title,
 		Slug:       contest.Slug,
 		StartTime:  startTime,

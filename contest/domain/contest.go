@@ -1,4 +1,4 @@
-package contest
+package domain
 
 import (
 	"bara/model"
