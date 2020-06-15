@@ -112,8 +112,8 @@ func (r *mutationResolver) UpdateProblem(ctx context.Context, problemID int, inp
 	return r.ProblemResolver.UpdateProblem(ctx, int64(problemID), input)
 }
 
-func (r *mutationResolver) UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
-	return r.UserResolver.UpdateUser(ctx, input)
+func (r *mutationResolver) UpdateMe(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
+	return r.UserResolver.UpdateMe(ctx, input)
 }
 
 func (r *mutationResolver) CreateContest(ctx context.Context, newContest graphql_model.NewContest) (*graphql_model.Contest, error) {

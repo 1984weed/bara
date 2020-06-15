@@ -138,5 +138,5 @@ type Mutation {
   testRunCode(inputStr: String!, input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!
-  updateUser(input: UserInput!): User
+  updateMe(input: UserInput!): User
 }

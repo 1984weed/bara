@@ -12,4 +12,5 @@ type UserForUpdate struct {
 	Email       *string
 	Bio         *string
 	Image       *string
+	ImageURL    *string
 }

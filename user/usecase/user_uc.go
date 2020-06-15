@@ -1,4 +1,4 @@
-package user_uc
+package usecase
 
 import (
 	"bara/model"
@@ -119,9 +119,9 @@ func (u *userUsecase) GetUserByUserName(ctx context.Context, userName string) (*
 }
 
 // UpdateUser...
-func (u *userUsecase) UpdateUser(ctx context.Context, user domain.UserForUpdate) (*model.Users, error) {
-	if user.Image != nil {
-		data, err := base64.StdEncoding.DecodeString(*user.Image)
+func (u *userUsecase) UpdateUser(ctx context.Context, userID int64, userForUpdate domain.UserForUpdate) (*model.Users, error) {
+	if userForUpdate.Image != nil {
+		data, err := base64.StdEncoding.DecodeString(*userForUpdate.Image)
 
 		if err != nil {
 			return nil, err
@@ -132,9 +132,17 @@ func (u *userUsecase) UpdateUser(ctx context.Context, user domain.UserForUpdate)
 		if err != nil {
 			return nil, err
 		}
-
-		fmt.Println(url)
+		userForUpdate.ImageURL = &url
 	}
 
-	return nil, nil
+	err := u.runner.RunInTransaction(func(r user.Repository) error {
+		err := r.UpdateUser(ctx, userID, &userForUpdate)
+		return err
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return u.GetUserByID(ctx, userID)
 }

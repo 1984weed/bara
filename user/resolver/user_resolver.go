@@ -8,6 +8,7 @@ import (
 	"bara/user/domain"
 	"context"
 	"errors"
+	"strconv"
 )
 
 type userResolver struct {
@@ -72,7 +73,7 @@ func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_m
 	}
 
 	return &graphql_model.User{
-		ID:          string(user.ID),
+		ID:          strconv.Itoa(int(user.ID)),
 		DisplayName: user.DisplayName,
 		UserName:    user.UserName,
 		Email:       user.Email,
@@ -81,7 +82,11 @@ func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_m
 	}, nil
 }
 
-func (u *userResolver) UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
+func (u *userResolver) UpdateMe(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
+	var user *model.Users
+	if user = auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
 	userForUpdate := domain.UserForUpdate{
 		UserName:    input.UserName,
 		DisplayName: input.DisplayName,
@@ -90,11 +95,18 @@ func (u *userResolver) UpdateUser(ctx context.Context, input graphql_model.UserI
 		Image:       input.Image,
 	}
 
-	_, err := u.uc.UpdateUser(ctx, userForUpdate)
+	user, err := u.uc.UpdateUser(ctx, user.ID, userForUpdate)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return &graphql_model.User{
+		ID:          strconv.Itoa(int(user.ID)),
+		DisplayName: user.DisplayName,
+		UserName:    user.UserName,
+		Email:       user.Email,
+		Image:       user.Image,
+		Bio:         user.Bio,
+	}, nil
 }

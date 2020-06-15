@@ -89,8 +89,8 @@ type ComplexityRoot struct {
 		SubmitContestCode     func(childComplexity int, contestSlug string, input graphql_model.SubmitCode) int
 		TestRunCode           func(childComplexity int, inputStr string, input graphql_model.SubmitCode) int
 		UpdateContest         func(childComplexity int, contestID string, newContest graphql_model.NewContest) int
+		UpdateMe              func(childComplexity int, input graphql_model.UserInput) int
 		UpdateProblem         func(childComplexity int, problemID int, input graphql_model.NewProblem) int
-		UpdateUser            func(childComplexity int, input graphql_model.UserInput) int
 	}
 
 	Problem struct {
@@ -167,7 +167,7 @@ type MutationResolver interface {
 	TestRunCode(ctx context.Context, inputStr string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error)
 	CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int, input graphql_model.NewProblem) (*graphql_model.Problem, error)
-	UpdateUser(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error)
+	UpdateMe(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error)
 	CreateContest(ctx context.Context, newContest graphql_model.NewContest) (*graphql_model.Contest, error)
 	UpdateContest(ctx context.Context, contestID string, newContest graphql_model.NewContest) (*graphql_model.Contest, error)
 	DeleteContest(ctx context.Context, slug string) (*bool, error)
@@ -421,6 +421,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateContest(childComplexity, args["contestID"].(string), args["newContest"].(graphql_model.NewContest)), true
 
+	case "Mutation.updateMe":
+		if e.complexity.Mutation.UpdateMe == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateMe_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateMe(childComplexity, args["input"].(graphql_model.UserInput)), true
+
 	case "Mutation.updateProblem":
 		if e.complexity.Mutation.UpdateProblem == nil {
 			break
@@ -432,18 +444,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateProblem(childComplexity, args["problemID"].(int), args["input"].(graphql_model.NewProblem)), true
-
-	case "Mutation.updateUser":
-		if e.complexity.Mutation.UpdateUser == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateUser_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(graphql_model.UserInput)), true
 
 	case "Problem.codeSnippets":
 		if e.complexity.Problem.CodeSnippets == nil {
@@ -1032,7 +1032,7 @@ type Mutation {
   testRunCode(inputStr: String!, input: SubmitCode!): CodeResult!
   createProblem(input: NewProblem!): Problem!
   updateProblem(problemID: Int!, input: NewProblem!): Problem!
-  updateUser(input: UserInput!): User
+  updateMe(input: UserInput!): User
 }`},
 )
 
@@ -1176,6 +1176,20 @@ func (ec *executionContext) field_Mutation_updateContest_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateMe_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 graphql_model.UserInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNUserInput2baraᚋgraphql_modelᚐUserInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateProblem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1195,20 +1209,6 @@ func (ec *executionContext) field_Mutation_updateProblem_args(ctx context.Contex
 		}
 	}
 	args["input"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 graphql_model.UserInput
-	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNUserInput2baraᚋgraphql_modelᚐUserInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
 	return args, nil
 }
 
@@ -2269,7 +2269,7 @@ func (ec *executionContext) _Mutation_updateProblem(ctx context.Context, field g
 	return ec.marshalNProblem2ᚖbaraᚋgraphql_modelᚐProblem(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_updateMe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2286,7 +2286,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_updateMe_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2295,7 +2295,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["input"].(graphql_model.UserInput))
+		return ec.resolvers.Mutation().UpdateMe(rctx, args["input"].(graphql_model.UserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5853,8 +5853,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updateUser":
-			out.Values[i] = ec._Mutation_updateUser(ctx, field)
+		case "updateMe":
+			out.Values[i] = ec._Mutation_updateMe(ctx, field)
 		case "createContest":
 			out.Values[i] = ec._Mutation_createContest(ctx, field)
 			if out.Values[i] == graphql.Null {

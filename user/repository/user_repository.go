@@ -3,6 +3,7 @@ package repository
 import (
 	"bara/model"
 	"bara/user"
+	"bara/user/domain"
 	"context"
 
 	"github.com/go-pg/pg/v9"
@@ -93,4 +94,46 @@ func (u *userRepository) Register(ctx context.Context, user *model.Users) (*mode
 	}
 
 	return u.GetUserByUserName(ctx, user.UserName)
+}
+
+func (u *userRepository) UpdateUser(ctx context.Context, userID int64, userForUpdate *domain.UserForUpdate) error {
+	var user = &model.Users{
+		ID: userID,
+	}
+	var updateFlag = false
+
+	if userForUpdate.DisplayName != nil {
+		user.DisplayName = *userForUpdate.DisplayName
+		updateFlag = true
+	}
+
+	if userForUpdate.Bio != nil {
+		user.Bio = *userForUpdate.Bio
+		updateFlag = true
+	}
+
+	if userForUpdate.UserName != nil {
+		user.UserName = *userForUpdate.UserName
+		updateFlag = true
+	}
+
+	if userForUpdate.Email != nil {
+		user.Email = *userForUpdate.Email
+		updateFlag = true
+	}
+
+	if userForUpdate.Image != nil {
+		user.Image = *userForUpdate.Image
+		updateFlag = true
+	}
+
+	if !updateFlag {
+		return nil
+	}
+	_, err := u.Conn.Model(user).Where("id = ?", userID).UpdateNotZero()
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
