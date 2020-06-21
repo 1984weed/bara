@@ -13,4 +13,5 @@ type UserForUpdate struct {
 	Bio         *string
 	Image       *string
 	ImageURL    *string
+	ImageUUID   *string
 }

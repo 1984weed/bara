@@ -9,7 +9,7 @@ type Users struct {
 	Password    string
 	Email       string
 	Bio         string
-	Image       string
+	ImageURL    string
 	UpdatedAt   time.Time
 	CreatedAt   time.Time
 }

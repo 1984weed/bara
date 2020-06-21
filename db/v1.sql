@@ -8,7 +8,7 @@ CREATE TABLE users (
   password VARCHAR(255) NULL,
   email VARCHAR(255) NOT NULL,
   bio VARCHAR(1024),
-  image VARCHAR(255),
+  image_url VARCHAR(255),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT user_email_unique UNIQUE (email),

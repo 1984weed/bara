@@ -123,7 +123,7 @@ func (u *userRepository) UpdateUser(ctx context.Context, userID int64, userForUp
 	}
 
 	if userForUpdate.Image != nil {
-		user.Image = *userForUpdate.Image
+		user.ImageURL = *userForUpdate.ImageURL
 		updateFlag = true
 	}
 

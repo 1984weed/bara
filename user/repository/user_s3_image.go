@@ -1,49 +1,74 @@
 package repository
 
 import (
-	"bytes"
 	"context"
-	"net/http"
+	"fmt"
+	"io"
 
-	"github.com/aws/aws-sdk-go/aws"
+	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rs/xid"
 )
 
-type UserS3Image interface {
-	PutImageFile(context context.Context, data []byte) (string, error)
+type ImageUploader interface {
+	UploadProfileImage(context context.Context, r io.Reader) (string, error)
+	GetProfileURL(name string) string
 }
 
-type userS3Image struct {
+type imageUploader struct {
 	s          *session.Session
 	bucketName string
-	fileDir    string
+	projetID   string
 }
 
 // NewUserImageRepository will create an object that represent the problem.Repository interface
-func NewUserImageRepository(s *session.Session, bucketName, fileDir string) UserS3Image {
-	return &userS3Image{s, bucketName, fileDir}
+func NewUserImageRepository(s *session.Session, bucketName, projectID string) ImageUploader {
+	return &imageUploader{s, bucketName, projectID}
 }
 
-func (u *userS3Image) PutImageFile(context context.Context, data []byte) (string, error) {
+func (u *imageUploader) UploadProfileImage(context context.Context, r io.Reader) (string, error) {
 	guid := xid.New()
 
-	tempFileName := "profiles/" + guid.String()
+	_, _, err := upload(context, r, u.projetID, u.bucketName, guid.String(), true)
 
-	_, err := s3.New(u.s).PutObject(&s3.PutObjectInput{
-		Bucket:               aws.String(u.bucketName),
-		Key:                  aws.String(tempFileName),
-		ACL:                  aws.String("public-read"), // could be private if you want it to be access by only authorized users
-		Body:                 bytes.NewReader(data),
-		ContentType:          aws.String(http.DetectContentType(data)),
-		ContentDisposition:   aws.String("attachment"),
-		ServerSideEncryption: aws.String("AES256"),
-		StorageClass:         aws.String("INTELLIGENT_TIERING"),
-	})
 	if err != nil {
 		return "", err
 	}
 
-	return tempFileName, err
+	return guid.String(), nil
+}
+
+func (u *imageUploader) GetProfileURL(name string) string {
+	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", u.bucketName, name)
+}
+
+func upload(ctx context.Context, r io.Reader, projectID, bucket, name string, public bool) (*storage.ObjectHandle, *storage.ObjectAttrs, error) {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	bh := client.Bucket(bucket)
+	if _, err = bh.Attrs(ctx); err != nil {
+		return nil, nil, err
+	}
+
+	obj := bh.Object(name)
+	w := obj.NewWriter(ctx)
+	if _, err := io.Copy(w, r); err != nil {
+		return nil, nil, err
+	}
+	if err := w.Close(); err != nil {
+		return nil, nil, err
+	}
+
+	if public {
+		if err := obj.ACL().Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	attrs, err := obj.Attrs(ctx)
+
+	return obj, attrs, err
 }

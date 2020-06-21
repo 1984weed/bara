@@ -55,7 +55,7 @@ func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
 		DisplayName: user.DisplayName,
 		UserName:    user.UserName,
 		Email:       user.Email,
-		Image:       user.Image,
+		Image:       user.ImageURL,
 		Role:        &role,
 		Bio:         user.Bio,
 	}, nil
@@ -77,7 +77,7 @@ func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_m
 		DisplayName: user.DisplayName,
 		UserName:    user.UserName,
 		Email:       user.Email,
-		Image:       user.Image,
+		Image:       user.ImageURL,
 		Bio:         user.Bio,
 	}, nil
 }
@@ -106,7 +106,7 @@ func (u *userResolver) UpdateMe(ctx context.Context, input graphql_model.UserInp
 		DisplayName: user.DisplayName,
 		UserName:    user.UserName,
 		Email:       user.Email,
-		Image:       user.Image,
+		Image:       user.ImageURL,
 		Bio:         user.Bio,
 	}, nil
 }

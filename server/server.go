@@ -122,6 +122,18 @@ func main() {
 			Value:  "test",
 			Usage:  "S3 folder",
 		},
+		cli.StringFlag{
+			Name:   "GCP_BUCKET",
+			EnvVar: "GCP_BUCKET",
+			Value:  "",
+			Usage:  "GCP bucket",
+		},
+		cli.StringFlag{
+			Name:   "GCP_PROJECTID",
+			EnvVar: "GCP_PROJECTID",
+			Value:  "",
+			Usage:  "GCP project id",
+		},
 	}
 	app.Action = func(ctx *cli.Context) error {
 
@@ -171,7 +183,7 @@ func main() {
 			Region:      aws.String(ctx.String("S3_REGION")),
 		})
 		// User Image
-		userImage := user_repository.NewUserImageRepository(s, ctx.String("AWS_S3_BUCKET_NAME"), ctx.String("AWS_S3_ACCOUNT_FOLDER"))
+		userImage := user_repository.NewUserImageRepository(s, ctx.String("GCP_BUCKET"), ctx.String("GCP_PROJECTID"))
 
 		userUc := user_usecase.NewUserUsecase(userRepoRunner, userImage, timeoutContext)
 		userResolver := user_resolver.NewUserResolver(userUc)

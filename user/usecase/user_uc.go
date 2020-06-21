@@ -7,7 +7,6 @@ import (
 	"bara/user/repository"
 	"bara/utils"
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
@@ -16,11 +15,11 @@ import (
 type userUsecase struct {
 	runner         user.RepositoryRunner
 	contextTimeout time.Duration
-	userImage      repository.UserS3Image
+	userImage      repository.ImageUploader
 }
 
 // NewUserUsecase creates user usecase
-func NewUserUsecase(runner user.RepositoryRunner, userImage repository.UserS3Image, contextTimeout time.Duration) user.Usecase {
+func NewUserUsecase(runner user.RepositoryRunner, userImage repository.ImageUploader, contextTimeout time.Duration) user.Usecase {
 	return &userUsecase{runner, contextTimeout, userImage}
 }
 
@@ -121,18 +120,20 @@ func (u *userUsecase) GetUserByUserName(ctx context.Context, userName string) (*
 // UpdateUser...
 func (u *userUsecase) UpdateUser(ctx context.Context, userID int64, userForUpdate domain.UserForUpdate) (*model.Users, error) {
 	if userForUpdate.Image != nil {
-		data, err := base64.StdEncoding.DecodeString(*userForUpdate.Image)
+		data, err := utils.EncodeBase64Image(*userForUpdate.Image)
 
 		if err != nil {
 			return nil, err
 		}
 
-		url, err := u.userImage.PutImageFile(ctx, data)
+		uniqueID, err := u.userImage.UploadProfileImage(ctx, data)
 
 		if err != nil {
 			return nil, err
 		}
-		userForUpdate.ImageURL = &url
+
+		profileURL := u.userImage.GetProfileURL(uniqueID)
+		userForUpdate.ImageURL = &profileURL
 	}
 
 	err := u.runner.RunInTransaction(func(r user.Repository) error {
