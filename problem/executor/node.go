@@ -11,7 +11,7 @@ function getResultStr(result) {
     resultStr = JSON.stringify(JSON.parse(result));
   } catch {
     if(Array.isArray(result)) {
-      resultStr = "[" + result + "]"
+      resultStr = JSON.stringify(result.sort())
     } else {
       resultStr = result
     }
@@ -23,7 +23,12 @@ function getResultStr(result) {
 function getExpected(line) {
   let expected = ""
   try {
-    expected = JSON.stringify(JSON.parse(line));
+    const obj = JSON.parse(line)
+    if(Array.isArray(obj)) {
+      expected = JSON.stringify(obj.sort());
+    } else {
+      expected = JSON.stringify(obj);
+    }
   } catch {
     expected = line
   }
