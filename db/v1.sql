@@ -100,7 +100,7 @@ CREATE TABLE contest_user_results (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
   contest_id INTEGER NOT NULL,
-  ranking INTEGER NOT NULL,
+  ranking INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS code_languages cascade;

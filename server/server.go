@@ -46,15 +46,27 @@ func main() {
 			Usage:  "DB user",
 		},
 		cli.StringFlag{
-			Name:   "DB_PASSWORD",
-			EnvVar: "DB_PASSWORD",
+			Name:   "DB_PASS",
+			EnvVar: "DB_PASS",
 			Value:  "postgres",
 			Usage:  "DB password",
 		},
 		cli.StringFlag{
+			Name:   "DB_SOCKET_PATH",
+			EnvVar: "DB_SOCKET_PATH",
+			Value:  "/cloudsql",
+			Usage:  "DB_SOCKET_PATH for cloud run",
+		},
+		cli.StringFlag{
+			Name:   "INSTANCE_CONNECTION_NAME",
+			EnvVar: "INSTANCE_CONNECTION_NAME",
+			Value:  "",
+			Usage:  "INSTANCE_CONNECTION_NAME for cloud run",
+		},
+		cli.StringFlag{
 			Name:   "DB_HOST",
 			EnvVar: "DB_HOST",
-			Value:  "localhost",
+			Value:  "",
 			Usage:  "DB url",
 		},
 		cli.StringFlag{
@@ -64,10 +76,10 @@ func main() {
 			Usage:  "DB url",
 		},
 		cli.StringFlag{
-			Name:   "DATABASE_NAME",
-			EnvVar: "DATABASE_NAME",
+			Name:   "DB_NAME",
+			EnvVar: "DB_NAME",
 			Value:  "bara",
-			Usage:  "DB url",
+			Usage:  "DB name",
 		},
 		cli.StringFlag{
 			Name:   "PORT",
@@ -140,10 +152,10 @@ func main() {
 		db := pg.Connect(
 			&pg.Options{
 				User:     ctx.String("DB_USER"),
-				Password: ctx.String("DB_PASSWORD"),
+				Password: ctx.String("DB_PASS"),
 				Network:  "tcp",
 				Addr:     fmt.Sprintf("%s:%s", ctx.String("DB_HOST"), ctx.String("DB_PORT")),
-				Database: ctx.String("DATABASE_NAME"),
+				Database: ctx.String("DB_NAME"),
 			})
 
 		redisPool := &redis.Pool{

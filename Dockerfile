@@ -13,6 +13,9 @@ COPY --from=builder /src/bara /app/
 COPY --from=builder /src/sandbox-cli /app/
 RUN addgroup -g 2000 execuser && \
     adduser -D -u 2001 -G execuser execuser
+
+EXPOSE 8080
+ENV PORT=8080 
 RUN chmod 700 ./bara
 RUN chmod +x ./sandbox-cli
 CMD ./bara

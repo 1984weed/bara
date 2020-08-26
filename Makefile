@@ -10,6 +10,7 @@ SANDBOX_MAIN_FILE=sandbox/main.go
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 build: install build-server build-sandbox
+
 install: 
 	go get ./...
 
@@ -36,3 +37,6 @@ docker-local:
 
 init-db-data:
 	./scripts/init-data.sh
+
+build-docker-image:
+	@docker build -t baracode-graphql .

@@ -1,5 +1,6 @@
 BEGIN;
 
+INSERT INTO users (user_name, display_name, password) VALUES ('admin', 'admin', 'admin')
 INSERT INTO code_languages (id, name, slug) VALUES (1 ,'JavaScript', 'javascript');
 
 INSERT INTO problems (slug, title, description, function_name, output_type, author_id)
