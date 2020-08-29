@@ -25,8 +25,8 @@ export default class MyDocument extends Document {
         )
     }
 
+    // todo change to getInitialStatic from this 
     static async getInitialProps(ctx: DocumentContext) {
-        // const sheet = new ServerStyleSheet()
         const sheets = new ServerStyleSheets()
 
         const originalRenderPage = ctx.renderPage

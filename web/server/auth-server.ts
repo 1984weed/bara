@@ -7,7 +7,7 @@ import passport from "passport"
 import passportLocal from "passport-local"
 import { AuthSeverConfig, User, OAuthUser } from "./model"
 import { logger } from "./logger"
-import * as jwt from 'jsonwebtoken';
+import * as jwt from "jsonwebtoken"
 
 const LocalStrategy = passportLocal.Strategy
 
@@ -125,31 +125,29 @@ export default (
      * Generate token
      */
 
-     expressApp.get(`${pathPrefix}/getToken`, (req, res) => {
-        if(req.user) {
+    expressApp.get(`${pathPrefix}/getToken`, (req, res) => {
+        // if (req.user) {
+            const jwtPayload = {
+                email: "user1@example.com",
+                name: "JWT Taro",
+            }
+            const jwtSecret = "secret_key_goes_here"
+            const jwtOptions: jwt.SignOptions = {
+                algorithm: "HS256",
+                expiresIn: "3s",
+            }
 
-const jwtPayload = {
-    email: 'user1@example.com',
-    name: 'JWT Taro',
-};
-const jwtSecret = 'secret_key_goes_here';
-const jwtOptions: jwt.SignOptions = {
-    algorithm: 'HS256',
-    expiresIn: '3s',
-};
-
-const token = jwt.sign(jwtPayload, jwtSecret, jwtOptions);
-console.log("==================token===============", token)
+            const token = jwt.sign(jwtPayload, jwtSecret, jwtOptions)
             return res.json({
                 result: "ok",
-                token: ""
+                token
             })
-        }
+        // }
 
-        return res.json({
-            error: "Session timeout"
-        })
-     })
+        // return res.json({
+        //     error: "Not login",
+        // })
+    })
 
     /**
      * Sign out a user
@@ -177,7 +175,8 @@ console.log("==================token===============", token)
                     if (err) return res.redirect(`${pathPrefix}/error?action=signup&type=credentials`)
                     return res.redirect("/")
                 })
-            }).catch((err) => {
+            })
+            .catch(err => {
                 logger.error("Fail sign up", err)
             })
     })
@@ -186,7 +185,7 @@ console.log("==================token===============", token)
         const session = {
             maxAge: sessionMaxAge,
             revalidateAge: sessionRevalidateAge,
-            user: null
+            user: null,
         }
 
         if (req.user) {

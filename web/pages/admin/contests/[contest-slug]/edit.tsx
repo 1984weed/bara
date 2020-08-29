@@ -12,7 +12,7 @@ import Layout from "../../../../components/Layout"
 import ErrorNotification from "../../../../components/notifications/ErrorNotification"
 import SuccessNotification from "../../../../components/notifications/SuccessNotification"
 import { Contest, Problem } from "../../../../graphql/types"
-import { NextPageContextWithGraphql } from "../../../../lib/with-graphql-client"
+// import { NextPageContextWithGraphql } from "../../../../lib/with-graphql-client"
 import { Session } from "../../../../types/Session"
 import { ContestForm } from "../../../../components/contests/ContestForm"
 
@@ -130,34 +130,34 @@ const EditContest = ({ session, contest, problems }: Props) => {
     )
 }
 
-EditContest.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-    const result = await client.request(
-        {
-            query: contestQuery,
-            variables: { slug: query["contest-slug"] },
-        },
-        {}
-    )
+// EditContest.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
+//     const result = await client.request(
+//         {
+//             query: contestQuery,
+//             variables: { slug: query["contest-slug"] },
+//         },
+//         {}
+//     )
 
-    if (result.data == null) {
-        return Promise.resolve({
-            contest: null,
-            session: "",
-            pathname: "",
-        })
-    }
+//     if (result.data == null) {
+//         return Promise.resolve({
+//             contest: null,
+//             session: "",
+//             pathname: "",
+//         })
+//     }
 
-    const { contest, problems } = result.data as {
-        contest: Contest
-        problems: Problem[]
-    }
+//     const { contest, problems } = result.data as {
+//         contest: Contest
+//         problems: Problem[]
+//     }
 
-    return Promise.resolve({
-        contest,
-        problems,
-        session: "",
-        pathname: "",
-    })
-}
+//     return Promise.resolve({
+//         contest,
+//         problems,
+//         session: "",
+//         pathname: "",
+//     })
+// }
 
 export default EditContest

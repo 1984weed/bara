@@ -149,13 +149,13 @@ async function handleSubmit(
     return data
 }
 
-NewProblem.getInitialProps = async ({ res, session }) => {
-    if (session.user == null) {
-        if (res != null) {
-            res.writeHead(302, { Location: "/" })
-            res.end()
-        }
-    }
-}
+// NewProblem.getInitialProps = async ({ res, session }) => {
+//     if (session.user == null) {
+//         if (res != null) {
+//             res.writeHead(302, { Location: "/" })
+//             res.end()
+//         }
+//     }
+// }
 
 export default NewProblem

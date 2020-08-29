@@ -9,7 +9,7 @@ import { getArrayAutoTestCaseDef } from "../../../../types/TestAutoType"
 import ErrorNotification from "../../../../components/notifications/ErrorNotification"
 import SuccessNotification from "../../../../components/notifications/SuccessNotification"
 import { NextPage } from "next"
-import { NextPageContextWithGraphql } from "../../../../lib/with-graphql-client"
+// import { NextPageContextWithGraphql } from "../../../../lib/with-graphql-client"
 import { useForm } from "react-hook-form"
 import { createNewProblemsVariables } from "../new"
 import { Box } from "@material-ui/core"
@@ -129,27 +129,27 @@ async function handleSubmit(createPost: FetchData<any>, problemID: number, value
     return data
 }
 
-ProblemEditComponent.getInitialProps = async ({ query, client, res }: NextPageContextWithGraphql) => {
-    const result = await client.request(
-        {
-            query: problemQuery,
-            variables: { slug: query.slug },
-        },
-        {}
-    )
+// ProblemEditComponent.getInitialProps = async ({ query, client, res }: NextPageContextWithGraphql) => {
+//     const result = await client.request(
+//         {
+//             query: problemQuery,
+//             variables: { slug: query.slug },
+//         },
+//         {}
+//     )
 
-    if (result.data == null) {
-        if (res) {
-            res.statusCode = 404
-            res.end("Not found")
-            return
-        }
-    }
+//     if (result.data == null) {
+//         if (res) {
+//             res.statusCode = 404
+//             res.end("Not found")
+//             return
+//         }
+//     }
 
-    return Promise.resolve({
-        problem: ((result.data as unknown) as any).problem as Problem,
-        session: null,
-    })
-}
+//     return Promise.resolve({
+//         problem: ((result.data as unknown) as any).problem as Problem,
+//         session: null,
+//     })
+// }
 
 export default ProblemEditComponent

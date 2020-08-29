@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form"
 import { ContestForm } from "../../../components/contests/ContestForm"
 import Layout from "../../../components/Layout"
 import { Problem } from "../../../graphql/types"
-import { NextPageContextWithGraphql } from "../../../lib/with-graphql-client"
+// import { NextPageContextWithGraphql } from "../../../lib/with-graphql-client"
 
 export const allProblemsQuery = `
 query problems($limit: Int) {
@@ -89,31 +89,31 @@ const NewContest = ({ session, problems }) => {
     )
 }
 
-NewContest.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-    const result = await client.request(
-        {
-            query: allProblemsQuery
-        }
-    )
+// NewContest.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
+//     const result = await client.request(
+//         {
+//             query: allProblemsQuery
+//         }
+//     )
 
-    if (result.data == null) {
-        return Promise.resolve({
-            contest: null,
-            problems: [],
-            session: "",
-            pathname: "",
-        })
-    }
+//     if (result.data == null) {
+//         return Promise.resolve({
+//             contest: null,
+//             problems: [],
+//             session: "",
+//             pathname: "",
+//         })
+//     }
 
-    const { problems } = result.data as {
-        problems: Problem[]
-    }
+//     const { problems } = result.data as {
+//         problems: Problem[]
+//     }
 
-    return Promise.resolve({
-        problems,
-        session: "",
-        pathname: "",
-    })
-}
+//     return Promise.resolve({
+//         problems,
+//         session: "",
+//         pathname: "",
+//     })
+// }
 
 export default NewContest

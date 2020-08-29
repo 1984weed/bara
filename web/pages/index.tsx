@@ -4,6 +4,7 @@ import Link from "next/link"
 import React from "react"
 import Layout from "../components/Layout"
 import { Problem } from "../graphql/types"
+import { useSession } from "../lib/session"
 
 type Props = {
     session: any
@@ -24,6 +25,9 @@ const problems: React.FunctionComponent<Props> = ({ session }: Props) => {
     const { data } = useQuery<{ problems: Problem[] }>(problem, {
         variables: { limit: 50 },
     })
+
+    const sessions = useSession()
+    console.log("sessions", sessions)
     return (
         <Layout session={session}>
             <TableContainer>

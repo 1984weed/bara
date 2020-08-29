@@ -3,7 +3,7 @@ import { Contest } from "../../../graphql/types"
 import { NextPage } from "next"
 import Layout from "../../../components/Layout"
 import Link from "next/link"
-import { NextPageContextWithGraphql } from "../../../lib/with-graphql-client"
+// import { NextPageContextWithGraphql } from "../../../lib/with-graphql-client"
 import { Container, Typography, Box, TableContainer, Table, TableBody, TableHead, TableRow, TableCell } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 import { grey } from "@material-ui/core/colors"
@@ -85,23 +85,23 @@ const ContestComponent: NextPage<Props> = ({ session, contest }: Props) => {
     )
 }
 
-ContestComponent.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-    const result = await client.request(
-        {
-            query: getContestProblemsQuery,
-            variables: { slug: query["contest-slug"] },
-        },
-        {}
-    )
+// ContestComponent.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
+//     const result = await client.request(
+//         {
+//             query: getContestProblemsQuery,
+//             variables: { slug: query["contest-slug"] },
+//         },
+//         {}
+//     )
 
-    const { contest } = result.data as {
-        contest: Contest
-    }
+//     const { contest } = result.data as {
+//         contest: Contest
+//     }
 
-    return Promise.resolve({
-        session: "",
-        contest,
-    })
-}
+//     return Promise.resolve({
+//         session: "",
+//         contest,
+//     })
+// }
 
 export default ContestComponent

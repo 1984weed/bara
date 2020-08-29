@@ -8,7 +8,7 @@ import { EditorArea, RunCodeType, SubmitCodeResult, SubmitCodeType } from "../..
 import SideArea from "../../components/problems/SideArea"
 import { CodeLanguage, Problem } from "../../graphql/types"
 import { useRememberState } from "../../hooks/useRememberState"
-import { NextPageContextWithGraphql } from "../../lib/with-graphql-client"
+// import { NextPageContextWithGraphql } from "../../lib/with-graphql-client"
 
 type Props = {
     session: any
@@ -180,32 +180,32 @@ function handleSubmit(
     })
 }
 
-ProblemComponent.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-    const result = await client.request(
-        {
-            query: problemQuery,
-            variables: { slug: query.slug },
-        },
-        {}
-    )
+// ProblemComponent.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
+//     const result = await client.request(
+//         {
+//             query: problemQuery,
+//             variables: { slug: query.slug },
+//         },
+//         {}
+//     )
 
-    if (result.data == null) {
-        return Promise.resolve({
-            problem: null,
-            session: "",
-            pathname: "",
-        })
-    }
+//     if (result.data == null) {
+//         return Promise.resolve({
+//             problem: null,
+//             session: "",
+//             pathname: "",
+//         })
+//     }
 
-    const { problem } = result.data as {
-        problem: Problem
-    }
+//     const { problem } = result.data as {
+//         problem: Problem
+//     }
 
-    return Promise.resolve({
-        problem,
-        session: "",
-        pathname: "",
-    })
-}
+//     return Promise.resolve({
+//         problem,
+//         session: "",
+//         pathname: "",
+//     })
+// }
 
 export default ProblemComponent

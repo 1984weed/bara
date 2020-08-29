@@ -2,10 +2,10 @@ import { NextPage } from "next"
 import Error from "next/error"
 import { useRouter } from "next/router"
 import React, { useState, ReactNode, ChangeEvent } from "react"
-import { toBase64 } from "../base64"
-import Layout from "../components/Layout"
-import { User } from "../graphql/types"
-import { NextPageContextWithGraphql } from "../lib/with-graphql-client"
+import { toBase64 } from "../../base64"
+import Layout from "../../components/Layout"
+import { User } from "../../graphql/types"
+// import { NextPageContextWithGraphql } from "../../lib/with-graphql-client"
 import { Avatar, makeStyles, Box, Grid, Typography, Button, TextField, Dialog, DialogTitle } from "@material-ui/core"
 import { useForm, ErrorMessage } from "react-hook-form"
 import PhotoIcon from "@material-ui/icons/Photo"
@@ -489,22 +489,22 @@ const ProfileInfoRow = ({ labelChild, realValueChild }: RorProfileInfoProps) => 
     )
 }
 
-user.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-    const result = await client.request(
-        {
-            query: getUserQuery,
-            variables: { userName: query.username },
-        },
-        {}
-    )
+// user.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
+//     const result = await client.request(
+//         {
+//             query: getUserQuery,
+//             variables: { userName: query.username },
+//         },
+//         {}
+//     )
 
-    const { data } = result
+//     const { data } = result
 
-    return Promise.resolve({
-        userData: data["user"] || {},
-        session: "",
-        pathname: "",
-    })
-}
+//     return Promise.resolve({
+//         userData: data["user"] || {},
+//         session: "",
+//         pathname: "",
+//     })
+// }
 
 export default user
