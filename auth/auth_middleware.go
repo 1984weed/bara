@@ -1,17 +1,14 @@
 package auth
 
 import (
-	"bara/model"
-	"bara/user"
+	"bara/utils"
 	"context"
 	"encoding/json"
-	"errors"
-	"log"
+	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // A private key for context that only this package can access. This is important
@@ -23,95 +20,64 @@ type contextKey struct {
 	name string
 }
 
+// CurrentUser contains current's userId
+type CurrentUser struct {
+	Sub int64
+}
+
 // Middleware decodes the share session cookie and packs the session into context
-func Middleware(user user.RepositoryRunner, pool *redis.Pool) func(http.Handler) http.Handler {
+func Middleware(jwtSecret string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			c := r.Header.Get("Authorization")
 
-			if c == "" {
-				log.Print("Get Authorization token empty")
+			splittedToken := strings.Split(c, " ")
+
+			// Guest user doesn't have Authorization token or empty token
+			if len(splittedToken) != 2 || splittedToken[1] == "" {
 				next.ServeHTTP(w, r)
 				return
-			}
-			cookie, err := url.QueryUnescape(c)
 
-			if err != nil || cookie[0:2] != "s:" {
-				log.Print("auth-token is broken")
-				next.ServeHTTP(w, r)
-				return
 			}
 
-			redisKey := strings.Split(cookie[2:], ".")[0]
+			tokenString := splittedToken[1]
+			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+				// Don't forget to validate the alg is what you expect:
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+				}
 
-			userID, err := getSession("sess:", redisKey, pool)
-
+				return []byte(jwtSecret), nil
+			})
+			// JWT token is broken
 			if err != nil {
-				next.ServeHTTP(w, r)
+				interceptRequest(w, utils.JWTBrokenError(err.Error()))
 				return
 			}
 
-			repo := user.GetRepository()
-			// get the user from the database
-			user, err := repo.GetUserByID(r.Context(), userID)
+			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+				// put it in context
+				ctx := context.WithValue(r.Context(), userCtxKey, claims["sub"])
 
-			// put it in context
-			ctx := context.WithValue(r.Context(), userCtxKey, user)
+				// and call the next with our new context
+				r = r.WithContext(ctx)
+			} else {
+				interceptRequest(w, utils.JWTExpiredError())
+				return
+			}
 
-			// and call the next with our new context
-			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
 	}
 }
 
-func getSession(prefix string, key string, pool *redis.Pool) (int64, error) {
-	conn := pool.Get()
-	defer conn.Close()
-	if err := conn.Err(); err != nil {
-		return 0, err
-	}
-	data, err := conn.Do("GET", prefix+key)
-	if err != nil {
-		return 0, err
-	}
-	if data == nil {
-		return 0, nil // no data was associated with this key
-	}
-	b, err := redis.Bytes(data, err)
-	if err != nil {
-		return 0, err
-	}
-	userID, err := getUserID(b)
-
-	if err != nil {
-		return 0, err
-	}
-	return userID, nil
-}
-
-func getUserID(d []byte) (int64, error) {
-	var f interface{}
-	err := json.Unmarshal(d, &f)
-
-	if err != nil {
-		return 0, err
-	}
-	m := f.(map[string]interface{})
-
-	user, ok := m["passport"]
-
-	if !ok {
-		return 0, errors.New("There is no sessions")
-	}
-
-	v := user.(map[string]interface{})
-
-	return int64(v["user"].(float64)), nil
+func interceptRequest(w http.ResponseWriter, res *utils.ResponseError) {
+	w.WriteHeader(res.Status)
+	json.NewEncoder(w).Encode(res.Content)
 }
 
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
-func ForContext(ctx context.Context) *model.Users {
-	raw, _ := ctx.Value(userCtxKey).(*model.Users)
+func ForContext(ctx context.Context) *CurrentUser {
+	raw, _ := ctx.Value(userCtxKey).(*CurrentUser)
 	return raw
 }

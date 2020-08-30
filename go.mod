@@ -12,6 +12,7 @@ require (
 	github.com/bxcodec/go-clean-arch v2.0.1+incompatible // indirect
 	github.com/codegangsta/envy v0.0.0-20141216192214-4b78388c8ce4 // indirect
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/go-seccomp-bpf v1.1.0
 	github.com/fsouza/go-dockerclient v1.4.4 // indirect
 	github.com/garyburd/redigo v1.6.0

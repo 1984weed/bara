@@ -28,7 +28,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/garyburd/redigo/redis"
 	"github.com/go-chi/chi"
 	"github.com/go-pg/pg/v9"
 	"github.com/rs/cors"
@@ -158,17 +157,17 @@ func main() {
 				Database: ctx.String("DB_NAME"),
 			})
 
-		redisPool := &redis.Pool{
-			MaxIdle:     10,
-			IdleTimeout: 240 * time.Second,
-			TestOnBorrow: func(c redis.Conn, t time.Time) error {
-				_, err := c.Do("PING")
-				return err
-			},
-			Dial: func() (redis.Conn, error) {
-				return redis.DialURL(ctx.String("REDIS_URL"))
-			},
-		}
+		// redisPool := &redis.Pool{
+		// 	MaxIdle:     10,
+		// 	IdleTimeout: 240 * time.Second,
+		// 	TestOnBorrow: func(c redis.Conn, t time.Time) error {
+		// 		_, err := c.Do("PING")
+		// 		return err
+		// 	},
+		// 	Dial: func() (redis.Conn, error) {
+		// 		return redis.DialURL(ctx.String("REDIS_URL"))
+		// 	},
+		// }
 
 		port := ctx.String("PORT")
 		timeoutContext := time.Duration(5) * time.Second
@@ -210,7 +209,7 @@ func main() {
 			MaxAge:           300,
 		})
 		router.Use(cors.Handler)
-		router.Use(auth.Middleware(userRepoRunner, redisPool))
+		router.Use(auth.Middleware("secret_key_goes_here"))
 
 		router.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
 		router.Handle("/query", cors.Handler(handler.GraphQL(generated.NewExecutableSchema(

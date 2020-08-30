@@ -128,13 +128,13 @@ export default (
     expressApp.get(`${pathPrefix}/getToken`, (req, res) => {
         // if (req.user) {
             const jwtPayload = {
-                email: "user1@example.com",
+                sub: 3,
                 name: "JWT Taro",
             }
             const jwtSecret = "secret_key_goes_here"
             const jwtOptions: jwt.SignOptions = {
                 algorithm: "HS256",
-                expiresIn: "3s",
+                expiresIn: "60m",
             }
 
             const token = jwt.sign(jwtPayload, jwtSecret, jwtOptions)

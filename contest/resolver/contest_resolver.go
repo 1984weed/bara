@@ -53,10 +53,9 @@ func (cr *contestResolver) GetContest(ctx context.Context, slug string) (*graphq
 
 	resContest := contestToGraphqlContest(contest)
 
-	var user *model.Users
-	user = auth.ForContext(ctx)
+	user := auth.ForContext(ctx)
 	if user != nil {
-		contestProblemsStatus, err := cr.uc.GetContestProblemResult(model.ContestID(contest.ID), user.ID)
+		contestProblemsStatus, err := cr.uc.GetContestProblemResult(model.ContestID(contest.ID), user.Sub)
 		if err != nil {
 			return nil, err
 		}

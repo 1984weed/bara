@@ -238,9 +238,9 @@ func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, i
 }
 
 func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
-	var user *model.Users
+	var user *auth.CurrentUser
 	if user = auth.ForContext(ctx); user == nil {
-		return nil, errors.New("Forbidden")
+		return nil, utils.GraphqlPermissionError()
 	}
 
 	domainCode := &domain.SubmitCode{
@@ -248,7 +248,7 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 		TypedCode:    input.TypedCode,
 		ProblemSlug:  input.Slug,
 	}
-	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.ID)
+	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.Sub)
 
 	if err != nil {
 		return nil, err
@@ -267,9 +267,9 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 }
 
 func (pr *problemResolver) SubmitContestCode(ctx context.Context, contestSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
-	var user *model.Users
+	var user *auth.CurrentUser
 	if user = auth.ForContext(ctx); user == nil {
-		return nil, errors.New("Forbidden")
+		return nil, utils.GraphqlPermissionError()
 	}
 
 	domainCode := &domain.SubmitCode{
@@ -277,13 +277,13 @@ func (pr *problemResolver) SubmitContestCode(ctx context.Context, contestSlug st
 		TypedCode:    input.TypedCode,
 		ProblemSlug:  input.Slug,
 	}
-	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.ID)
+	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.Sub)
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = pr.cc.RegisterProblemResult(result, contestSlug, input.Slug, user.ID)
+	err = pr.cc.RegisterProblemResult(result, contestSlug, input.Slug, user.Sub)
 
 	if err != nil {
 		return nil, err
@@ -327,7 +327,7 @@ func (pr *problemResolver) TestRunCode(ctx context.Context, inputStr string, inp
 }
 
 func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, problemSlug string, limit, offset int) ([]*graphql_model.Submission, error) {
-	var user *model.Users
+	var user *auth.CurrentUser
 	if user = auth.ForContext(ctx); user == nil {
 		return []*graphql_model.Submission{}, nil
 	}

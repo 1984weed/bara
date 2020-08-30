@@ -56,10 +56,10 @@ function createClient(initialState) {
         ssrMode: typeof window === "undefined",
         url: graphqlURL,
         cache: memCache({ initialState }),
-        // fetchOptions: {
-        //     mode: "cors",
-        //     credentials: "include",
-        // },
+        fetchOptions: {
+            mode: "cors",
+            credentials: "include",
+        },
         fetch: buildAxiosFetch(gqlAxios),
     })
 }

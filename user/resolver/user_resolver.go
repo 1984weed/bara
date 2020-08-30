@@ -3,11 +3,10 @@ package resolver
 import (
 	"bara/auth"
 	"bara/graphql_model"
-	"bara/model"
 	"bara/user"
 	"bara/user/domain"
+	"bara/utils"
 	"context"
-	"errors"
 	"strconv"
 )
 
@@ -33,22 +32,18 @@ func (u *userResolver) Register(ctx context.Context, userName string, email stri
 }
 
 func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
-	var user *model.Users
-	if user = auth.ForContext(ctx); user == nil {
-		return nil, errors.New("Forbidden")
+	var currentUser *auth.CurrentUser
+	if currentUser = auth.ForContext(ctx); currentUser == nil {
+		return nil, utils.GraphqlPermissionError()
 	}
 
-	user, err := u.uc.GetUserByID(ctx, user.ID)
+	user, err := u.uc.GetUserByID(ctx, currentUser.Sub)
 
 	if err != nil {
 		return nil, err
 	}
 
 	role := graphql_model.UserRoleNormal
-
-	if domain.IsAdmin(user.UserName) {
-		role = graphql_model.UserRoleAdmin
-	}
 
 	return &graphql_model.User{
 		ID:          string(user.ID),
@@ -83,9 +78,9 @@ func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_m
 }
 
 func (u *userResolver) UpdateMe(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
-	var user *model.Users
-	if user = auth.ForContext(ctx); user == nil {
-		return nil, errors.New("Forbidden")
+	var currentUser *auth.CurrentUser
+	if currentUser = auth.ForContext(ctx); currentUser == nil {
+		return nil, utils.GraphqlPermissionError()
 	}
 	userForUpdate := domain.UserForUpdate{
 		UserName:    input.UserName,
