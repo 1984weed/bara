@@ -332,7 +332,7 @@ func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, pr
 		return []*graphql_model.Submission{}, nil
 	}
 
-	submissions, err := pr.uc.GetUsersSubmissionByProblemID(ctx, user.ID, problemSlug, limit, offset)
+	submissions, err := pr.uc.GetUsersSubmissionByProblemID(ctx, user.Sub, problemSlug, limit, offset)
 	if err != nil {
 		return []*graphql_model.Submission{}, err
 	}

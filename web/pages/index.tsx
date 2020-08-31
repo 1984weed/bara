@@ -27,7 +27,6 @@ const problems: React.FunctionComponent<Props> = ({ session }: Props) => {
     })
 
     const sessions = useSession()
-    console.log("sessions", sessions)
     return (
         <Layout session={session}>
             <TableContainer>

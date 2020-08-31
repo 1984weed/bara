@@ -4,9 +4,7 @@ import redis from "redis"
 import { createProviders, ProviderKeys } from "./auth-providers"
 import authServer from "./auth-server"
 import { createDBStore } from "./auth-store"
-const RedisStore = require("connect-redis")(expressSession)
 
-import { logger } from "./logger"
 // Load environment variables from .env
 require("dotenv").load()
 
@@ -29,6 +27,11 @@ nextApp
                 cookieName: process.env.COOKIE_NAME || "auth-token",
                 pathPrefix: "/auth",
                 sessionCookie: "connect.sid",
+                jwtSecret: process.env.JWT_SECRET,
+                jwtOptions: {
+                    algorithm: "HS256",
+                    expiresIn: "60m",
+                },
                 domain: process.env.SUB_DOMAIN || null,
                 store: createDBStore(initDBConfig()),
                 providers: createProviders({

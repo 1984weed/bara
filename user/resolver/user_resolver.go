@@ -90,7 +90,7 @@ func (u *userResolver) UpdateMe(ctx context.Context, input graphql_model.UserInp
 		Image:       input.Image,
 	}
 
-	user, err := u.uc.UpdateUser(ctx, user.ID, userForUpdate)
+	user, err := u.uc.UpdateUser(ctx, currentUser.Sub, userForUpdate)
 
 	if err != nil {
 		return nil, err

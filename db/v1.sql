@@ -9,6 +9,7 @@ CREATE TABLE users (
   email VARCHAR(255) NOT NULL,
   bio VARCHAR(1024),
   image_url VARCHAR(255),
+  role VARCHAR(10),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT user_email_unique UNIQUE (email),

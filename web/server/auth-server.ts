@@ -16,6 +16,8 @@ export default (
     {
         port,
         sessionSecret,
+        jwtSecret,
+        jwtOptions,
         cookieName,
         store,
         sessionCookie,
@@ -71,6 +73,7 @@ export default (
                 return {
                     id: user.id,
                     name: user.userName,
+                    role: user.role,
                     email: user.email,
                 }
             })
@@ -124,29 +127,16 @@ export default (
     /**
      * Generate token
      */
-
     expressApp.get(`${pathPrefix}/getToken`, (req, res) => {
-        // if (req.user) {
-            const jwtPayload = {
-                sub: 3,
-                name: "JWT Taro",
-            }
-            const jwtSecret = "secret_key_goes_here"
-            const jwtOptions: jwt.SignOptions = {
-                algorithm: "HS256",
-                expiresIn: "60m",
-            }
-
-            const token = jwt.sign(jwtPayload, jwtSecret, jwtOptions)
+        if (req.user) {
             return res.json({
-                result: "ok",
-                token
+                token: generateToken(req.user),
             })
-        // }
+        }
 
-        // return res.json({
-        //     error: "Not login",
-        // })
+        return res.json({
+            token: "",
+        })
     })
 
     /**
@@ -181,15 +171,26 @@ export default (
             })
     })
 
+    function generateToken(user: User) {
+        const jwtPayload = {
+            sub: user.id,
+            role: user.role,
+        }
+
+        return jwt.sign(jwtPayload, jwtSecret, jwtOptions)
+    }
+
     expressApp.get(`${pathPrefix}/session`, (req, res) => {
         const session = {
             maxAge: sessionMaxAge,
             revalidateAge: sessionRevalidateAge,
             user: null,
+            token: "",
         }
 
         if (req.user) {
             session.user = req.user
+            session.token = generateToken(req.user)
         }
 
         return res.json(session)

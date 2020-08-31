@@ -1,5 +1,6 @@
 import * as session from "express-session"
 import { AuthStore } from "./auth-store"
+import {SignOptions} from "jsonwebtoken"
 
 export type AuthSeverConfig = {
     port: number
@@ -8,6 +9,8 @@ export type AuthSeverConfig = {
     sessionMaxAge: number
     sessionCookie: string
     sessionSecret: string
+    jwtSecret: string
+    jwtOptions: SignOptions
     domain: string
     pathPrefix: string
     providers: Provider[]
@@ -61,4 +64,5 @@ export type User = {
     email?: string
     password?: string
     imageUrl?: string
+    role?: "user" | "admin"
 }

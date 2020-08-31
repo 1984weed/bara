@@ -11,11 +11,11 @@ gqlAxios.interceptors.request.use(async function(config) {
     let token = window.localStorage.getItem("api-token")
 
     // If local doesn't have api-token, it needs to get new one
-    if (!token) {
+    // if (!token) {
         const tokenRes = await getIdToken()
         token = tokenRes.token
         window.localStorage.setItem("api-token", token)
-    }
+    // }
     config.headers.Authorization = `Bearer ${token}`
 
     return config

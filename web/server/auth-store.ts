@@ -23,13 +23,14 @@ class AuthDBStore implements AuthStore {
 
     async findByID(id: number): Promise<User | null> {
         const res = await this.store.query({
-            text: `SELECT id, user_name, email FROM users WHERE id = $1`,
+            text: `SELECT id, user_name, email, role FROM users WHERE id = $1`,
             values: [id],
         })
         if (res.rows.length === 0) {
             return null
         }
-        return res.rows[0]
+        const defaultRole = "user"
+        return {role: defaultRole, ...res.rows[0]}
     }
 
     async findByEmail(email: string): Promise<User | null> {
