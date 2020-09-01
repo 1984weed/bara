@@ -8,6 +8,7 @@ export type AuthSeverConfig = {
     cookieName: string
     sessionMaxAge: number
     sessionCookie: string
+    sessionStore: session.Store
     sessionSecret: string
     jwtSecret: string
     jwtOptions: SignOptions

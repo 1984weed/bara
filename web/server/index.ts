@@ -4,6 +4,7 @@ import redis from "redis"
 import { createProviders, ProviderKeys } from "./auth-providers"
 import authServer from "./auth-server"
 import { createDBStore } from "./auth-store"
+const RedisStore = require("connect-redis")(expressSession)
 
 // Load environment variables from .env
 require("dotenv").load()
@@ -27,6 +28,7 @@ nextApp
                 cookieName: process.env.COOKIE_NAME || "auth-token",
                 pathPrefix: "/auth",
                 sessionCookie: "connect.sid",
+                sessionStore: initCacheStore(process.env.REDIS_URI),
                 jwtSecret: process.env.JWT_SECRET,
                 jwtOptions: {
                     algorithm: "HS256",
@@ -69,6 +71,14 @@ function initDBConfig() {
         database: process.env.DB_NAME,
         password: process.env.DB_PASS,
     }
+}
+
+function initCacheStore(redisUri: string): session.Store {
+    return new RedisStore({
+        client: redis.createClient({
+            url: redisUri,
+        }),
+    })
 }
 
 function initProviderKeys(consumerKey: string, consumerSecret: string): ProviderKeys {

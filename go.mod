@@ -15,7 +15,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/go-seccomp-bpf v1.1.0
 	github.com/fsouza/go-dockerclient v1.4.4 // indirect
-	github.com/garyburd/redigo v1.6.0
+	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20190923054218-35076c1b2bea // indirect
 	github.com/gin-gonic/gin v1.4.0 // indirect

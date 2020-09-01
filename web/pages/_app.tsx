@@ -17,14 +17,6 @@ interface Props extends AppPropsType {
 
 export default function App({ Component, pageProps }) {
     const graphQLClient = useGraphQLClient(pageProps.initState)
-    // useEffect(() => {
-    //     // Remove the server-side injected CSS.
-    //     const jssStyles = document.querySelector('#jss-server-side');
-    //     if (jssStyles) {
-    //       jssStyles.parentElement.removeChild(jssStyles);
-    //     }
-    //   }, []);
-
 
     return (
         <Provider session={pageProps.session}>
@@ -37,29 +29,3 @@ export default function App({ Component, pageProps }) {
         </Provider>
     )
 }
-
-// export class MyApp extends App<Props> {
-//     // static async getInitialProps({ Component, ctx, client }: AppContextWithGraphql) {
-//     //     let pageProps = {}
-//     //     const { req } = ctx
-//     //     const session = await getSession(req)
-
-//     //     if (Component.getInitialProps) {
-//     //         pageProps = await Component.getInitialProps({ session, client, ...ctx })
-//     //     }
-
-//     //     return { pageProps, session }
-//     // }
-//     render() {
-//         const { Component, pageProps, graphQLClient, session } = this.props
-
-//         return (
-//             <ClientContext.Provider value={graphQLClient}>
-//                 <Component {...pageProps} session={session} />
-//             </ClientContext.Provider>
-//         )
-//     }
-// }
-
-// export default withGraphQLClient(MyApp)
-// export default MyApp

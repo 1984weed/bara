@@ -5,6 +5,7 @@ import { createMuiTheme, responsiveFontSizes } from "@material-ui/core/styles"
 import React from "react"
 import { CssBaseline } from "@material-ui/core"
 
+
 const theme = responsiveFontSizes(createMuiTheme())
 
 export default class MyDocument extends Document {
@@ -25,7 +26,6 @@ export default class MyDocument extends Document {
         )
     }
 
-    // todo change to getInitialStatic from this 
     static async getInitialProps(ctx: DocumentContext) {
         const sheets = new ServerStyleSheets()
 

@@ -16,6 +16,7 @@ export default (
     {
         port,
         sessionSecret,
+        sessionStore,
         jwtSecret,
         jwtOptions,
         cookieName,
@@ -39,6 +40,7 @@ export default (
     expressApp.use(
         ExpressSession({
             secret: sessionSecret,
+            store: sessionStore,
             resave: true,
             rolling: true,
             saveUninitialized: true,

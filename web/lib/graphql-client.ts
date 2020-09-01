@@ -6,16 +6,22 @@ const graphqlURL = process.env.GRAPHQL_URL
 import axios from "axios"
 import { buildAxiosFetch } from "@lifeomic/axios-fetch"
 
+
+
 const gqlAxios = axios.create()
 gqlAxios.interceptors.request.use(async function(config) {
-    let token = window.localStorage.getItem("api-token")
+    let token = ""
+    console.log("gqlAxios.interceptors.request")
+    if(window) {
+        token = window.localStorage.getItem("api-token")
+    }
 
     // If local doesn't have api-token, it needs to get new one
-    // if (!token) {
+    if (!token) {
         const tokenRes = await getIdToken()
         token = tokenRes.token
-        window.localStorage.setItem("api-token", token)
-    // }
+        window && window.localStorage.setItem("api-token", token)
+    }
     config.headers.Authorization = `Bearer ${token}`
 
     return config
@@ -53,12 +59,12 @@ let graphQLClient
 
 function createClient(initialState) {
     return new GraphQLClient({
-        ssrMode: typeof window === "undefined",
+        ssrMode: false,//typeof window === "undefined",
         url: graphqlURL,
         cache: memCache({ initialState }),
         fetchOptions: {
             mode: "cors",
-            credentials: "include",
+            // credentials: "include",
         },
         fetch: buildAxiosFetch(gqlAxios),
     })

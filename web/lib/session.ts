@@ -21,9 +21,10 @@ const _useSessionHook = (session): any[] => {
     const _getSession = async () => {
         try {
             const newClientSessionData = await getSession()
-
-            setData(newClientSessionData)
-            setLoading(false)
+            if(newClientSessionData) {
+                setData(newClientSessionData)
+                setLoading(false)
+            }
         } catch (error) {
             console.log("client session error", error)
         }
@@ -51,7 +52,6 @@ function getSession(): Promise<any> {
             })
             .then(res => resolve(res))
     })
-    // }
 }
 
 export const Provider = ({ children, session }: { children: ReactNode; session: any }) => {

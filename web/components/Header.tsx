@@ -5,11 +5,11 @@ import NextRouter, { Router, withRouter } from "next/router"
 import React, { FunctionComponent } from "react"
 import { Session } from "../types/Session"
 import { HeaderIcon } from "./icons/HeaderIcon"
+import { useSession } from "../lib/session"
 const { NextAuth } = require("next-auth/client")
 
 type Props = {
     router: Router
-    session: Session
 }
 
 const useLinkStyles = makeStyles(theme => ({
@@ -49,7 +49,8 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const Header: NextPage<Props> = ({ session, router: { pathname } }: Props) => {
+const Header: NextPage<Props> = ({ router: { pathname } }: Props) => {
+    const [session] = useSession()
     const classes = useStyles()
     return (
         <Grid container className={classes.header} justify="space-between" alignItems="center">
@@ -60,7 +61,7 @@ const Header: NextPage<Props> = ({ session, router: { pathname } }: Props) => {
                 <StyledLink href="/contests" className={pathname === "/contests" ? "is-active" : ""}>
                     Contests
                 </StyledLink>
-                {session && session.user && (
+                {session && session.user.role == "admin" && (
                     <StyledLink href="/admin" className={pathname === "/admin" ? "is-active" : ""}>
                         Admin
                     </StyledLink>
@@ -80,7 +81,7 @@ const Header: NextPage<Props> = ({ session, router: { pathname } }: Props) => {
                 </Link>
             </Box>
             {(() => {
-                if (session && session.user) {
+                if (session) {
                     return (
                         <Box>
                             <StyledLink
@@ -108,11 +109,7 @@ const Header: NextPage<Props> = ({ session, router: { pathname } }: Props) => {
                             </StyledLink>
                         </Box>
                         <Box>
-                            <StyledLink
-                                href="/signup"
-                                style={{ fontWeight: "bold" }}
-                                className={pathname === "/signup" ? "is-active" : ""}
-                            >
+                            <StyledLink href="/signup" style={{ fontWeight: "bold" }} className={pathname === "/signup" ? "is-active" : ""}>
                                 Sign up
                             </StyledLink>
                         </Box>

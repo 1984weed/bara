@@ -6,10 +6,6 @@ import Layout from "../components/Layout"
 import { Problem } from "../graphql/types"
 import { useSession } from "../lib/session"
 
-type Props = {
-    session: any
-}
-
 const problem = `
 query getProblems($limit: Int!) {
     problems(limit: $limit) {
@@ -21,14 +17,13 @@ query getProblems($limit: Int!) {
 }
 `
 
-const problems: React.FunctionComponent<Props> = ({ session }: Props) => {
+const problems: React.FunctionComponent = () => {
     const { data } = useQuery<{ problems: Problem[] }>(problem, {
         variables: { limit: 50 },
     })
 
-    const sessions = useSession()
     return (
-        <Layout session={session}>
+        <Layout>
             <TableContainer>
                 <Table>
                     <TableHead>
