@@ -23,6 +23,7 @@ const _useSessionHook = (session): any[] => {
             const newClientSessionData = await getSession()
             if(newClientSessionData) {
                 setData(newClientSessionData)
+                localStorage.setItem("api-token", newClientSessionData.token)
                 setLoading(false)
             }
         } catch (error) {

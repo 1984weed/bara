@@ -145,6 +145,12 @@ func main() {
 			Value:  "",
 			Usage:  "GCP project id",
 		},
+		cli.StringFlag{
+			Name:   "JWT_SECRET",
+			EnvVar: "JWT_SECRET",
+			Value:  "secret",
+			Usage:  "JWT Secret for the api's authentification.",
+		},
 	}
 	app.Action = func(ctx *cli.Context) error {
 
@@ -209,7 +215,7 @@ func main() {
 			MaxAge:           300,
 		})
 		router.Use(cors.Handler)
-		router.Use(auth.Middleware("secret_key_goes_here"))
+		router.Use(auth.Middleware(ctx.String("JWT_SECRET")))
 
 		router.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
 		router.Handle("/query", cors.Handler(handler.GraphQL(generated.NewExecutableSchema(

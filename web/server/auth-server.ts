@@ -100,6 +100,7 @@ export default (
                 store
                     .findByEmail(username)
                     .then(user => {
+                        console.log(user)
                         if (user == null) {
                             return done(null, false, { message: "Incorrect username." })
                         }
@@ -184,8 +185,6 @@ export default (
 
     expressApp.get(`${pathPrefix}/session`, (req, res) => {
         const session = {
-            maxAge: sessionMaxAge,
-            revalidateAge: sessionRevalidateAge,
             user: null,
             token: "",
         }

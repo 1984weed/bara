@@ -23,7 +23,6 @@ gqlAxios.interceptors.response.use(
         localStorage.setItem("token", tokenRes.token)
         // axios.defaults.headers.common["Authorization"] = `Bearer ${tokenRes.token}`
 
-        console.log("きたー", error)
         error.hasRefreshedToken = true
         return Promise.reject(error)
     }

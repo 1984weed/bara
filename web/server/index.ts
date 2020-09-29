@@ -29,7 +29,7 @@ nextApp
                 pathPrefix: "/auth",
                 sessionCookie: "connect.sid",
                 sessionStore: initCacheStore(process.env.REDIS_URI),
-                jwtSecret: process.env.JWT_SECRET,
+                jwtSecret: process.env.JWT_SECRET || "secret",
                 jwtOptions: {
                     algorithm: "HS256",
                     expiresIn: "60m",

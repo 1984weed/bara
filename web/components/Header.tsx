@@ -61,7 +61,7 @@ const Header: NextPage<Props> = ({ router: { pathname } }: Props) => {
                 <StyledLink href="/contests" className={pathname === "/contests" ? "is-active" : ""}>
                     Contests
                 </StyledLink>
-                {session && session.user.role == "admin" && (
+                {session?.user?.role === "admin" && (
                     <StyledLink href="/admin" className={pathname === "/admin" ? "is-active" : ""}>
                         Admin
                     </StyledLink>
@@ -81,19 +81,15 @@ const Header: NextPage<Props> = ({ router: { pathname } }: Props) => {
                 </Link>
             </Box>
             {(() => {
-                if (session) {
+                if (session.user) {
                     return (
                         <Box>
                             <StyledLink
-                                href="/"
+                                href="#"
                                 onClick={() => {
-                                    NextAuth.signout()
-                                        .then(() => {
-                                            NextRouter.push("/")
-                                        })
-                                        .catch(err => {
-                                            NextRouter.push("/")
-                                        })
+                                    fetch("/auth/signout", {method: "post"}).then(() => {
+                                        NextRouter.push("/")
+                                    })
                                 }}
                             >
                                 Sign out

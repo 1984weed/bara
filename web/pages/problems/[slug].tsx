@@ -6,13 +6,11 @@ import React from "react"
 import Layout from "../../components/Layout"
 import { EditorArea, RunCodeType, SubmitCodeResult, SubmitCodeType } from "../../components/problems/ProblemPage"
 import SideArea from "../../components/problems/SideArea"
-import { CodeLanguage, Problem } from "../../graphql/types"
-import { useRememberState } from "../../hooks/useRememberState"
-// import { NextPageContextWithGraphql } from "../../lib/with-graphql-client"
+import { CodeLanguage } from "../../graphql/types"
+import { useSession } from "../../lib/session"
 
 type Props = {
     session: any
-    problem: Problem | null
 }
 
 const problemQuery = `
@@ -83,17 +81,18 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const ProblemComponent: NextPage<Props> = ({ session, problem }: Props) => {
+const ProblemComponent: NextPage<Props> = () => {
     const router = useRouter()
+    const [session] = useSession()
 
-    if (router === null) {
+    if (router == null) {
         return <></>
-    }
-    if (problem == null) {
-        return <span>Error</span>
     }
     const { slug } = router.query
 
+    const problemData = useQuery(problemQuery, {
+        variables: { slug: router.query.slug },
+    })
     const { data, refetch } = useQuery(getSubmissionList, {
         variables: { slug, offset: 0, limit: 50 },
     })
@@ -101,21 +100,27 @@ const ProblemComponent: NextPage<Props> = ({ session, problem }: Props) => {
     const [submitCode, submittedResult] = useMutation(submitCodeMutation)
     const [testRunCode, testRunResult] = useMutation(testRunCodeMutation)
 
+    const classes = useStyles()
+    if (problemData.loading) {
+        return <></>
+    }
+
+    const { problem } = problemData.data
     const language = CodeLanguage.JavaScript
     const targetCodeSnippet = problem.codeSnippets.find(a => a.lang === "JavaScript") || { code: "" }
 
     const defaultCode = targetCodeSnippet.code
-    const classes = useStyles()
 
-    const submittedResultForProblemPage: SubmitCodeResult = submittedResult.data ? {
-        status: submittedResult.data.submitCode.result.status,
-        expected: submittedResult.data.submitCode.result.expected,
-        time: submittedResult.data.submitCode.result.time,
-        input: submittedResult.data.submitCode.result.input,
-        result: submittedResult.data.submitCode.result.result,
-        stdout: submittedResult.data.submitCode.stdout,
-
-    } : null
+    const submittedResultForProblemPage: SubmitCodeResult = submittedResult.data
+        ? {
+              status: submittedResult.data.submitCode.result.status,
+              expected: submittedResult.data.submitCode.result.expected,
+              time: submittedResult.data.submitCode.result.time,
+              input: submittedResult.data.submitCode.result.input,
+              result: submittedResult.data.submitCode.result.result,
+              stdout: submittedResult.data.submitCode.stdout,
+          }
+        : null
 
     return (
         <Layout title={problem.title} session={session}>
@@ -148,7 +153,7 @@ const ProblemComponent: NextPage<Props> = ({ session, problem }: Props) => {
                             })
                         }}
                         onSubmitCode={(e: SubmitCodeType) => {
-                            if (session.user == null) {
+                            if (session?.user == null) {
                                 alert("Please login")
                                 return
                             }
@@ -179,33 +184,5 @@ function handleSubmit(
         variables: option,
     })
 }
-
-// ProblemComponent.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-//     const result = await client.request(
-//         {
-//             query: problemQuery,
-//             variables: { slug: query.slug },
-//         },
-//         {}
-//     )
-
-//     if (result.data == null) {
-//         return Promise.resolve({
-//             problem: null,
-//             session: "",
-//             pathname: "",
-//         })
-//     }
-
-//     const { problem } = result.data as {
-//         problem: Problem
-//     }
-
-//     return Promise.resolve({
-//         problem,
-//         session: "",
-//         pathname: "",
-//     })
-// }
 
 export default ProblemComponent

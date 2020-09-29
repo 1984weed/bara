@@ -1,12 +1,13 @@
 import Box from "@material-ui/core/Box"
 import { FetchData, useMutation } from "graphql-hooks"
 import { useRouter } from "next/router"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import Layout from "../../../components/Layout"
 import ErrorNotification from "../../../components/notifications/ErrorNotification"
 import ProblemForm from "../../../components/problems/ProblemForm"
 import { useRememberState } from "../../../hooks/useRememberState"
+import { useSession } from "../../../lib/session"
 
 export const createProblem = `
 mutation createProblem($title: String!, $slug: String!, $description: String!, $functionName: String!, $outputType: String!, $argsNum: Int!, $args:  [CodeArg!]!, $testCaseNum: Int!, $testCases: [TestCase!]!) {
@@ -33,32 +34,43 @@ query testNewQuestion($title: String!, $description: String!, $functionName: Str
 
 const NEW_PROBLEM_KEY = "new-problem-form"
 
-const NewProblem = ({ session }) => {
+const NewProblem = () => {
     const router = useRouter()
+    const [session] = useSession()
+
+    useEffect(() => {
+        if (session == null || session.user.session == null) {
+            router.push("/")
+        }
+    }, [session])
+
     const [createPost, { loading }] = useMutation(createProblem)
 
     const [submitError, setSubmitError] = useState(false)
 
-    const [formState, setFormState] = useRememberState(NEW_PROBLEM_KEY, JSON.stringify({
-        title: "",
-        slug: "",
-        description: "",
-        functionName: "",
-        outputType: "int[]",
-        testCaseNum: "0",
-        argumentNum: "0",
-        argumentNames: [],
-        argumentTypes: [],
-        testCaseGenState: [],
-        testCaseGen: [{count: 0}]
-    }))
+    const [formState, setFormState] = useRememberState(
+        NEW_PROBLEM_KEY,
+        JSON.stringify({
+            title: "",
+            slug: "",
+            description: "",
+            functionName: "",
+            outputType: "int[]",
+            testCaseNum: "0",
+            argumentNum: "0",
+            argumentNames: [],
+            argumentTypes: [],
+            testCaseGenState: [],
+            testCaseGen: [{ count: 0 }],
+        })
+    )
 
-    if(loading) {
+    if (loading) {
         return <div>Loading</div>
     }
 
     const formHooks = useForm({
-        defaultValues: JSON.parse(formState) 
+        defaultValues: JSON.parse(formState),
     })
     const currentState = formHooks.watch({ nest: true })
 
@@ -74,16 +86,16 @@ const NewProblem = ({ session }) => {
             <Box>
                 <ProblemForm
                     {...formHooks}
-                    onClickSubmit={async (values) =>  {
-                        const data = await handleSubmit(createPost,  values)
+                    onClickSubmit={async values => {
+                        const data = await handleSubmit(createPost, values)
 
-                        if(data) {
+                        if (data) {
                             router.push(`/problems/${data.createProblem.slug}`)
-                            return 
-                        } 
+                            return
+                        }
 
                         setSubmitError(true)
-                        localStorage.setItem(NEW_PROBLEM_KEY, "");
+                        localStorage.setItem(NEW_PROBLEM_KEY, "")
                     }}
                 ></ProblemForm>
             </Box>
@@ -94,11 +106,11 @@ const NewProblem = ({ session }) => {
 export function createNewProblemsVariables(formState: any, argsNum: number, testCaseNum: number): any {
     const testCases = []
     for (let i = 0; i < testCaseNum; i++) {
-        const inputArray =  formState[`inputTestCase-${i}`]
+        const inputArray = formState[`inputTestCase-${i}`]
         inputArray.forEach(s => {
             s.replace(/ /g, "")
         })
-        
+
         testCases.push({
             input: inputArray,
             output: formState["outTestCase"][i].replace(/ /g, ""),
@@ -125,7 +137,7 @@ export function createNewProblemsVariables(formState: any, argsNum: number, test
         outputType,
         testCases,
         testCaseNum,
-        args
+        args,
     }
 }
 async function handleTest(doTestform: FetchData<any>, formState: any, argsNum: number, testCaseNum: number) {
@@ -135,10 +147,7 @@ async function handleTest(doTestform: FetchData<any>, formState: any, argsNum: n
     return result
 }
 
-async function handleSubmit(
-    createPost: FetchData<any>,
-    formState: any
-): Promise<any> {
+async function handleSubmit(createPost: FetchData<any>, formState: any): Promise<any> {
     const { data, error } = await createPost({
         variables: createNewProblemsVariables(formState, parseInt(formState.argumentNum) || 0, parseInt(formState.testCaseNum)),
     })

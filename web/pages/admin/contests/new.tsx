@@ -7,7 +7,6 @@ import React from "react"
 import { useForm } from "react-hook-form"
 import { ContestForm } from "../../../components/contests/ContestForm"
 import Layout from "../../../components/Layout"
-import { Problem } from "../../../graphql/types"
 
 export const allProblemsQuery = `
 query problems($limit: Int) {
