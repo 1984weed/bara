@@ -7,6 +7,7 @@ import (
 	"bara/user/domain"
 	"bara/utils"
 	"context"
+	"fmt"
 	"strconv"
 )
 
@@ -19,16 +20,6 @@ func NewUserResolver(uc user.Usecase) user.Resolver {
 	return &userResolver{
 		uc,
 	}
-}
-
-func (u *userResolver) Register(ctx context.Context, userName string, email string, password string) error {
-	_, err := u.uc.Register(ctx, userName, email, password)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
@@ -46,7 +37,7 @@ func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
 	role := graphql_model.UserRoleNormal
 
 	return &graphql_model.User{
-		ID:          string(user.ID),
+		ID:          fmt.Sprintf("%d", user.ID),
 		DisplayName: user.DisplayName,
 		UserName:    user.UserName,
 		Email:       user.Email,

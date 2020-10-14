@@ -238,7 +238,12 @@ func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, i
 }
 
 func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
+	// if user := auth.ForContext(ctx); user == nil {
+	// 	return nil, errors.New("Forbidden")
+	// }
+
 	var user *auth.CurrentUser
+
 	if user = auth.ForContext(ctx); user == nil {
 		return nil, utils.GraphqlPermissionError()
 	}

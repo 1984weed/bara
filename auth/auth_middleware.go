@@ -11,10 +11,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// A private key for context that only this package can access. This is important
-// to prevent collisions between different context uses
-var userCtxKey = &contextKey{"user"}
-var sessionCtxKey = &contextKey{"session"}
+var UserCtxKey = &contextKey{"user"}
+var SessionCtxKey = &contextKey{"session"}
 
 type contextKey struct {
 	name string
@@ -57,7 +55,7 @@ func Middleware(jwtSecret string) func(http.Handler) http.Handler {
 
 			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 				// put it in context
-				ctx := context.WithValue(r.Context(), userCtxKey, claims["sub"])
+				ctx := context.WithValue(r.Context(), UserCtxKey, &CurrentUser{Sub: int64(claims["sub"].(float64))})
 
 				// and call the next with our new context
 				r = r.WithContext(ctx)
@@ -78,6 +76,6 @@ func interceptRequest(w http.ResponseWriter, res *utils.ResponseError) {
 
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
 func ForContext(ctx context.Context) *CurrentUser {
-	raw, _ := ctx.Value(userCtxKey).(*CurrentUser)
+	raw, _ := ctx.Value(UserCtxKey).(*CurrentUser)
 	return raw
 }

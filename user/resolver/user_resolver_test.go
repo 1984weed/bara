@@ -1,11 +1,12 @@
 package resolver_test
 
 import (
+	"bara/auth"
+	"bara/model"
 	"bara/user/mocks"
 	"bara/user/resolver"
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,18 +18,34 @@ func TestRegister(t *testing.T) {
 
 	u := resolver.NewUserResolver(mockUserUC)
 
+	userID := int64(1)
 	t.Run("success", func(t *testing.T) {
-		mockUserUC.On("Register", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil).Once()
-		err := u.Register(context.Background(), "user-name", "test@test.com", "password")
+		expected := &model.Users{
+			ID:       userID,
+			UserName: "userName",
+		}
 
+		mockUserUC.On("GetUserByID", mock.Anything, userID).Return(expected, nil).Once()
+
+		user, err := u.GetMe(withUserIDContext(userID))
+
+		assert.NotNil(t, user)
 		assert.NoError(t, err)
 	})
 
-	t.Run("fail", func(t *testing.T) {
-		mockUserUC.On("Register", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(errors.New("Error test")).Once()
-		err := u.Register(context.Background(), "user-name", "test@test.com", "password")
+	t.Run("fail because there is an error", func(t *testing.T) {
+		mockUserUC.On("GetUserByID", mock.Anything, userID).Return(nil, errors.New("not found")).Once()
 
-		assert.NoError(t, err)
-		fmt.Println(err.Error())
+		user, err := u.GetMe(withUserIDContext(userID))
+
+		assert.Nil(t, user)
+		assert.Error(t, err)
 	})
+}
+
+func withUserIDContext(userID int64) context.Context {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, auth.UserCtxKey, &auth.CurrentUser{Sub: userID})
+
+	return ctx
 }
