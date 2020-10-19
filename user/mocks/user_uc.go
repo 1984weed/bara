@@ -56,7 +56,25 @@ func (u *UserUsecase) GetUserByID(ctx context.Context, userID int64) (*model.Use
 }
 
 func (u *UserUsecase) GetUserByUserName(ctx context.Context, userName string) (*model.Users, error) {
-	return nil, nil
+	ret := u.Called(ctx, userName)
+
+	var r0 *model.Users
+	if rf, ok := ret.Get(0).(func(context.Context, string) *model.Users); ok {
+		r0 = rf(ctx, userName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Users)
+		}
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, userName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+
 }
 
 func (u *UserUsecase) UpdateUser(ctx context.Context, userID int64, user domain.UserForUpdate) (*model.Users, error) {

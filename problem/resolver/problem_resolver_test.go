@@ -2,12 +2,13 @@ package resolver_test
 
 import (
 	"bara/graphql_model"
+	"bara/mocks"
 	"bara/model"
 	"bara/problem/domain"
-	"bara/problem/mocks"
 	"bara/problem/resolver"
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,6 +17,7 @@ import (
 
 func TestGetBySlug(t *testing.T) {
 	mockProblemUC := new(mocks.ProblemUsecase)
+	mockContestUC := new(mocks.ContestUsecase)
 
 	mockProblem := &domain.Problem{
 		Slug:          "test-slug",
@@ -27,34 +29,49 @@ func TestGetBySlug(t *testing.T) {
 			{Name: "target", VarType: "int"},
 			{Name: "num", VarType: "int[]"},
 		},
+		ProblemTestcases: []domain.Testcase{
+			{
+				InputArray: []string{"1"},
+				Input:      "input",
+				Output:     "output",
+			},
+		},
 		OutputType: "int",
 	}
 
 	t.Run("success", func(t *testing.T) {
 		mockProblemUC.On("GetBySlug", mock.Anything, "test-slug").Return(mockProblem, nil).Once()
 
-		u := resolver.NewProblemResolver(mockProblemUC)
+		u := resolver.NewProblemResolver(mockProblemUC, mockContestUC)
 
 		problem, err := u.GetBySlug(context.TODO(), "test-slug")
 
+		fmt.Println(problem.ProblemDetailInfo)
 		assert.NoError(t, err)
-		assert.Equal(t, &graphql_model.Question{
-			Title:       mockProblem.Title,
-			Slug:        mockProblem.Slug,
-			Description: mockProblem.Description,
-			CodeSnippets: []*graphql_model.CodeSnippet{
-				{
-					Code: `/**
-* @param {number} target
-* @param {number[]} num
-* @return {number} 
-*/
-function helloWorld(target, num) {
-	
-}`,
-					Lang: graphql_model.CodeLanguageJavaScript,
-				},
-			}}, problem)
+		// 		assert.Equal(t, &graphql_model.Problem{
+		// 			Title:       mockProblem.Title,
+		// 			Slug:        mockProblem.Slug,
+		// 			Description: mockProblem.Description,
+		// 			CodeSnippets: []*graphql_model.CodeSnippet{
+		// 				{
+		// 					Code: `/**
+		// * @param {number} target
+		// * @param {number[]} num
+		// * @return {number}
+		// */
+		// function helloWorld(target, num) {
+
+		// }`,
+		// 					Lang: graphql_model.CodeLanguageJavaScript,
+		// 				},
+		// 			},
+		// 			ProblemDetailInfo: ,
+		// 	FunctionName string          `json:"functionName"`
+		// 	OutputType   string          `json:"outputType"`
+		// 	ArgsNum      int             `json:"argsNum"`
+		// 	Args         []*CodeArgType  `json:"args"`
+		// 	TestCases    []*TestCaseType `json:"testCases"`
+		// 			}, problem)
 
 		mockProblemUC.AssertExpectations(t)
 	})
@@ -62,7 +79,7 @@ function helloWorld(target, num) {
 	t.Run("error-failed", func(t *testing.T) {
 		mockProblemUC.On("GetBySlug", mock.Anything, "test-slug").Return(nil, errors.New("Unexpexted Error")).Once()
 
-		u := resolver.NewProblemResolver(mockProblemUC)
+		u := resolver.NewProblemResolver(mockProblemUC, mockContestUC)
 
 		problem, err := u.GetBySlug(context.TODO(), "test-slug")
 
@@ -76,14 +93,14 @@ function helloWorld(target, num) {
 
 func TestGetTestNewProblem(t *testing.T) {
 	mockProblemUC := new(mocks.ProblemUsecase)
+	mockContestUC := new(mocks.ContestUsecase)
 
-	u := resolver.NewProblemResolver(mockProblemUC)
-	input := graphql_model.NewQuestion{
+	u := resolver.NewProblemResolver(mockProblemUC, mockContestUC)
+	input := graphql_model.NewProblem{
 		Title:        "total sum",
 		Description:  "description",
 		FunctionName: "helloworld",
 		OutputType:   "int",
-		LanguageID:   graphql_model.CodeLanguageJavaScript,
 		ArgsNum:      2,
 		Args: []*graphql_model.CodeArg{
 			{
@@ -102,7 +119,7 @@ func TestGetTestNewProblem(t *testing.T) {
 		new, err := u.GetTestNewProblem(context.TODO(), input)
 
 		assert.NoError(t, err)
-		assert.Equal(t, &graphql_model.Question{
+		assert.Equal(t, &graphql_model.Problem{
 			Title:       input.Title,
 			Slug:        "total-sum",
 			Description: input.Description,

@@ -346,7 +346,7 @@ func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, pr
 
 	for i, s := range submissions {
 		results[i] = &graphql_model.Submission{
-			ID:         fmt.Sprintln("%s", s.ID),
+			ID:         fmt.Sprintf("%d", s.ID),
 			LangSlug:   codeSlugToGraphQL[s.CodeLangSlug],
 			RuntimeMs:  s.ExecTime,
 			StatusSlug: s.StatusSlug,

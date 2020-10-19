@@ -1,10 +1,10 @@
 package usecase_test
 
 import (
+	"bara/mocks"
 	"bara/model"
 	"bara/problem/domain"
 	"bara/problem/executor"
-	"bara/problem/mocks"
 	"bara/problem/usecase"
 	"context"
 	"errors"
