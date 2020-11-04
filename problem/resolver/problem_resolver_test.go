@@ -8,7 +8,6 @@ import (
 	"bara/problem/resolver"
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,34 +43,9 @@ func TestGetBySlug(t *testing.T) {
 
 		u := resolver.NewProblemResolver(mockProblemUC, mockContestUC)
 
-		problem, err := u.GetBySlug(context.TODO(), "test-slug")
+		_, err := u.GetBySlug(context.TODO(), "test-slug")
 
-		fmt.Println(problem.ProblemDetailInfo)
 		assert.NoError(t, err)
-		// 		assert.Equal(t, &graphql_model.Problem{
-		// 			Title:       mockProblem.Title,
-		// 			Slug:        mockProblem.Slug,
-		// 			Description: mockProblem.Description,
-		// 			CodeSnippets: []*graphql_model.CodeSnippet{
-		// 				{
-		// 					Code: `/**
-		// * @param {number} target
-		// * @param {number[]} num
-		// * @return {number}
-		// */
-		// function helloWorld(target, num) {
-
-		// }`,
-		// 					Lang: graphql_model.CodeLanguageJavaScript,
-		// 				},
-		// 			},
-		// 			ProblemDetailInfo: ,
-		// 	FunctionName string          `json:"functionName"`
-		// 	OutputType   string          `json:"outputType"`
-		// 	ArgsNum      int             `json:"argsNum"`
-		// 	Args         []*CodeArgType  `json:"args"`
-		// 	TestCases    []*TestCaseType `json:"testCases"`
-		// 			}, problem)
 
 		mockProblemUC.AssertExpectations(t)
 	})

@@ -125,7 +125,7 @@ func (a *userRepositoryTest) TestGetUserByEmail() {
 		res, err := repo.GetUserByEmail(context.Background(), "invalidemail")
 
 		assert.Empty(t, res)
-		require.Error(a.T(), err)
+		require.NoError(a.T(), err)
 	})
 }
 
@@ -157,6 +157,6 @@ func (a *userRepositoryTest) TestGetUserByUserName() {
 		res, err := repo.GetUserByEmail(context.Background(), "invalid-username")
 
 		assert.Empty(t, res)
-		require.Error(a.T(), err)
+		require.NoError(a.T(), err)
 	})
 }

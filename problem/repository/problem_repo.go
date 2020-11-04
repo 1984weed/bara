@@ -169,7 +169,7 @@ func (r *problemRepository) GetProblemUserResult(ctx context.Context, problemSlu
 			AND pur.problem_id = p.id 
 			AND p.slug = ?
 			AND l.ID = pur.code_lang_id
-			ORDER BY created_at DESC
+			ORDER BY id 
 			LIMIT ? OFFSET ?
 		`, userID, problemSlug, limit, offset)
 

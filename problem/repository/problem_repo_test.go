@@ -56,7 +56,7 @@ func (a *problemRepositoryTest) TestGetBySlug() {
 func (a *problemRepositoryTest) TestGetTestcaseByProblemID() {
 	repo := repository.NewProblemRepositoryRunner(a.DB).GetRepository()
 
-	problems, err := repo.GetProblems(context.Background(), 0, 10)
+	problems, err := repo.GetProblems(context.Background(), 10, 0)
 	problemID := problems[0].ID
 
 	res, err := repo.GetTestcaseByProblemID(context.Background(), problemID)
@@ -73,6 +73,7 @@ func (a *problemRepositoryTest) TestGetTestcaseByProblemID() {
 func (a *problemRepositoryTest) TestSaveNewProblem() {
 	repo := repository.NewProblemRepositoryRunner(a.DB).GetRepository()
 	problem := &model.Problems{
+		ID:           3,
 		Slug:         "test-one",
 		Title:        "Title one",
 		Description:  "description description",
@@ -82,13 +83,14 @@ func (a *problemRepositoryTest) TestSaveNewProblem() {
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
-	problems, err := repo.GetProblems(context.Background(), 0, 10)
+	problems, err := repo.GetProblems(context.Background(), 10, 0)
 
 	assert.Equal(a.T(), len(getMockProblems()), len(problems))
 
 	err = repo.SaveProblem(context.Background(), problem)
 
-	problems, err = repo.GetProblems(context.Background(), 0, 10)
+	problems, err = repo.GetProblems(context.Background(), 10, 0)
+
 	assert.Equal(a.T(), len(getMockProblems())+1, len(problems))
 	require.NoError(a.T(), err)
 }
@@ -110,13 +112,13 @@ func (a *problemRepositoryTest) TestSaveUpdateProblem() {
 		UpdatedAt:    time.Now(),
 	}
 
-	problems, err := repo.GetProblems(context.Background(), 0, 10)
+	problems, err := repo.GetProblems(context.Background(), 10, 0)
 	assert.Equal(a.T(), 2, len(problems))
 
 	err = repo.SaveProblem(context.Background(), problem)
 	require.NoError(a.T(), err)
 
-	problems, err = repo.GetProblems(context.Background(), 0, 10)
+	problems, err = repo.GetProblems(context.Background(), 10, 0)
 
 	// do not increase the amount of problems
 	assert.Equal(a.T(), 2, len(problems))
@@ -135,7 +137,7 @@ func (a *problemRepositoryTest) TestSaveUpdateProblem() {
 // TestDeleteProblemArgs ...
 func (a *problemRepositoryTest) TestDeleteProblemArgs() {
 	repo := repository.NewProblemRepositoryRunner(a.DB).GetRepository()
-	problems, _ := repo.GetProblems(context.Background(), 0, 10)
+	problems, _ := repo.GetProblems(context.Background(), 10, 0)
 
 	args := getMockArgs(problems[0].ID)
 
@@ -180,9 +182,11 @@ func seedProblemData(t *testing.T, db *pg.DB) {
 	}
 	problems := getMockProblems()
 	users := getMockUsers()
+	userIDs := make([]int64, len(users))
 
-	for _, u := range users {
+	for i, u := range users {
 		err := db.Insert(&u)
+		userIDs[i] = u.ID
 		require.NoError(t, err)
 	}
 
@@ -203,8 +207,7 @@ func seedProblemData(t *testing.T, db *pg.DB) {
 	}
 
 	problemID := problems[0].ID
-	userID := users[0].ID
-	userResults := getMockUserResults(userID, problemID, languages[0].ID)
+	userResults := getMockUserResults(userIDs[0], problemID, languages[0].ID)
 
 	for _, u := range userResults {
 		err := db.Insert(&u)
