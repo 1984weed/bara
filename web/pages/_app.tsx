@@ -1,12 +1,10 @@
-import { ClientContext, GraphQLClient } from "graphql-hooks"
-import { AppContext } from "next/app"
-import { AppPropsType, NextComponentType } from "next/dist/next-server/lib/utils"
-import React, { useEffect } from "react"
-import { Session } from "../types/Session"
-import { useGraphQLClient } from "../lib/graphql-client"
-import { useSession, Provider } from "../lib/session"
-import { ThemeProvider } from "@material-ui/core/styles"
 import CssBaseline from "@material-ui/core/CssBaseline"
+import { ThemeProvider } from "@material-ui/core/styles"
+import { ClientContext, GraphQLClient } from "graphql-hooks"
+import { Provider } from 'next-auth/client'
+import { AppPropsType } from "next/dist/next-server/lib/utils"
+import React from "react"
+import { useGraphQLClient } from "../lib/graphql-client"
 import { theme } from "../lib/theme"
 
 interface Props extends AppPropsType {
@@ -18,7 +16,12 @@ export default function App({ Component, pageProps }) {
     const graphQLClient = useGraphQLClient(pageProps.initState)
 
     return (
-        <Provider session={pageProps.session}>
+        <Provider 
+        options={{
+            clientMaxAge: 0,
+            keepAlive: 0
+          }}
+        session={pageProps.session}>
             <ClientContext.Provider value={graphQLClient}>
                 <ThemeProvider theme={theme}>
                     <CssBaseline />

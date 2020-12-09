@@ -3,10 +3,10 @@ import { NextPage } from "next"
 import Link from "next/link"
 import NextRouter, { Router, withRouter } from "next/router"
 import React, { FunctionComponent } from "react"
-import { Session } from "../types/Session"
 import { HeaderIcon } from "./icons/HeaderIcon"
-import { useSession } from "../lib/session"
-const { NextAuth } = require("next-auth/client")
+import { useSession } from 'next-auth/client'
+import { signOut } from 'next-auth/client'
+
 
 type Props = {
     router: Router
@@ -81,16 +81,12 @@ const Header: NextPage<Props> = ({ router: { pathname } }: Props) => {
                 </Link>
             </Box>
             {(() => {
-                if (session.user) {
+                if (session?.user) {
                     return (
                         <Box>
                             <StyledLink
                                 href="#"
-                                onClick={() => {
-                                    fetch("/auth/signout", {method: "post"}).then(() => {
-                                        NextRouter.push("/")
-                                    })
-                                }}
+                                onClick={ signOut }
                             >
                                 Sign out
                             </StyledLink>

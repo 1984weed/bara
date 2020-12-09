@@ -489,22 +489,4 @@ const ProfileInfoRow = ({ labelChild, realValueChild }: RorProfileInfoProps) => 
     )
 }
 
-// user.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-//     const result = await client.request(
-//         {
-//             query: getUserQuery,
-//             variables: { userName: query.username },
-//         },
-//         {}
-//     )
-
-//     const { data } = result
-
-//     return Promise.resolve({
-//         userData: data["user"] || {},
-//         session: "",
-//         pathname: "",
-//     })
-// }
-
 export default user

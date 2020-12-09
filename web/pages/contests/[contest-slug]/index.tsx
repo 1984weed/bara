@@ -1,18 +1,15 @@
-import React from "react"
-import { Contest } from "../../../graphql/types"
-import { NextPage } from "next"
-import Layout from "../../../components/Layout"
-import Link from "next/link"
-// import { NextPageContextWithGraphql } from "../../../lib/with-graphql-client"
-import { Container, Typography, Box, TableContainer, Table, TableBody, TableHead, TableRow, TableCell } from "@material-ui/core"
+import { Box, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
-import { grey } from "@material-ui/core/colors"
 import CheckIcon from "@material-ui/icons/Check"
+import { useQuery } from "graphql-hooks"
+import { NextPage } from "next"
+import Link from "next/link"
+import { useRouter } from "next/router"
+import React from "react"
+import Layout from "../../../components/Layout"
+import { Contest } from "../../../graphql/types"
 
-type Props = {
-    session: any
-    contest: Contest
-}
+type Props = {}
 
 const getContestProblemsQuery = `
 query getContestProblems($slug: String!) {
@@ -38,11 +35,22 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const ContestComponent: NextPage<Props> = ({ session, contest }: Props) => {
+const ContestComponent: NextPage<Props> = () => {
     const classes = useStyles()
+    const router = useRouter()
+
+    const { data } = useQuery<{ contest: Contest }>(getContestProblemsQuery, {
+        variables: { slug: router.query["contest-slug"] },
+    })
+
+    if(!data) {
+        return <>Loading</>
+    }
+
+    const { contest } = data
 
     return (
-        <Layout session={session}>
+        <Layout>
             <Container maxWidth="md" component="main">
                 <Box>
                     <Typography variant="h2" color="textPrimary">
@@ -84,24 +92,5 @@ const ContestComponent: NextPage<Props> = ({ session, contest }: Props) => {
         </Layout>
     )
 }
-
-// ContestComponent.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-//     const result = await client.request(
-//         {
-//             query: getContestProblemsQuery,
-//             variables: { slug: query["contest-slug"] },
-//         },
-//         {}
-//     )
-
-//     const { contest } = result.data as {
-//         contest: Contest
-//     }
-
-//     return Promise.resolve({
-//         session: "",
-//         contest,
-//     })
-// }
 
 export default ContestComponent

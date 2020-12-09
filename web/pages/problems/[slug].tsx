@@ -7,7 +7,7 @@ import Layout from "../../components/Layout"
 import { EditorArea, RunCodeType, SubmitCodeResult, SubmitCodeType } from "../../components/problems/ProblemPage"
 import SideArea from "../../components/problems/SideArea"
 import { CodeLanguage } from "../../graphql/types"
-import { useSession } from "../../lib/session"
+import { useSession } from 'next-auth/client'
 
 type Props = {
     session: any

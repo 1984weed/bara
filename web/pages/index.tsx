@@ -4,7 +4,7 @@ import Link from "next/link"
 import React from "react"
 import Layout from "../components/Layout"
 import { Problem } from "../graphql/types"
-import { useSession } from "../lib/session"
+import { useSession } from 'next-auth/client'
 
 const problem = `
 query getProblems($limit: Int!) {
@@ -21,6 +21,8 @@ const problems: React.FunctionComponent = () => {
     const { data } = useQuery<{ problems: Problem[] }>(problem, {
         variables: { limit: 50 },
     })
+
+    const session = useSession()
 
     return (
         <Layout>

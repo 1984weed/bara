@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
@@ -54,8 +55,11 @@ func Middleware(jwtSecret string) func(http.Handler) http.Handler {
 			}
 
 			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+				sub, _ := claims["sub"].(string)
+				subInt, _ := strconv.ParseInt(sub, 10, 64)
+
 				// put it in context
-				ctx := context.WithValue(r.Context(), UserCtxKey, &CurrentUser{Sub: int64(claims["sub"].(float64))})
+				ctx := context.WithValue(r.Context(), UserCtxKey, &CurrentUser{Sub: subInt})
 
 				// and call the next with our new context
 				r = r.WithContext(ctx)

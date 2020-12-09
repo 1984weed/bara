@@ -16,10 +16,12 @@ gqlAxios.interceptors.request.use(async function(config) {
         token = window.localStorage.getItem("api-token")
     }
 
+    console.log("token", typeof token)
+
     // If local doesn't have api-token, it needs to get new one
-    if (!token) {
+    if (!token || token == "undefined") {
         const tokenRes = await getIdToken()
-        token = tokenRes.token
+        token = tokenRes.accessToken
         window && window.localStorage.setItem("api-token", token)
     }
     config.headers.Authorization = `Bearer ${token}`
@@ -39,7 +41,7 @@ gqlAxios.interceptors.response.use(
 
         const tokenRes = await getIdToken()
 
-        localStorage.setItem("api-token", tokenRes.token)
+        localStorage.setItem("api-token", tokenRes.accessToken)
         axios.defaults.headers.common["Authorization"] = `Bearer ${tokenRes.token}`
 
         error.hasRefreshedToken = true
@@ -48,7 +50,7 @@ gqlAxios.interceptors.response.use(
 )
 
 export const getIdToken = () => {
-    return fetch(`http://localhost:3000/auth/getToken`)
+    return fetch(`/api/bara/jwt`)
         .then(req => req.json())
         .then(res => {
             return res
@@ -59,12 +61,11 @@ let graphQLClient
 
 function createClient(initialState) {
     return new GraphQLClient({
-        ssrMode: false,//typeof window === "undefined",
+        ssrMode: false,
         url: graphqlURL,
         cache: memCache({ initialState }),
         fetchOptions: {
             mode: "cors",
-            // credentials: "include",
         },
         fetch: buildAxiosFetch(gqlAxios),
     })
