@@ -4,7 +4,7 @@ import Link from "next/link"
 import React from "react"
 import Layout from "../components/Layout"
 import { Problem } from "../graphql/types"
-import { useSession } from "../lib/session"
+import { useSession } from 'next-auth/client'
 
 const problem = `
 query getProblems($limit: Int!) {

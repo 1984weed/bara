@@ -7,7 +7,6 @@ import { Contest } from "../../graphql/types"
 import { Paper, TableContainer, TableHead, TableRow, TableCell, Table, makeStyles, TableBody } from "@material-ui/core"
 
 type Props = {
-    session: any
 }
 
 const contests = `
@@ -20,13 +19,6 @@ query getContests($limit: Int!) {
 }
 `
 
-const defaultProps = {
-    bgcolor: "background.paper",
-    m: 1,
-    border: 1,
-    style: { width: "5rem", height: "5rem" },
-}
-
 const useStyles = makeStyles({
     table: {
         minWidth: 650,
@@ -36,14 +28,14 @@ const useStyles = makeStyles({
     },
 })
 
-const problems: React.FunctionComponent<Props> = ({ session }: Props) => {
+const problems: React.FunctionComponent<Props> = () => {
     const { data } = useQuery<{ contests: Contest[] }>(contests, {
         variables: { limit: 50 },
     })
 
     const classes = useStyles()
     return (
-        <Layout session={session}>
+        <Layout>
             <TableContainer>
                 <Table className={classes.table} aria-label="simple table">
                     <TableHead>

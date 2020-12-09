@@ -48,7 +48,7 @@ gqlAxios.interceptors.response.use(
 )
 
 export const getIdToken = () => {
-    return fetch(`http://localhost:3000/auth/getToken`)
+    return fetch(`/api/bara/jwt`)
         .then(req => req.json())
         .then(res => {
             return res

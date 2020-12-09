@@ -1,6 +1,6 @@
 import { Box, Container, CssBaseline } from "@material-ui/core"
 import Head from "next/head"
-import { useSession } from "../lib/session"
+import { useSession } from 'next-auth/client'
 import Footer from "./Footer"
 import Header from "./Header"
 

@@ -5,7 +5,7 @@ import NextRouter, { Router, withRouter } from "next/router"
 import React, { FunctionComponent } from "react"
 import { Session } from "../types/Session"
 import { HeaderIcon } from "./icons/HeaderIcon"
-import { useSession } from "../lib/session"
+import { useSession } from 'next-auth/client'
 const { NextAuth } = require("next-auth/client")
 
 type Props = {
@@ -81,7 +81,7 @@ const Header: NextPage<Props> = ({ router: { pathname } }: Props) => {
                 </Link>
             </Box>
             {(() => {
-                if (session.user) {
+                if (session?.user) {
                     return (
                         <Box>
                             <StyledLink

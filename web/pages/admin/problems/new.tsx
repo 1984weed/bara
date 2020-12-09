@@ -7,7 +7,7 @@ import Layout from "../../../components/Layout"
 import ErrorNotification from "../../../components/notifications/ErrorNotification"
 import ProblemForm from "../../../components/problems/ProblemForm"
 import { useRememberState } from "../../../hooks/useRememberState"
-import { useSession } from "../../../lib/session"
+import { useSession } from 'next-auth/client'
 
 export const createProblem = `
 mutation createProblem($title: String!, $slug: String!, $description: String!, $functionName: String!, $outputType: String!, $argsNum: Int!, $args:  [CodeArg!]!, $testCaseNum: Int!, $testCases: [TestCase!]!) {

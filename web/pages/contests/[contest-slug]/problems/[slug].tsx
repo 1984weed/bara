@@ -7,14 +7,9 @@ import React from "react"
 import Layout from "../../../../components/Layout"
 import { EditorArea, RunCodeType, SubmitCodeType } from "../../../../components/problems/ProblemPage"
 import SideArea from "../../../../components/problems/SideArea"
-import { CodeLanguage, Problem } from "../../../../graphql/types"
-import { useRememberState } from "../../../../hooks/useRememberState"
-// import { NextPageContextWithGraphql } from "../../../../lib/with-graphql-client"
+import { CodeLanguage } from "../../../../graphql/types"
 
-type Props = {
-    session: any
-    problem: Problem | null
-}
+type Props = {}
 
 const problemQuery = `
 query getProblem($slug: String!) {
@@ -84,16 +79,18 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const ProblemComponent: NextPage<Props> = ({ session, problem }: Props) => {
+const ProblemComponent: NextPage<Props> = () => {
     const router = useRouter()
 
     if (router === null) {
         return <></>
     }
-    if (problem == null) {
-        return <span>Error</span>
-    }
+
     const { slug } = router.query
+    const problemData = useQuery(problemQuery, {
+        variables: { slug },
+    })
+
     const contestSlug = router.query["contest-slug"] as string
 
     const { data, refetch } = useQuery(getSubmissionList, {
@@ -104,13 +101,17 @@ const ProblemComponent: NextPage<Props> = ({ session, problem }: Props) => {
     const [testRunCode, testRunResult] = useMutation(testRunCodeMutation)
 
     const language = CodeLanguage.JavaScript
-    const targetCodeSnippet = problem.codeSnippets.find(a => a.lang === "JavaScript") || { code: "" }
 
-    const defaultCode = targetCodeSnippet.code
     const classes = useStyles()
+    if (!problemData.data) {
+        return <>Loading</>
+    }
+    const { problem } = problemData.data
+    const targetCodeSnippet = problem.codeSnippets.find(a => a.lang === "JavaScript") || { code: "" }
+    const defaultCode = targetCodeSnippet.code
 
     return (
-        <Layout title={problem.title} session={session}>
+        <Layout title={problem.title}>
             <Grid container className={classes.mainGrid}>
                 <Grid item xs={12} md={6}>
                     <SideArea
@@ -185,33 +186,5 @@ function handleSubmit(
         variables: option,
     })
 }
-
-// ProblemComponent.getInitialProps = async ({ query, client }: NextPageContextWithGraphql) => {
-//     const result = await client.request(
-//         {
-//             query: problemQuery,
-//             variables: { slug: query.slug },
-//         },
-//         {}
-//     )
-
-//     if (result.data == null) {
-//         return Promise.resolve({
-//             problem: null,
-//             session: "",
-//             pathname: "",
-//         })
-//     }
-
-//     const { problem } = result.data as {
-//         problem: Problem
-//     }
-
-//     return Promise.resolve({
-//         problem,
-//         session: "",
-//         pathname: "",
-//     })
-// }
 
 export default ProblemComponent

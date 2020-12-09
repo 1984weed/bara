@@ -6,7 +6,8 @@ import React from "react"
 import GithubSignInButton from "../components/atoms/GithubSignInButton"
 import TwitterSignInButton from "../components/atoms/TwitterSignInButton"
 import Layout from "../components/Layout"
-
+import { signIn } from 'next-auth/client'
+import { useForm } from "react-hook-form"
 
 const useStyles = makeStyles(theme => ({
     paper: {
@@ -38,12 +39,16 @@ const useStyles = makeStyles(theme => ({
 
 export default ({ session }) => {
     const classes = useStyles()
+    const formHooks = useForm({
+        email: "",
+        password: ""
+    })
     return (
-        <Layout title="Login" session={session}>
+        <Layout title="Login">
             <Typography component="h1" variant="h5">
                 Sign in
             </Typography>
-            <form className={classes.form} noValidate action="/auth/signin" method="post">
+            <form className={classes.form} noValidate onSubmit={() => signIn('email', { email })}>
                 <TextField
                     variant="outlined"
                     margin="normal"
