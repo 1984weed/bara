@@ -29,7 +29,6 @@ mutation createContest($title: String!, $slug: String!, $startTimestamp: String!
 
 const useStyles = makeStyles(theme => ({
     paper: {
-        marginTop: theme.spacing(8),
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -66,7 +65,7 @@ const NewContest = () => {
 
     const onSubmit = async formData => {
         formData.duration = "90"
-        const { data, error } = await createPost({
+        const { error } = await createPost({
             variables: formData,
         })
 
@@ -78,9 +77,8 @@ const NewContest = () => {
     return (
         <Layout title="Admin problems">
             <Typography component="h1" variant="h5">
-                New contest
+                Create a new contest
             </Typography>
-            <CssBaseline />
             <div className={classes.paper}>
                 <form className={classes.form} onSubmit={form.handleSubmit(onSubmit)}>
                     <ContestForm {...form} problems={problems} />

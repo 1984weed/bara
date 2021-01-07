@@ -1,13 +1,13 @@
 import Box from "@material-ui/core/Box"
 import { FetchData, useMutation } from "graphql-hooks"
 import { useRouter } from "next/router"
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import Layout from "../../../components/Layout"
 import ErrorNotification from "../../../components/notifications/ErrorNotification"
 import ProblemForm from "../../../components/problems/ProblemForm"
 import { useRememberState } from "../../../hooks/useRememberState"
-import { useSession } from 'next-auth/client'
+import { useProtectAdminPage } from "../../../hooks/useProtectAdminPage"
 
 export const createProblem = `
 mutation createProblem($title: String!, $slug: String!, $description: String!, $functionName: String!, $outputType: String!, $argsNum: Int!, $args:  [CodeArg!]!, $testCaseNum: Int!, $testCases: [TestCase!]!) {
@@ -36,13 +36,9 @@ const NEW_PROBLEM_KEY = "new-problem-form"
 
 const NewProblem = () => {
     const router = useRouter()
-    const [session] = useSession()
 
-    useEffect(() => {
-        if (session == null || session.user.session == null) {
-            router.push("/")
-        }
-    }, [session])
+    // Protect this page
+    useProtectAdminPage()
 
     const [createPost, { loading }] = useMutation(createProblem)
 
@@ -79,8 +75,8 @@ const NewProblem = () => {
     })
 
     return (
-        <Layout title="Admin problems" session={session}>
-            <h1>New problem</h1>
+        <Layout title="Admin problems">
+            <h1>Create a new problem</h1>
 
             {submitError && <ErrorNotification onClose={() => setSubmitError(false)} />}
             <Box>
@@ -116,7 +112,6 @@ export function createNewProblemsVariables(formState: any, argsNum: number, test
             output: formState["outTestCase"][i].replace(/ /g, ""),
         })
     }
-    console.log("testCases", testCases)
 
     const args = []
     for (let i = 0; i < argsNum; i++) {
@@ -157,14 +152,5 @@ async function handleSubmit(createPost: FetchData<any>, formState: any): Promise
 
     return data
 }
-
-// NewProblem.getInitialProps = async ({ res, session }) => {
-//     if (session.user == null) {
-//         if (res != null) {
-//             res.writeHead(302, { Location: "/" })
-//             res.end()
-//         }
-//     }
-// }
 
 export default NewProblem

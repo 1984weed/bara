@@ -11,12 +11,9 @@ import { buildAxiosFetch } from "@lifeomic/axios-fetch"
 const gqlAxios = axios.create()
 gqlAxios.interceptors.request.use(async function(config) {
     let token = ""
-    console.log("gqlAxios.interceptors.request")
     if(window) {
         token = window.localStorage.getItem("api-token")
     }
-
-    console.log("token", typeof token)
 
     // If local doesn't have api-token, it needs to get new one
     if (!token || token == "undefined") {

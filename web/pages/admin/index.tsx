@@ -36,7 +36,7 @@ const problems: React.FunctionComponent<Props> = ({ session }: Props) => {
             <Box>
                 Contests
                 <Box>
-                    <Link href="/admin/contests/new">Create new contest</Link>
+                    <Link href="/admin/contests/new">Create a new contest</Link>
                 </Box>
                 <TableContainer>
                     <Table>
@@ -71,7 +71,7 @@ const problems: React.FunctionComponent<Props> = ({ session }: Props) => {
             <Box>
                 Problems
                 <Box>
-                    <Link href="/admin/problems/new">Create new problem</Link>
+                    <Link href="/admin/problems/new">Create a new problem</Link>
                 </Box>
                 <Table>
                     <TableHead>
