@@ -7,11 +7,14 @@ import { useEffect } from "react";
 export function useProtectAdminPage(
 ): void {
     const router = useRouter()
-    const [session] = useSession()
+    const [session, loading] = useSession()
 
     useEffect(() => {
+        if(loading) {
+            return 
+        }
         if (session == null || session.user.role !== "admin") {
             router.push("/")
         }
-    }, [session])
+    }, [session, loading])
 }

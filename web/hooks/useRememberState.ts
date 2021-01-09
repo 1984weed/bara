@@ -6,7 +6,10 @@ export function useRememberState(
 ): [string, Dispatch<string>] {
   const [value, setValue] = React.useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem(key) || initialValue;
+      if(localStorage.getItem(key) == null || localStorage.getItem(key) === "") {
+        return initialValue
+      }
+      return localStorage.getItem(key)
     }
     return initialValue;
   });

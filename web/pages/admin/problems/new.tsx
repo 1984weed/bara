@@ -40,7 +40,7 @@ const NewProblem = () => {
     // Protect this page
     useProtectAdminPage()
 
-    const [createPost, { loading }] = useMutation(createProblem)
+    const [createPost] = useMutation(createProblem)
 
     const [submitError, setSubmitError] = useState(false)
 
@@ -60,10 +60,6 @@ const NewProblem = () => {
             testCaseGen: [{ count: 0 }],
         })
     )
-
-    if (loading) {
-        return <div>Loading</div>
-    }
 
     const formHooks = useForm({
         defaultValues: JSON.parse(formState),
@@ -85,13 +81,14 @@ const NewProblem = () => {
                     onClickSubmit={async values => {
                         const data = await handleSubmit(createPost, values)
 
+
                         if (data) {
+                            setFormState("")
                             router.push(`/problems/${data.createProblem.slug}`)
                             return
                         }
 
                         setSubmitError(true)
-                        localStorage.setItem(NEW_PROBLEM_KEY, "")
                     }}
                 ></ProblemForm>
             </Box>
