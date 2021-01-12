@@ -46,9 +46,24 @@ func JWTBrokenError(err string) *ResponseError {
 	}
 }
 
-func GraphqlPermissionError() error {
+// InternalServerError represents some unspecific errors
+func PermissionError() error {
 	return &gqlerror.Error{
-		Message: "Current user doesn't have a permission",
+		Message:    "Current user doesn't have a permission",
+		Extensions: errorCode("PERMISSION_ERROR"),
 	}
+}
 
+func errorCode(code string) map[string]interface{} {
+	return map[string]interface{}{
+		"Code": code,
+	}
+}
+
+// InternalServerError represents some unspecific errors
+func InternalServerError() error {
+	return &gqlerror.Error{
+		Message:    "An internal server error occurred",
+		Extensions: errorCode("INTERNAL_SERVER_ERROR"),
+	}
 }

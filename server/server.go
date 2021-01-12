@@ -229,7 +229,7 @@ func main() {
 			}),
 			handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
 				debug.PrintStack()
-				return errors.New("An error happens")
+				return errors.New("Unknown error happens")
 			}),
 		)))
 

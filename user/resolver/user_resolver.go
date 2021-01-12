@@ -25,7 +25,7 @@ func NewUserResolver(uc user.Usecase) user.Resolver {
 func (u *userResolver) GetMe(ctx context.Context) (*graphql_model.User, error) {
 	var currentUser *auth.CurrentUser
 	if currentUser = auth.ForContext(ctx); currentUser == nil {
-		return nil, utils.GraphqlPermissionError()
+		return nil, utils.PermissionError()
 	}
 
 	user, err := u.uc.GetUserByID(ctx, currentUser.Sub)
@@ -71,7 +71,7 @@ func (u *userResolver) GetUser(ctx context.Context, userName string) (*graphql_m
 func (u *userResolver) UpdateMe(ctx context.Context, input graphql_model.UserInput) (*graphql_model.User, error) {
 	var currentUser *auth.CurrentUser
 	if currentUser = auth.ForContext(ctx); currentUser == nil {
-		return nil, utils.GraphqlPermissionError()
+		return nil, utils.PermissionError()
 	}
 	userForUpdate := domain.UserForUpdate{
 		UserName:    input.UserName,

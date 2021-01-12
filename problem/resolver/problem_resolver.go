@@ -82,7 +82,12 @@ func (pr *problemResolver) GetBySlug(ctx context.Context, slug string) (*graphql
 	}
 
 	testcases := make([]*graphql_model.TestCaseType, len(p.ProblemTestcases))
-	sampleTestCase := p.ProblemTestcases[0].Input
+	sampleTestCase := ""
+
+	// todo sample data should be registered by admin page
+	if len(p.ProblemTestcases) > 0 {
+		sampleTestCase = p.ProblemTestcases[0].Input
+	}
 
 	for i, p := range p.ProblemTestcases {
 		inputArray := p.ConvertInputArray()
@@ -245,7 +250,7 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 	var user *auth.CurrentUser
 
 	if user = auth.ForContext(ctx); user == nil {
-		return nil, utils.GraphqlPermissionError()
+		return nil, utils.PermissionError()
 	}
 
 	domainCode := &domain.SubmitCode{
@@ -274,7 +279,7 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 func (pr *problemResolver) SubmitContestCode(ctx context.Context, contestSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
 	var user *auth.CurrentUser
 	if user = auth.ForContext(ctx); user == nil {
-		return nil, utils.GraphqlPermissionError()
+		return nil, utils.PermissionError()
 	}
 
 	domainCode := &domain.SubmitCode{
@@ -316,7 +321,7 @@ func (pr *problemResolver) TestRunCode(ctx context.Context, inputStr string, inp
 	result, err := pr.uc.RunProblem(ctx, domainCode, inputStr)
 
 	if err != nil {
-		return nil, err
+		return nil, utils.InternalServerError()
 	}
 
 	return &graphql_model.CodeResult{
