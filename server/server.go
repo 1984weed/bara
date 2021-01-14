@@ -10,6 +10,7 @@ import (
 	"bara/problem/executor"
 	problem_repository "bara/problem/repository"
 	problem_resolver "bara/problem/resolver"
+	problem_rest "bara/problem/rest"
 	problem_usecase "bara/problem/usecase"
 	user_repository "bara/user/repository"
 	user_resolver "bara/user/resolver"
@@ -163,18 +164,6 @@ func main() {
 				Database: ctx.String("DB_NAME"),
 			})
 
-		// redisPool := &redis.Pool{
-		// 	MaxIdle:     10,
-		// 	IdleTimeout: 240 * time.Second,
-		// 	TestOnBorrow: func(c redis.Conn, t time.Time) error {
-		// 		_, err := c.Do("PING")
-		// 		return err
-		// 	},
-		// 	Dial: func() (redis.Conn, error) {
-		// 		return redis.DialURL(ctx.String("REDIS_URL"))
-		// 	},
-		// }
-
 		port := ctx.String("PORT")
 		timeoutContext := time.Duration(5) * time.Second
 
@@ -232,6 +221,14 @@ func main() {
 				return errors.New("Unknown error happens")
 			}),
 		)))
+
+		// Provide rest api to use some features
+		router.Route("/v1", func(r chi.Router) {
+			r.Route("/problems", func(pr chi.Router) {
+				// Create a problem
+				pr.Get("/", problem_rest.Helloworld)
+			})
+		})
 
 		log.Printf("connect to http://localhost:%s/payground for GraphQL playground", port)
 		log.Fatal(http.ListenAndServe(":"+port, router))

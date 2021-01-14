@@ -34,7 +34,7 @@ func JWTExpiredError() *ResponseError {
 	}
 }
 
-// JWTExpiredError represents that JWT is broken
+// JWTBrokenError represents that JWT is broken
 func JWTBrokenError(err string) *ResponseError {
 	return &ResponseError{
 		Status: http.StatusUnauthorized,
@@ -46,13 +46,12 @@ func JWTBrokenError(err string) *ResponseError {
 	}
 }
 
-// InternalServerError represents some unspecific errors
-func PermissionError() error {
-	return &gqlerror.Error{
-		Message:    "Current user doesn't have a permission",
-		Extensions: errorCode("PERMISSION_ERROR"),
-	}
-}
+// // PermissionError represents some unspecific errors
+// func PermissionError() error {
+// 	return &gqlerror.Error{
+// 		Message:    "Current user doesn't have a permission",
+// 		Extensions: errorCode("PERMISSION_ERROR"),
+// 	} }
 
 func errorCode(code string) map[string]interface{} {
 	return map[string]interface{}{
@@ -61,9 +60,14 @@ func errorCode(code string) map[string]interface{} {
 }
 
 // InternalServerError represents some unspecific errors
-func InternalServerError() error {
-	return &gqlerror.Error{
+var (
+	InternalServerError = &gqlerror.Error{
 		Message:    "An internal server error occurred",
 		Extensions: errorCode("INTERNAL_SERVER_ERROR"),
 	}
-}
+	// PermissionError represents some unspecific errors
+	PermissionError = &gqlerror.Error{
+		Message:    "Current user doesn't have a permission",
+		Extensions: errorCode("PERMISSION_ERROR"),
+	}
+)

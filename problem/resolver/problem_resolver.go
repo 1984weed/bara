@@ -243,14 +243,11 @@ func (pr *problemResolver) UpdateProblem(ctx context.Context, problemID int64, i
 }
 
 func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
-	// if user := auth.ForContext(ctx); user == nil {
-	// 	return nil, errors.New("Forbidden")
-	// }
 
 	var user *auth.CurrentUser
 
 	if user = auth.ForContext(ctx); user == nil {
-		return nil, utils.PermissionError()
+		return nil, utils.PermissionError
 	}
 
 	domainCode := &domain.SubmitCode{
@@ -279,7 +276,7 @@ func (pr *problemResolver) SubmitProblem(ctx context.Context, input graphql_mode
 func (pr *problemResolver) SubmitContestCode(ctx context.Context, contestSlug string, input graphql_model.SubmitCode) (*graphql_model.CodeResult, error) {
 	var user *auth.CurrentUser
 	if user = auth.ForContext(ctx); user == nil {
-		return nil, utils.PermissionError()
+		return nil, utils.PermissionError
 	}
 
 	domainCode := &domain.SubmitCode{
@@ -290,13 +287,13 @@ func (pr *problemResolver) SubmitContestCode(ctx context.Context, contestSlug st
 	result, err := pr.uc.SubmitProblem(ctx, domainCode, user.Sub)
 
 	if err != nil {
-		return nil, err
+		return nil, utils.InternalServerError
 	}
 
 	err = pr.cc.RegisterProblemResult(result, contestSlug, input.Slug, user.Sub)
 
 	if err != nil {
-		return nil, err
+		return nil, utils.InternalServerError
 	}
 
 	return &graphql_model.CodeResult{
@@ -321,7 +318,7 @@ func (pr *problemResolver) TestRunCode(ctx context.Context, inputStr string, inp
 	result, err := pr.uc.RunProblem(ctx, domainCode, inputStr)
 
 	if err != nil {
-		return nil, utils.InternalServerError()
+		return nil, utils.InternalServerError
 	}
 
 	return &graphql_model.CodeResult{
@@ -339,12 +336,12 @@ func (pr *problemResolver) TestRunCode(ctx context.Context, inputStr string, inp
 func (pr *problemResolver) GetUsersSubmissionByProblemID(ctx context.Context, problemSlug string, limit, offset int) ([]*graphql_model.Submission, error) {
 	var user *auth.CurrentUser
 	if user = auth.ForContext(ctx); user == nil {
-		return []*graphql_model.Submission{}, nil
+		return []*graphql_model.Submission{}, utils.PermissionError
 	}
 
 	submissions, err := pr.uc.GetUsersSubmissionByProblemID(ctx, user.Sub, problemSlug, limit, offset)
 	if err != nil {
-		return []*graphql_model.Submission{}, err
+		return []*graphql_model.Submission{}, utils.InternalServerError
 	}
 
 	results := make([]*graphql_model.Submission, len(submissions))
