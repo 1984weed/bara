@@ -46,13 +46,6 @@ func JWTBrokenError(err string) *ResponseError {
 	}
 }
 
-// // PermissionError represents some unspecific errors
-// func PermissionError() error {
-// 	return &gqlerror.Error{
-// 		Message:    "Current user doesn't have a permission",
-// 		Extensions: errorCode("PERMISSION_ERROR"),
-// 	} }
-
 func errorCode(code string) map[string]interface{} {
 	return map[string]interface{}{
 		"Code": code,

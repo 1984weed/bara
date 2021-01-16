@@ -59,11 +59,11 @@ export const EditorArea = ({
     onSubmitCode
 }: Props) => {
     const [editor, setEditor] = useState(null)
-    const [typedCode, setTypedCode] = useRememberState(localTypedCodeKey, "")
+    const [typedCode, setTypedCode] = useRememberState(localTypedCodeKey, defaultCode)
     const [testcase, setTestcase] = useState(sampleTestCase)
     const [checkedCustomTestcase, setCheckedCustomTestcase] = useState(false)
-
     const initialCode = typedCode === "" || typedCode === null ?  defaultCode : typedCode
+
     return (
         <Grid container direction="column" justify="center" alignItems="stretch" style={{ height: "100%" }}>
             <Grid item>
@@ -84,9 +84,12 @@ export const EditorArea = ({
                         value={initialCode}
                     />
                     {(() => {
+                        // the test run fails 
                         if (testRunResult.error) {
                             return displayCodeResultError()
                         }
+
+                        // the test run data
                         if (testRunResult.data) {
                             return displayCodeResult(
                                 title,
@@ -102,6 +105,7 @@ export const EditorArea = ({
                                 true
                             )
                         }
+
                         if (submittedResult) {
                             return displayCodeResult(
                                 title,

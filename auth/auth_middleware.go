@@ -21,7 +21,13 @@ type contextKey struct {
 
 // CurrentUser contains current's userId
 type CurrentUser struct {
-	Sub int64
+	Sub  int64
+	Role string
+}
+
+// IsAdmin is a flag for admin users
+func (c *CurrentUser) IsAdmin() bool {
+	return c.Role == "admin"
 }
 
 // Middleware decodes the share session cookie and packs the session into context
@@ -56,10 +62,11 @@ func Middleware(jwtSecret string) func(http.Handler) http.Handler {
 
 			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 				sub, _ := claims["sub"].(string)
+				role, _ := claims["role"].(string)
 				subInt, _ := strconv.ParseInt(sub, 10, 64)
 
 				// put it in context
-				ctx := context.WithValue(r.Context(), UserCtxKey, &CurrentUser{Sub: subInt})
+				ctx := context.WithValue(r.Context(), UserCtxKey, &CurrentUser{Sub: subInt, Role: role})
 
 				// and call the next with our new context
 				r = r.WithContext(ctx)

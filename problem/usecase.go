@@ -9,7 +9,7 @@ import (
 type Usecase interface {
 	GetProblems(ctx context.Context, limit, offset int) ([]domain.Problem, error)
 	GetBySlug(ctx context.Context, slug string) (*domain.Problem, error)
-	CreateProblem(ctx context.Context, input *domain.NewProblem) (*domain.Problem, error)
+	CreateProblem(ctx context.Context, input *domain.NewProblem, authorID int64) (*domain.Problem, error)
 	UpdateProblem(ctx context.Context, problemID int64, input *domain.NewProblem) (*domain.Problem, error)
 	SubmitProblem(ctx context.Context, code *domain.SubmitCode, userID int64) (*domain.CodeResult, error)
 	RunProblem(ctx context.Context, code *domain.SubmitCode, inputStr string) (*domain.CodeResult, error)

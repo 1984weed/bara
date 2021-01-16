@@ -185,8 +185,11 @@ CREATE TABLE code_languages
 (
   id INTEGER PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  slug VARCHAR(255) NOT NULL
+  unique_key VARCHAR(255) NOT NULL
 );
+
+CREATE UNIQUE INDEX unique_key
+  ON code_languages(unique_key);
 
 DROP TABLE IF EXISTS problem_args
 cascade;

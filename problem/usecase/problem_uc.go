@@ -20,6 +20,7 @@ func NewProblemUsecase(runner problem.RepositoryRunner, codeExecutor executor.Cl
 	return &problemUsecase{runner, codeExecutor, contextTimeout}
 }
 
+// GetProblems returns problems
 func (p *problemUsecase) GetProblems(ctx context.Context, limit, offset int) ([]domain.Problem, error) {
 	rep := p.runner.GetRepository()
 
@@ -37,6 +38,7 @@ func (p *problemUsecase) GetProblems(ctx context.Context, limit, offset int) ([]
 	return modelProblems, nil
 }
 
+// GetBySlug retrieves a problem by slug
 func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Problem, error) {
 	rep := p.runner.GetRepository()
 	problem, err := rep.GetBySlug(ctx, slug)
@@ -75,7 +77,7 @@ func (p *problemUsecase) GetBySlug(ctx context.Context, slug string) (*domain.Pr
 	}, nil
 }
 
-func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain.NewProblem) (*domain.Problem, error) {
+func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain.NewProblem, authorID int64) (*domain.Problem, error) {
 	slug := inputProblem.GetSlug()
 
 	if inputProblem.Slug != nil {
@@ -88,7 +90,7 @@ func (p *problemUsecase) CreateProblem(ctx context.Context, inputProblem *domain
 		Description:  inputProblem.Description,
 		FunctionName: inputProblem.FunctionName,
 		OutputType:   inputProblem.OutputType,
-		AuthorID:     0,
+		AuthorID:     authorID,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}

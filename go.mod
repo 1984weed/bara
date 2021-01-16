@@ -13,16 +13,19 @@ require (
 	github.com/codegangsta/envy v0.0.0-20141216192214-4b78388c8ce4 // indirect
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/docker/distribution v2.7.1+incompatible
 	github.com/elastic/go-seccomp-bpf v1.1.0
 	github.com/fsouza/go-dockerclient v1.4.4 // indirect
 	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20190923054218-35076c1b2bea // indirect
-	github.com/gin-gonic/gin v1.4.0 // indirect
+	github.com/gin-gonic/gin v1.4.0
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/cors v1.0.0 // indirect
+	github.com/go-chi/render v1.0.1
 	github.com/go-pg/pg v8.0.6+incompatible // indirect
 	github.com/go-pg/pg/v9 v9.0.0-beta.11
+	github.com/google/martian v2.1.0+incompatible
 	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
 	github.com/gorilla/sessions v1.2.0
 	github.com/gosimple/slug v1.7.0
@@ -46,4 +49,5 @@ require (
 	google.golang.org/api v0.27.0 // indirect
 	gopkg.in/boj/redistore.v1 v1.0.0-20160128113310-fc113767cd6b // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	gotest.tools/v3 v3.0.3
 )

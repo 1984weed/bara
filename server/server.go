@@ -179,6 +179,8 @@ func main() {
 		problemUc := problem_usecase.NewProblemUsecase(problemRepo, codeExecutor, timeoutContext)
 		problemResolver := problem_resolver.NewProblemResolver(problemUc, contestUc)
 
+		problemRestApi := problem_rest.NewProblemRestApi(problemUc)
+
 		// User
 		userRepoRunner := user_repository.NewUserRepositoryRunner(db)
 
@@ -225,8 +227,10 @@ func main() {
 		// Provide rest api to use some features
 		router.Route("/v1", func(r chi.Router) {
 			r.Route("/problems", func(pr chi.Router) {
+				pr.Get("/", problemRestApi.CreateProblem)
+
 				// Create a problem
-				pr.Get("/", problem_rest.Helloworld)
+				pr.Post("/", problemRestApi.CreateProblem)
 			})
 		})
 

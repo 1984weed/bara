@@ -155,6 +155,10 @@ func (pr *problemResolver) GetTestNewProblem(ctx context.Context, input graphql_
 }
 
 func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_model.NewProblem) (*graphql_model.Problem, error) {
+	var user auth.CurrentUser
+	if user := auth.ForContext(ctx); user == nil {
+		return nil, errors.New("Forbidden")
+	}
 	args := make([]domain.ProblemArgs, input.ArgsNum)
 	for i, a := range input.Args {
 		args[i] = domain.ProblemArgs{
@@ -182,7 +186,8 @@ func (pr *problemResolver) CreateProblem(ctx context.Context, input graphql_mode
 		ProblemArgs:  args,
 		Testcases:    testcases,
 	}
-	p, err := pr.uc.CreateProblem(ctx, problem)
+
+	p, err := pr.uc.CreateProblem(ctx, problem, user.Sub)
 
 	if err != nil {
 		return nil, err

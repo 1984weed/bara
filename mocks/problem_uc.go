@@ -38,8 +38,25 @@ func (p *ProblemUsecase) GetProblems(ctx context.Context, limit, offset int) ([]
 	return nil, nil
 }
 
-func (p *ProblemUsecase) CreateProblem(ctx context.Context, input *domain.NewProblem) (*domain.Problem, error) {
-	return nil, nil
+func (p *ProblemUsecase) CreateProblem(ctx context.Context, input *domain.NewProblem, authorID int64) (*domain.Problem, error) {
+	ret := p.Called(ctx, input, authorID)
+
+	var r0 *domain.Problem
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.NewProblem, int64) *domain.Problem); ok {
+		r0 = rf(ctx, input, authorID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.Problem)
+		}
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.NewProblem, int64) error); ok {
+		r1 = rf(ctx, input, authorID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 func (p *ProblemUsecase) UpdateProblem(ctx context.Context, problemID int64, input *domain.NewProblem) (*domain.Problem, error) {
